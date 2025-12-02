@@ -1,3 +1,6 @@
+<?php
+include_once __DIR__ . '/../config/baseConfig.php';
+?>
 <!DOCTYPE html>
 
 <head>
@@ -7,8 +10,8 @@
 
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
-    <link rel="shortcut icon" href="assets/image/favicon.png">
-    <link rel="stylesheet" href="assets/css/header.css">
+    <link rel="shortcut icon" href="<?php echo BaseConfig::$BASE_URL; ?>assets/images/favicon.png">
+    <link rel="stylesheet" href="<?php echo BaseConfig::$BASE_URL; ?>assets/css/header.css">
 </head>
 
 <body>

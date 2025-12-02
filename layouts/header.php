@@ -15,8 +15,8 @@
 
     <!-- Desktop -->
     <div class="header-icons">
-        <span class="icon"><img src="./assets/images/default_profile_image.png" class="menu-icon" alt="profile" /></span>
-        <span class="icon"><img src="./assets/images/logout.png" class="menu-icon" alt="logout" /></span>
+        <span class="icon"><img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/default_profile_image.png" class="menu-icon" alt="profile" /></span>
+        <span class="icon"><img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/logout.png" class="menu-icon" alt="logout" /></span>
     </div>
 
     <!-- Mobile -->
@@ -29,8 +29,8 @@
     <a href="#" class="menu-item">My Jobs</a>
     <a href="#" class="menu-item">Help</a>
     <hr>
-    <a href="#" class="menu-item side-menu-row"><img src="./assets/images/profile_image.png" class="menu-icon" alt="profile" /> Profile</a>
-    <a href="#" class="menu-item side-menu-row"><img src="./assets/images/logout.png" class="menu-icon" alt="logout" /> Logout</a>
+    <a href="#" class="menu-item side-menu-row"><img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/default_profile_image.png" class="menu-icon" alt="profile" /> Profile</a>
+    <a href="#" class="menu-item side-menu-row"><img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/logout.png" class="menu-icon" alt="logout" /> Logout</a>
 </div>
 
 <script>
