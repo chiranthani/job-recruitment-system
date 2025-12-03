@@ -1,4 +1,4 @@
-<!-- after login menus handle with php login session [role based menu permission] -->
+
 
 <header class="header">
     <div class="header-logo">
@@ -6,11 +6,27 @@
         <span class="logo-text">Jobs XX</span>
     </div>
 
+    <!-- after login menus handle with php login session [role based menu permission] -->
     <!-- Desktop -->
     <nav class="nav">
-        <a class="active" href="#">Home</a>
+        <!-- candidate -->
+        <a class="active" href="<?php echo BaseConfig::$BASE_URL; ?>home.php">Home</a>
         <a href="#">My Jobs</a>
-        <a href="#">Help</a>
+
+        <!-- recruiter/employer -->
+        <!-- <a href="#">Dashboard</a>
+        <a href="#">Job Posts</a>
+        <a href="#">Applications</a>
+        <a href="#">Company</a> -->
+       
+        <!-- Admin -->
+         <!-- <a href="#">Dashboard</a>
+         <a href="#">Users</a>
+         <a href="#">Companies</a> -->
+
+        <!-- common-->
+          <a href="#">Help</a>
+
     </nav>
 
     <!-- Desktop -->
