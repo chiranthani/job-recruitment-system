@@ -1,14 +1,5 @@
 # job-recruitment-system
 
-## Technologies -  HTML + CSS + JS + PHP + MySQL
-
-Components:
-1. User Management Module
-2. Employer Profile & Verification Module
-3. Job Post Management Module
-4. Applicant Management Module
-
-
 A simple and efficient job recruitment web application built using **Pure PHP, MySQL, HTML, CSS & JavaScript** without any frameworks.  
 It allows employers to post jobs and manage applicants, while job seekers can apply for jobs easily.
 
@@ -18,7 +9,6 @@ It allows employers to post jobs and manage applicants, while job seekers can ap
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Core PHP (No Frameworks)
 - **Database:** MySQL
-
 
 ---
 
