@@ -11,7 +11,7 @@
     </form>
 
     <?php
-    
+
     // Sample job posts array
     $jobs = [
         ['id' => 1, 'title' => 'Developer I', 'category' => 'IT', 'status' => 'Published', 'active' => true],
@@ -40,6 +40,7 @@
         </tr>
         <?php foreach ($jobs as $job): ?>
         <tr>
+            
             <td><?php echo $job['id']; ?></td>
             <td><?php echo $job['title']; ?></td>
             <td><?php echo $job['category']; ?></td>
