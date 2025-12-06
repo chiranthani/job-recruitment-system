@@ -26,12 +26,12 @@ class AppConstants {
     const APPLIED_JOB = 'Applied Job';
     const SAVED_JOB = 'Saved Job';
 
-    // application statues
+    // application statues constants
     const APPLICATION_STATUS = [
-        'APPLIED' => 'Applied Candidate',
-        'INREVIEW' => 'In Review',
+        'APPLIED' => 'Applied',
+        'IN_REVIEW' => 'In Review',
         'INTERVIEW'=> 'Interview',
-        'REJECTED'=> 'Rejected Candidate',
+        'REJECTED'=> 'Rejected',
         'OFFERED'=> 'Offer Made',
         'OFFER_RJECTED'=> 'Offer Rejected',
         'OFFER_ACCEPTED'=> 'Offer Accepted',
@@ -43,7 +43,21 @@ class AppConstants {
     const COMPANY_REJECTED = 'REJECTED';
     const COMPANY_PENDING = 'APPROVED';
 
-    // company sizes
-    const company_sizes = ['1-10 Employees','11-50 Employees','51-250 Employees','251 Employees and above'];
+
+    const EXPERIENCE_OPTIONS = [
+        '0-1 years',
+        '1-2 years',
+        '2-3 years',
+        '3-5 years',
+        '5+ years'
+    ];
+
+    const NOTICE_PERIOD_OPTIONS = [
+        'Immediately',
+        '1 Week',
+        '2 Weeks',
+        '1 Month',
+        'More than 1 Month'
+    ];
 
 }

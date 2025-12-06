@@ -1,4 +1,18 @@
 /* GENERAL */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #616D89;
+    --success: #40C057;
+    --info: #2F8BE6;
+    --warning: #f0ad4e;
+    --danger: #F55252;
+    --light: #DBDEE5;
+    --dark: #1A051D;
+    --white: #fff;
+    --gray: #6c757d;
+    --light-blue: #87F7FF;
+}
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -12,7 +26,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 15px 20px;
-    background: white;
+    background: var(--white);
     border-bottom: 1px solid #ddd;
     position: relative;
 }
@@ -75,7 +89,7 @@ body {
 }
 
 .menu-icon:hover {
-    fill: #000;
+    fill: var(--dark);
 }
 
 /* ================== MOBILE MENU ================== */
@@ -86,7 +100,7 @@ body {
     left: -260px;              
     width: 200px;
     height: 100vh;
-    background: white;
+    background: var(--white);
     padding: 20px;
     border-right: 1px solid #ccc;
     display: flex;
@@ -123,7 +137,7 @@ body {
 }
 
 .mobile-menu .menu-item.active {
-    color: #0066ff;
+    color: var(--primary-color);
     font-weight: 600;
 }
 
@@ -155,7 +169,7 @@ body {
         top: 0;
         left: -300px;
         height: 100vh;
-        background: #fff;
+        background: var(--white);
         padding-top: 50px;
         transition: left 0.3s ease;
     }

@@ -1,5 +1,8 @@
 
 
+</head>
+<body>
+
 <header class="header">
     <div class="header-logo">
         <span class="logo-icon">[ ]</span>
