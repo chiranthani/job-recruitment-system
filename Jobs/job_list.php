@@ -11,6 +11,7 @@
     </form>
 
     <?php
+    
     // Sample job posts array
     $jobs = [
         ['id' => 1, 'title' => 'Developer I', 'category' => 'IT', 'status' => 'Published', 'active' => true],
