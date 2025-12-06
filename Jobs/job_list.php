@@ -40,7 +40,6 @@
         </tr>
         <?php foreach ($jobs as $job): ?>
         <tr>
-            
             <td><?php echo $job['id']; ?></td>
             <td><?php echo $job['title']; ?></td>
             <td><?php echo $job['category']; ?></td>
