@@ -97,7 +97,7 @@ body {
 .mobile-menu {
     position: fixed;
     top: 0;
-    left: -260px;              
+    left: -260px;
     width: 200px;
     height: 100vh;
     background: var(--white);
@@ -111,7 +111,7 @@ body {
 }
 
 .mobile-menu.show {
-    left: 0;                 
+    left: 0;
 }
 
 .mobile-menu a {
@@ -151,11 +151,61 @@ body {
     display: none;
     font-size: 30px;
     cursor: pointer;
-    z-index: 10000;           
+    z-index: 10000;
+}
+
+.buttn {
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.buttn-outline {
+    border: 1px solid var(--primary-color);
+    background: var(--white);
+    color: var(--primary-color);
+}
+
+.buttn-outline:hover {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.buttn-sign-in {
+    border: none;
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.buttn-sign-in:hover {
+    background: #005bb5;
+}
+
+.denied-container{
+    display: flex;
+    padding: 20px;
+    background: #f8d7da;
+    justify-content: center;
+    height: 100vh;
+}
+.denied-box {
+    height: fit-content;
+    width: 400px;
+    margin: 60px auto;
+    padding: 25px;
+    background: var(--white);
+    border-left: 8px solid var(--danger);
+    border-radius: 5px;
+}
+
+.denied-box h2 {
+    color: var(--danger);
 }
 
 /* ====== Header Responsive ====== */
 @media (max-width: 768px) {
+
     .nav,
     .header-icons {
         display: none;
@@ -164,7 +214,8 @@ body {
     .hamburger {
         display: block;
     }
-       .mobile-menu {
+
+    .mobile-menu {
         position: fixed;
         top: 0;
         left: -300px;
