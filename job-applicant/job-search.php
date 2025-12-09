@@ -1,0 +1,155 @@
+<?php include '../config/database.php'; ?>
+<?php include '../layouts/layout_start.php'; ?>
+
+<link rel="stylesheet" href="application.css">
+
+<?php 
+include '../layouts/header.php'; 
+include 'backend/data-queries.php';
+?>
+
+<div class="main-container">
+
+    <div class="search-top-filter">
+        <input type="text" class="job-search-box" value="<?php echo ($_GET['search'] ?? "") ?>" placeholder="Search job title...">
+
+        <select class="company-select">
+            <option value="all">All Companies</option>
+            <?php
+            $get_approved_companies = getApprovedCompanies();
+
+            $sql = mysqli_query($con_main, $get_approved_companies);
+            while ($res = mysqli_fetch_array($sql)) {
+            ?>
+                <option value="<?php echo $res['id']; ?>"><?php echo $res['name']; ?></option>
+
+            <?php } ?>
+
+        </select>
+    </div>
+
+    <div class="search-content-area">
+
+        <aside class="search-sidebar">
+            <h3>Categories</h3>
+            <div class="filter-list">
+                <?php
+                $get_active_categories = getActiveCategoriesWithJobsCount();
+
+                $sql = mysqli_query($con_main, $get_active_categories);
+                while ($res = mysqli_fetch_array($sql)) {
+                ?>
+                    <label class="filter-item"><input type="checkbox" value="<?php echo $res['id']; ?>">
+                        <span><?php echo $res['name'] . " (" . $res['post_count'] . ")"; ?></span>
+                    </label>
+
+                <?php } ?>
+
+            </div>
+        </aside>
+
+
+        <section class="jobs-list">
+
+            <div class="job-card">
+                <div class="job-card-header">
+                    <h4>Frontend Developer</h4>
+                    <button class="apply-btn" onclick="window.location.href='apply.php?job=<?php echo (1) ?>'">Apply Now</button>
+                </div>
+                <p class="company">ABC Solutions</p>
+                <div class="job-card-about">
+                    <div> location</div>
+                    <div> full time</div>
+                    <div class="status job-type"> Remote </div>
+                </div>
+                <div class="job-card-des">We are looking for an experienced Frontend Developer to join our dynamic team.
+                    You will be responsible for building scalable web applications using React,... </div>
+                <div class="job-card-footer">Exp date: 12/12/2025</div>
+            </div>
+
+
+            <div class="pagination">
+                <a href="#">&laquo;</a>
+                <a href="#" class="active">1</a>
+                <a href="#">2</a>
+                <a href="#">3</a>
+                <a href="#">&raquo;</a>
+            </div>
+
+        </section>
+    </div>
+</div>
+<script>
+    const searchInput = document.querySelector(".job-search-box");
+    const companySelect = document.querySelector(".company-select");
+    const categoryChecks = document.querySelectorAll(".filter-item input[type=checkbox]");
+    const jobsList = document.querySelector(".jobs-list");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialCategory = urlParams.get("category") || "";
+
+    if (initialCategory) {
+        categoryChecks.forEach(c => {
+            const labelText = c.nextElementSibling.textContent.trim();
+            if (labelText == initialCategory) c.checked = true;
+        });
+    }
+
+    //  event live listeners
+    searchInput.addEventListener("keyup", fetchJobs);
+    companySelect.addEventListener("change", fetchJobs);
+    categoryChecks.forEach(c => c.addEventListener("change", fetchJobs));
+
+    fetchJobs();
+
+    function fetchJobs() {
+        let search = searchInput.value;
+        let company = companySelect.value;
+
+        let categories = [];
+        categoryChecks.forEach(c => {
+            if (c.checked) categories.push(c.nextElementSibling.textContent.trim());
+        });
+
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", `backend/search.php?search=${encodeURIComponent(search)}&company=${encodeURIComponent(company)}&categories[]=${categories.join("&categories[]=")}`);
+
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                renderJobs(JSON.parse(this.responseText));
+            }
+        };
+        xhr.send();
+    }
+
+
+    function renderJobs(jobs) {
+        jobsList.innerHTML = "";
+        if (jobs.length == 0) {
+            jobsList.innerHTML = `<p style="margin:20px; color:red;">No matching jobs found.</p>`;
+            return;
+        }
+
+        jobs.forEach(job => {
+            jobsList.innerHTML += `
+                <div class="job-card">
+                    <div class="job-card-header">
+                        <h4>${job.title}</h4>
+                        <button class="apply-btn" onclick="window.location.href='apply.php?job=${job.id}'">Apply Now</button>
+                    </div>
+                    <p class="company">${job.company_name}</p>
+                    <div class="job-card-about">
+                        <div>${job.location}</div>
+                        <div>${job.job_type}</div>
+                        <div class="status job-type">${job.work_type}</div>
+                    </div>
+                    <div class="job-card-des">${job.description.substring(0,120)}...</div>
+                    <div class="job-card-footer">Exp date: ${job.expiry_date}</div>
+                </div>`;
+        });
+    }
+</script>
+
+
+<?php include '../layouts/footer.php'; ?>
+<?php include '../layouts/layout_end.php'; ?>
