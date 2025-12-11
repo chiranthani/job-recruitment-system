@@ -1,6 +1,4 @@
 <?php
-	session_start();
-	
-	header ('Location: home.php');
-	
+header('Location: home.php');
+exit();
 ?>

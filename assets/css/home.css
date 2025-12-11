@@ -73,12 +73,6 @@
     padding: 0 30px;
 }
 
-.category-list a {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-}
-
 .category-card {
   background: var(--white);
   border-radius: 14px;
