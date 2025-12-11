@@ -31,7 +31,10 @@ include 'backend/data-queries.php';
     <div class="search-content-area">
 
         <aside class="search-sidebar">
-            <h3>Categories</h3>
+            <h3 class="category-header">
+                Categories 
+                <span class="arrow"></span>
+            </h3>
             <div class="filter-list">
                 <?php
                 $get_active_categories = getActiveCategoriesWithJobsCount();
@@ -40,7 +43,7 @@ include 'backend/data-queries.php';
                 while ($res = mysqli_fetch_array($sql)) {
                 ?>
                     <label class="filter-item"><input type="checkbox" value="<?php echo $res['id']; ?>">
-                        <span><?php echo $res['name'] . " (" . $res['post_count'] . ")"; ?></span>
+                        <span><?php echo $res['name']; ?></span> <span class="count"><?php echo $res['post_count']; ?></span>
                     </label>
 
                 <?php } ?>
@@ -51,35 +54,31 @@ include 'backend/data-queries.php';
 
         <section class="jobs-list">
 
-            <div class="job-card">
-                <div class="job-card-header">
-                    <h4>Frontend Developer</h4>
-                    <button class="apply-btn" onclick="window.location.href='apply.php?job=<?php echo (1) ?>'">Apply Now</button>
-                </div>
-                <p class="company">ABC Solutions</p>
-                <div class="job-card-about">
-                    <div> location</div>
-                    <div> full time</div>
-                    <div class="status job-type"> Remote </div>
-                </div>
-                <div class="job-card-des">We are looking for an experienced Frontend Developer to join our dynamic team.
-                    You will be responsible for building scalable web applications using React,... </div>
-                <div class="job-card-footer">Exp date: 12/12/2025</div>
-            </div>
 
-
-            <div class="pagination">
+            <!-- <div class="pagination">
                 <a href="#">&laquo;</a>
                 <a href="#" class="active">1</a>
                 <a href="#">2</a>
                 <a href="#">3</a>
                 <a href="#">&raquo;</a>
-            </div>
+            </div> -->
 
         </section>
     </div>
 </div>
 <script>
+
+    // Mobile category toggle
+    const categoryHeader = document.querySelector('.category-header');
+    const filterList = document.querySelector('.filter-list');
+
+    categoryHeader.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            categoryHeader.classList.toggle('active');
+            filterList.classList.toggle('active');
+        }
+    });
+
     const searchInput = document.querySelector(".job-search-box");
     const companySelect = document.querySelector(".company-select");
     const categoryChecks = document.querySelectorAll(".filter-item input[type=checkbox]");
@@ -108,11 +107,21 @@ include 'backend/data-queries.php';
 
         let categories = [];
         categoryChecks.forEach(c => {
-            if (c.checked) categories.push(c.nextElementSibling.textContent.trim());
+            if (c.checked) {
+                categories.push(c.value);
+            }
         });
 
+        let url = `backend/search.php?search=${encodeURIComponent(search)}&company=${company}`;
+
+        if (categories.length > 0) {
+            categories.forEach(cat => {
+                url += `&categories[]=${encodeURIComponent(cat)}`;
+            });
+        }
+
         let xhr = new XMLHttpRequest();
-        xhr.open("GET", `backend/search.php?search=${encodeURIComponent(search)}&company=${encodeURIComponent(company)}&categories[]=${categories.join("&categories[]=")}`);
+        xhr.open("GET", url);
 
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -139,11 +148,11 @@ include 'backend/data-queries.php';
                     </div>
                     <p class="company">${job.company_name}</p>
                     <div class="job-card-about">
-                        <div>${job.location}</div>
+                        <div>${job.location_name}</div>
                         <div>${job.job_type}</div>
                         <div class="status job-type">${job.work_type}</div>
                     </div>
-                    <div class="job-card-des">${job.description.substring(0,120)}...</div>
+                    <div class="job-card-des">${job.description.substring(0,230)}...</div>
                     <div class="job-card-footer">Exp date: ${job.expiry_date}</div>
                 </div>`;
         });

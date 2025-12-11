@@ -28,4 +28,6 @@ function getApprovedCompanies(){
 /** get user selected job post full content */
 function getSelectedJobPostDetails($id){
 
+    $sql = "";
+    return $sql;
 }

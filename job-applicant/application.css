@@ -532,8 +532,13 @@ label.required::after {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 15px;
+    font-size: 14px;
     cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.filter-item .count {
+    margin-left: auto;
 }
 
 .filter-item input[type="checkbox"] {
@@ -546,6 +551,27 @@ label.required::after {
     background: var(--light);
     border-radius: 4px;
 }
+
+
+/* Arrow icon */
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Default arrow (collapsed) */
+.category-header .arrow::before {
+    content: "▶";
+    font-size: 16px;
+}
+
+/* When expanded */
+.category-header.active .arrow::before {
+    content: "▼";
+}
+
 
 /** jobs list **/
 .jobs-list {
@@ -571,7 +597,7 @@ label.required::after {
 
 .job-card .company {
     color:navy;
-    font-size: 17px;
+    font-size: 16px;
     margin: 5px 0;
 }
 
@@ -589,6 +615,7 @@ label.required::after {
 .job-card-about{
     display: flex;
     gap: 26px;
+    font-size: 14px;
     justify-content: flex-start;
     align-items: baseline;
 }
@@ -599,6 +626,7 @@ label.required::after {
 }
 
 .job-card-footer{
+    margin-top: 10px;
     color: var(--dark);
     font-size: 12px;
     float: right;
@@ -659,6 +687,15 @@ label.required::after {
     }
 
     /** **/
+    .filter-list {
+        display: none;
+        padding-top: 10px;
+    }
+
+    .filter-list.active {
+        display: block;
+    }
+
     .job-header-card { flex-direction: column; text-align: center; }
     .job-right { text-align: center; margin-top: 10px; }
 
@@ -710,5 +747,16 @@ label.required::after {
         content: attr(data-label);
         font-weight: 600;
         color: var(--gray);
+    }
+}
+
+
+/* Desktop category expanded */
+@media(min-width: 769px) {
+    .category-header .arrow {
+        display: none;
+    }
+    .filter-list {
+        display: block !important;
     }
 }

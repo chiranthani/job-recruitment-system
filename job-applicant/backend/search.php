@@ -31,14 +31,14 @@ if ($search !== '') {
     $query .= " AND job_posts.title LIKE '%" . mysqli_real_escape_string($con_main, $search) . "%'";
 }
 
-if ($company !== '') {
-    $query .= " AND companies.name = '" . mysqli_real_escape_string($con_main, $company) . "'";
+if ($company != 'all' && $company != '') {
+    $query .= " AND job_posts.company_id = '" . mysqli_real_escape_string($con_main, $company) . "'";
 }
 
-// if (!empty($categories)) {
-//     $categories_sql = "'" . implode("','", array_map(fn($v) => mysqli_real_escape_string($conn, $v), $categories)) . "'";
-//     $query .= " AND category_name IN ($categories_sql)";
-// }
+if (!empty($categories)) {
+    $categories_sql = "'" . implode("','", array_map(fn($v) => mysqli_real_escape_string($con_main, $v), $categories)) . "'";
+    $query .= " AND job_posts.category_id IN ($categories_sql)";
+}
 
 
 $query .= " ORDER BY job_posts.createdAt DESC";
