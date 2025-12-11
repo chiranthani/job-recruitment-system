@@ -8,6 +8,7 @@ class AppConstants {
     const ROLE_ADMIN = 3;
     const ROLE_EMPLOYER = 2;
     const ROLE_JOB_SEEKER = 1;
+    const ROLE_GUEST = 0;
 
     // statuses
     const ACTIVE_STATUS = 1;
