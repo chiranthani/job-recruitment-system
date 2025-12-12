@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <div>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
-                <a href="profile.php" class="btn btn-secondary">Cancel</a>
+                <a href="company_profile.php" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>

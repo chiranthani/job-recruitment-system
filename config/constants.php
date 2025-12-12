@@ -18,7 +18,7 @@ class AppConstants {
     const gender_list = ['Male', 'Female', 'Other'];
 
     // work types
-    const WORK_TYPES = ['On-site', 'Remote', 'Hybrid', ''];
+    const WORK_TYPES = ['On-site', 'Remote', 'Hybrid'];
 
     // job types
     const JOB_TYPES = ['Full-Time','Part-Time','Contract','Internship','Freelance'];

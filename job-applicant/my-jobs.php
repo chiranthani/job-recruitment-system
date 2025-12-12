@@ -38,13 +38,6 @@
     <h3 class="section-title">My Applications</h3>
 
     <div class="my-application-filter-bar">
-            <?php 
-                  $get_complete_project = "SELECT * FROM `roles`";
-                     $sql = mysqli_query($con_main, $get_complete_project);
-                     while($res = mysqli_fetch_array($sql)){
-              ?>
-              <?php echo $res['name']; ?>
-              <?php } ?>
     <!-- Status Tabs -->
     <div class="status-tabs">
         <button class="tab active" data-status="ALL">All</button>

@@ -12,7 +12,15 @@ include 'backend/data-queries.php';
 
     <div class="search-top-filter">
         <input type="text" class="job-search-box" value="<?php echo ($_GET['search'] ?? "") ?>" placeholder="Search job title...">
+            <select class="work-type-select">
+            <option value="all">All work types</option>
+            <?php 
+            foreach (AppConstants::WORK_TYPES as $type) {
+            ?>
+                <option value="<?php echo $type; ?>"><?php echo $type; ?></option>
+            <?php } ?>
 
+        </select>
         <select class="company-select">
             <option value="all">All Companies</option>
             <?php
@@ -53,17 +61,16 @@ include 'backend/data-queries.php';
 
 
         <section class="jobs-list">
+            <div id="jobs-list-cards">
+
+            </div>
 
 
-            <!-- <div class="pagination">
-                <a href="#">&laquo;</a>
-                <a href="#" class="active">1</a>
-                <a href="#">2</a>
-                <a href="#">3</a>
-                <a href="#">&raquo;</a>
-            </div> -->
+            <div class="pagination">
+            </div>
 
         </section>
+        
     </div>
 </div>
 <script>
@@ -81,29 +88,34 @@ include 'backend/data-queries.php';
 
     const searchInput = document.querySelector(".job-search-box");
     const companySelect = document.querySelector(".company-select");
+    const workTypeSelect = document.querySelector(".work-type-select");
     const categoryChecks = document.querySelectorAll(".filter-item input[type=checkbox]");
-    const jobsList = document.querySelector(".jobs-list");
+    const jobsList = document.getElementById("jobs-list-cards");
+    const paginationDiv = document.querySelector(".pagination");
 
     const urlParams = new URLSearchParams(window.location.search);
     const initialCategory = urlParams.get("category") || "";
 
     if (initialCategory) {
         categoryChecks.forEach(c => {
-            const labelText = c.nextElementSibling.textContent.trim();
-            if (labelText == initialCategory) c.checked = true;
+            if (c.value == initialCategory) {
+                c.checked = true;
+            }
         });
     }
 
     //  event live listeners
     searchInput.addEventListener("keyup", fetchJobs);
     companySelect.addEventListener("change", fetchJobs);
+    workTypeSelect.addEventListener("change", fetchJobs);
     categoryChecks.forEach(c => c.addEventListener("change", fetchJobs));
 
     fetchJobs();
 
-    function fetchJobs() {
+    function fetchJobs(page = 1) {
         let search = searchInput.value;
         let company = companySelect.value;
+        let work_type = workTypeSelect.value;
 
         let categories = [];
         categoryChecks.forEach(c => {
@@ -112,7 +124,7 @@ include 'backend/data-queries.php';
             }
         });
 
-        let url = `backend/search.php?search=${encodeURIComponent(search)}&company=${company}`;
+        let url = `backend/search.php?page=${page}&search=${encodeURIComponent(search)}&company=${company}&work_type=${encodeURIComponent(work_type)}`;
 
         if (categories.length > 0) {
             categories.forEach(cat => {
@@ -125,7 +137,10 @@ include 'backend/data-queries.php';
 
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                renderJobs(JSON.parse(this.responseText));
+                let response = JSON.parse(this.responseText);
+                console.log('response:',response);
+                renderJobs(response.jobs);
+                renderPagination(response.total_pages, response.page);
             }
         };
         xhr.send();
@@ -157,6 +172,16 @@ include 'backend/data-queries.php';
                 </div>`;
         });
     }
+
+    function renderPagination(total, current) {
+        let html = "";
+        for (let i = 1; i <= total; i++) {
+            html += `<a onclick="fetchJobs(${i})" class="${i == current ? 'active' : ''}">${i}</a>`;
+        }
+
+        paginationDiv.innerHTML = html;
+    }
+
 </script>
 
 

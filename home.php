@@ -3,6 +3,7 @@
 <?php include 'layouts/layout_start.php'; ?>
 <link rel="stylesheet" href="assets/css/home.css">
 <?php include 'layouts/header.php'; ?>
+<?php include 'job-applicant/backend/data-queries.php'; ?>
 <!-- end page common elements-->
 
 <!-- start page main content -->
@@ -21,15 +22,19 @@
 <section class="job-categories">
     <h2>Browse Job Categories</h2>
     <div class="category-list">
-        <?php for ($i = 0; $i < 10; $i++): ?>
-            <a href="job-applicant/job-search.php?category="<?php echo ($i); ?>>
-            <div class="category-card">
-                <img src="assets/images/category_icons/it.png" alt="category image">
-                <h3>Category <?php echo ($i); ?></h3>
-                <p>120+ Jobs</p>
-            </div>
+        <?php
+        $get_active_categories = getActiveCategoriesWithJobsCount();
+        $sql = mysqli_query($con_main, $get_active_categories);
+        while ($res = mysqli_fetch_array($sql)) {
+        ?>
+            <a href="job-applicant/job-search.php?category=<?php echo $res['id']; ?>">
+                <div class="category-card">
+                    <img src="assets/images/category_icons/it.png" alt="category image">
+                    <h3><?php echo $res['name']; ?></h3>
+                    <p><?php echo $res['post_count']; ?> Jobs</p>
+                </div>
             </a>
-        <?php endfor; ?>
+        <?php } ?>
     </div>
 </section>
 <!-- end page main content -->

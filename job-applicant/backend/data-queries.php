@@ -28,6 +28,33 @@ function getApprovedCompanies(){
 /** get user selected job post full content */
 function getSelectedJobPostDetails($id){
 
-    $sql = "";
+    $sql = "SELECT
+            job_posts.*,
+            companies.name AS company_name,
+            locations.name AS location_name,
+            job_categories.name AS category_name
+        FROM
+            `job_posts`
+        INNER JOIN companies ON companies.id = job_posts.company_id
+        INNER JOIN job_categories ON job_categories.id = job_posts.category_id
+        INNER JOIN locations ON locations.id = job_posts.location_id
+        WHERE
+            job_posts.id = ".$id;
+
+    return $sql;
+}
+
+/** get selected post benefits */
+function getSelectedJobPostBenefits($jobId){
+
+        $sql = "SELECT
+            job_post_benefits.*,
+            benefits.name
+        FROM
+            `job_post_benefits`
+        INNER JOIN benefits on benefits.id = job_post_benefits.benefit_id
+        WHERE
+            job_post_benefits.job_post_id=".$jobId;
+            
     return $sql;
 }

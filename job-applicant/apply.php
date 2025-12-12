@@ -3,13 +3,22 @@
 
 <link rel="stylesheet" href="application.css">
 
-<?php include '../layouts/header.php'; ?>
+<?php include '../layouts/header.php'; 
+include 'backend/data-queries.php';
+?>
 
 <section>
     <div class="job-apply-container">
+ <?php
+            $get_job_post_data = getSelectedJobPostDetails($_GET['job']);
+
+            $job_sql = mysqli_query($con_main, $get_job_post_data);
+            $job = mysqli_fetch_assoc($job_sql);
+            ?>
+           
         <a onclick=" window.history.back()" class="back-link">← Back to Job Details</a>
-        <h2>Apply for Senior Frontend Developer</h2>
-        <p class="job-company">at ABC Solutions</p>
+        <h2>Apply for <?php echo $job['title'] ?></h2>
+        <p class="job-company">at <?php echo $job['company_name'] ?></p>
 
         <form method="POST" enctype="multipart/form-data">
 

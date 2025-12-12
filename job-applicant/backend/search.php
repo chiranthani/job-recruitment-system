@@ -4,7 +4,12 @@ include '../../config/constants.php';
 
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $company = isset($_GET['company']) ? trim($_GET['company']) : '';
+$work_type = isset($_GET['work_type']) ? trim($_GET['work_type']) : '';
 $categories = isset($_GET['categories']) ? $_GET['categories'] : [];
+$page  = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+$limit = 6;
+$offset = ($page - 1) * $limit;
 
 $query = "SELECT
     job_posts.id,
@@ -34,6 +39,9 @@ if ($search !== '') {
 if ($company != 'all' && $company != '') {
     $query .= " AND job_posts.company_id = '" . mysqli_real_escape_string($con_main, $company) . "'";
 }
+if ($work_type != 'all' && $work_type != '') {
+    $query .= " AND job_posts.work_type = '" . mysqli_real_escape_string($con_main, $work_type) . "'";
+}
 
 if (!empty($categories)) {
     $categories_sql = "'" . implode("','", array_map(fn($v) => mysqli_real_escape_string($con_main, $v), $categories)) . "'";
@@ -41,14 +49,24 @@ if (!empty($categories)) {
 }
 
 
-$query .= " ORDER BY job_posts.createdAt DESC";
+$query .= " ORDER BY job_posts.id DESC";
 
-$result = mysqli_query($con_main, $query);
+$total_result = mysqli_query($con_main, $query);
+$total_records = mysqli_num_rows($total_result);
+$total_pages = ceil($total_records / $limit);
 
+// pagination add and fetch
+$query .= " LIMIT $offset, $limit";
+$final_result = mysqli_query($con_main, $query);
 $jobs = [];
-while ($row = mysqli_fetch_assoc($result)) {
+
+while ($row = mysqli_fetch_assoc($final_result)) {
     $jobs[] = $row;
 }
 
-echo json_encode($jobs);
+echo json_encode([
+    'jobs' => $jobs,
+    'page' => $page,
+    'total_pages' => $total_pages
+]);
 exit;
