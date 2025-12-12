@@ -47,7 +47,7 @@ function getSelectedJobPostDetails($id){
 /** get selected post benefits */
 function getSelectedJobPostBenefits($jobId){
 
-        $sql = "SELECT
+    $sql = "SELECT
             job_post_benefits.*,
             benefits.name
         FROM
@@ -58,3 +58,13 @@ function getSelectedJobPostBenefits($jobId){
             
     return $sql;
 }
+
+/** get a candidate job table row */
+function getACandidateJob($useId,$jobId,$type){
+
+    $sql = "SELECT * FROM candidate_jobs WHERE job_id = {$jobId} AND user_id = {$useId} AND `type` = '{$type}'
+        LIMIT 1";
+    return $sql;
+}
+
+

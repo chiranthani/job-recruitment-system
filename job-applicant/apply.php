@@ -9,19 +9,19 @@ include 'backend/data-queries.php';
 
 <section>
     <div class="job-apply-container">
- <?php
+        <?php
             $get_job_post_data = getSelectedJobPostDetails($_GET['job']);
 
             $job_sql = mysqli_query($con_main, $get_job_post_data);
             $job = mysqli_fetch_assoc($job_sql);
-            ?>
+        ?>
            
         <a onclick=" window.history.back()" class="back-link">← Back to Job Details</a>
         <h2>Apply for <?php echo $job['title'] ?></h2>
         <p class="job-company">at <?php echo $job['company_name'] ?></p>
 
-        <form method="POST" enctype="multipart/form-data">
-
+        <form id="applyForm" enctype="multipart/form-data">
+            <input type="hidden" name="job_id" value="<?php echo $job['id'] ?>">
             <h3 class="form-title">Personal Information</h3>
 
             <div class="row">
@@ -97,6 +97,8 @@ include 'backend/data-queries.php';
         </form>
     </div>
 </section>
+<?php include 'modals/success-popup.php'; ?>
+<?php include 'modals/error-popup.php'; ?>
 <script>
     const resumeInput = document.getElementById('resumeInput');
     const resumeText = document.getElementById('resumeText');
@@ -121,6 +123,54 @@ include 'backend/data-queries.php';
         resumeText.innerHTML = `📄 Upload your resume<br><small>PDF, DOC, DOCX (Max 5MB)</small>`;
         removeBtn.style.display = 'none';
     }
+
+
+    document.getElementById("applyForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", "backend/application-submit.php", true);
+
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                let res = JSON.parse(xhr.responseText);
+
+                if (res.status == "success") {
+                    showSuccess("🎉 Application Submitted!",res.message || "Something went wrong!");
+                } else {
+                    showError(res.message || "Something went wrong!");
+                }
+            } else {
+                showError("Server error! Try again.");
+            }
+        };
+
+        xhr.send(formData);
+    });
+
+    // Popup handling
+    function showError(msg) {
+        document.getElementById("errorMessage").textContent = msg;
+        document.getElementById("errorPopup").style.display = "flex";
+    }
+
+    function showSuccess(title,msg) {
+        document.getElementById("popup-title").textContent = title;
+        document.getElementById("popup-message").textContent = msg;
+        document.getElementById("successPopup").style.display = "flex";
+    }
+    
+    function closeSuccessPopup() {
+        document.getElementById("successPopup").style.display = "none";
+        window.location.replace('job-search.php');
+    }
+
+    function closeErrorPopup() {
+        document.getElementById("errorPopup").style.display = "none";
+    }
+
 </script>
 
 
