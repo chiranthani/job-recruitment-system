@@ -4,96 +4,106 @@
 <?php include '../layouts/header.php'; ?>
 <!-- end page common elements-->
 
-<!-- start page main content -->
-<section>
+<link rel="stylesheet" href="job-post.css">
 
+<section class="job-wrapper">
     <h2>Job Post Creation</h2>
 
-    <form method="POST" action="save_job.php">
+    <form method="POST" action="save_job.php" class="job-form">
 
-        <label>* Job Status:</label>
-        <select name="job_status">
-            <option value="Draft">Draft</option>
-            <option value="Published">Published</option>
-        </select>
+        <!-- TWO COLUMN ROW: Job Status + Deadline -->
+        <div class="form-row-2col">
 
-        <label>Application Deadline:</label>
-        <input type="date" name="deadline">
+            <div>
+                <label>* Job Status:</label>
+                <select name="job_status" class="input-box">
+                    <option>Draft</option>
+                    <option>Published</option>
+                    <option>Archived</option>
+                </select>
+            </div>
 
-        <br><br>
+            <div>
+                <label>Application Deadline:</label>
+                <input type="date" name="deadline" class="input-box">
+            </div>
 
-        <label>* Category:</label>
-        <select name="category">
-            <option value="">Select Category</option>
-            <option value="IT">IT</option>
-            <option value="Finance">Finance</option>
-            <option value="HR">HR</option>
-            <option value="Marketing">Marketing</option>
-        </select>
+        </div>
 
-        <br><br>
+        <!-- Category -->
+        <div class="form-row">
+            <label>* Category:</label>
+            <select name="category" class="input-box-full">
+                <option>Select Category</option>
+                <option>IT</option>
+                <option>HR</option>
+                <option>Finance</option>
+                <option>Marketing</option>
+            </select>
+        </div>
 
-        <label>* Job Title:</label><br>
-        <input type="text" name="title" style="width:50%; height:30px;">
+        <!-- Job Title -->
+        <div class="form-row">
+            <label>* Job Title:</label>
+            <input type="text" name="job_title" class="input-box-full">
+        </div>
 
-        <br><br>
+        <!-- Job Type -->
+        <div class="form-row">
+            <label>* Job Type:</label>
+            <select name="job_type" class="input-box">
+                <option>Job Type</option>
+                <option>Full Time</option>
+                <option>Part Time</option>
+                <option>Intern</option>
+                <option>Contract</option>
+            </select>
+        </div>
 
-        <label>* Job Type:</label>
-        <select name="job_type">
-            <option value="">Job Type</option>
-            <option value="Full Time">Full Time</option>
-            <option value="Intern">Intern</option>
-            <option value="Contract">Contract</option>
-            <option value="Part Time">Part Time</option>
-        </select>
 
-        <br><br>
+        <!-- Description -->
+        <div class="form-row">
+            <label>* Description:</label>
+            <textarea name="description" class="textarea"></textarea>
+        </div>
 
-        <label>* Description:</label><br>
-        <textarea name="description" style="width:60%; height:120px;"></textarea>
+        <!-- Requirements -->
+        <div class="form-row">
+            <label>* Requirements:</label>
+            <textarea name="requirements" class="textarea"></textarea>
+        </div>
 
-        <br><br>
+        <!-- Benefits -->
+        <div class="form-row">
+            <label>* Benefits:</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox"> Receive a competitive salary based on experience.</label>
+                <label><input type="checkbox"> Comprehensive health insurance coverage.</label>
+                <label><input type="checkbox"> Flexible hours & work-from-home options.</label>
+                <label><input type="checkbox"> Performance-based bonuses & incentives.</label>
+            </div>
+        </div>
 
-        <label>* Requirements:</label><br>
-        <textarea name="requirements" style="width:60%; height:120px;"></textarea>
+        <!-- Job Location -->
+        <div class="form-row">
+            <label>* Job Location:</label>
+            <select class="input-box">
+                <option>Job Location</option>
+                <option>Colombo</option>
+                <option>Gampaha</option>
+                <option>Matara</option>
+                <option>Kandy</option>
+            </select>
+        </div>
 
-        <br><br>
-
-        <label>* Benefits:</label><br>
-
-        <label><input type="checkbox" name="benefits[]" value="Competitive Salary"> Receive a competitive salary based on experience and performance.</label><br>
-
-        <label><input type="checkbox" name="benefits[]" value="Health Insurance"> Comprehensive health insurance coverage for you and your family.</label><br>
-
-        <label><input type="checkbox" name="benefits[]" value="Work From Home"> Flexibility in work hours and the option to work from home.</label><br>
-
-        <label><input type="checkbox" name="benefits[]" value="Performance Bonus"> Eligibility for performance-based bonuses and incentives.</label><br>
-
-        <br>
-
-        <label>* Job Location:</label>
-        <select name="location">
-            <option value="">Job Location</option>
-            <option value="Colombo">Colombo</option>
-            <option value="Gampaha">Gampaha</option>
-            <option value="Matara">Matara</option>
-            <option value="Kandy">Kandy</option>
-            <option value="Galle">Galle</option>
-            <option value="Jaffna">Jaffna</option>
-            <option value="Negambo">Negambo</option>
-            <option value="Homagama">Homagama</option>
-            <option value="Kiribathgoda">Kiribathgoda</option>
-        </select>
-
-        <br><br>
-
-        <button type="submit">Save</button>
-        <button type="button" onclick="window.location.href='job_posts.php'">Close</button>
+        <!-- Save + Close Buttons -->
+        <div class="form-actions">
+            <button type="submit" class="save-btn">Save</button>
+            <button type="button" class="close-btn">Close</button>
+        </div>
 
     </form>
-
 </section>
-<!-- end page main content -->
 
 <?php include '../layouts/footer.php'; ?>
 <?php include '../layouts/layout_end.php'; ?>
