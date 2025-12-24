@@ -51,9 +51,6 @@
         <button class="apply-button">Apply for Job</button>
     </div>
 
-    <div class="footer-line">
-        Copyright © 2025 Jobs XX, All rights reserved.
-    </div>
 
 </section>
 
