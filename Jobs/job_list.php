@@ -21,7 +21,7 @@
         </div>
 
         <!-- New Job Post -->
-        <a href="job_post.php" class="new-job-btn">New Job Post</a>
+        <a href="create_post.php" class="new-job-btn">New Job Post</a>
     </div>
 
     <!-- Filter Buttons -->
@@ -29,7 +29,6 @@
         <button class="filter-btn">Category</button>
         <button class="filter-btn">Status</button>
         <button class="filter-btn">Job Type</button>
-        <button class="filter-btn">Job Location</button>
     </div>
 
     <!-- Job Table -->
