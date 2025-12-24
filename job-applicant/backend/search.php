@@ -8,7 +8,7 @@ $work_type = isset($_GET['work_type']) ? trim($_GET['work_type']) : '';
 $categories = isset($_GET['categories']) ? $_GET['categories'] : [];
 $page  = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
-$limit = 6;
+$limit = 2;
 $offset = ($page - 1) * $limit;
 
 $query = "SELECT

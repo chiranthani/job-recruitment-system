@@ -26,8 +26,7 @@ include 'backend/data-queries.php';
             <?php
             $get_approved_companies = getApprovedCompanies();
 
-            $sql = mysqli_query($con_main, $get_approved_companies);
-            while ($res = mysqli_fetch_array($sql)) {
+            foreach ($get_approved_companies as $res) {
             ?>
                 <option value="<?php echo $res['id']; ?>"><?php echo $res['name']; ?></option>
 
@@ -47,8 +46,8 @@ include 'backend/data-queries.php';
                 <?php
                 $get_active_categories = getActiveCategoriesWithJobsCount();
 
-                $sql = mysqli_query($con_main, $get_active_categories);
-                while ($res = mysqli_fetch_array($sql)) {
+
+                foreach ($get_active_categories as $res) {
                 ?>
                     <label class="filter-item"><input type="checkbox" value="<?php echo $res['id']; ?>">
                         <span><?php echo $res['name']; ?></span> <span class="count"><?php echo $res['post_count']; ?></span>
@@ -117,6 +116,10 @@ include 'backend/data-queries.php';
         let company = companySelect.value;
         let work_type = workTypeSelect.value;
 
+        if (isNaN(page) || page < 1) {
+            page = 1;
+        }
+
         let categories = [];
         categoryChecks.forEach(c => {
             if (c.checked) {
@@ -138,7 +141,7 @@ include 'backend/data-queries.php';
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 let response = JSON.parse(this.responseText);
-                console.log('response:',response);
+             
                 renderJobs(response.jobs);
                 renderPagination(response.total_pages, response.page);
             }
@@ -159,7 +162,7 @@ include 'backend/data-queries.php';
                 <div class="job-card">
                     <div class="job-card-header">
                         <h4>${job.title}</h4>
-                        <button class="apply-btn" onclick="window.location.href='apply.php?job=${job.id}'">Apply Now</button>
+                        <button class="apply-btn" onclick="window.location.href='apply.php?job=${job.id}'">View</button>
                     </div>
                     <p class="company">${job.company_name}</p>
                     <div class="job-card-about">

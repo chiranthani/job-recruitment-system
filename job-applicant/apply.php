@@ -5,15 +5,23 @@
 
 <?php include '../layouts/header.php'; 
 include 'backend/data-queries.php';
+    $userId = $_SESSION['user_id'] ?? 4;
+
+    $candidate = getCandidateDetails($userId);
+
+    $existingResume = $candidate['cv_url'] ?? null;
+    $fname = $candidate['first_name'] ?? '';
+    $lname = $candidate['last_name'] ?? '';
+    $email = $candidate['email'] ?? '';
+    $contact_no = $candidate['contact_no'] ?? '';
 ?>
 
 <section>
     <div class="job-apply-container">
         <?php
-            $get_job_post_data = getSelectedJobPostDetails($_GET['job']);
+            $job = getSelectedJobPostDetails($_GET['job']);
 
-            $job_sql = mysqli_query($con_main, $get_job_post_data);
-            $job = mysqli_fetch_assoc($job_sql);
+        
         ?>
            
         <a onclick=" window.history.back()" class="back-link">← Back to Job Details</a>
@@ -27,23 +35,23 @@ include 'backend/data-queries.php';
             <div class="row">
                 <div class="col">
                     <label class="required">First Name</label>
-                    <input type="text" name="first_name" placeholder="John" required>
+                    <input type="text" name="first_name" value="<?php echo $fname ?>" placeholder="John" required>
                 </div>
                 <div class="col">
                     <label class="required">Last Name</label>
-                    <input type="text" name="last_name" placeholder="Doe" required>
+                    <input type="text" name="last_name" value="<?php echo $lname ?>" placeholder="Doe" required>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
                     <label class="required">Email</label>
-                    <input type="email" name="email" placeholder="john.doe@example.com" required>
+                    <input type="email" name="email" value="<?php echo $email ?>" placeholder="john.doe@example.com" required>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
                     <label class="required">Contact No</label>
-                    <input type="text" name="phone" placeholder="0712345678" required>
+                    <input type="text" name="phone" value="<?php echo $contact_no ?>" placeholder="0712345678" required>
                 </div>
             </div>
             <h3 class="form-title">Professional Information</h3>
@@ -51,7 +59,7 @@ include 'backend/data-queries.php';
                 <div class="col">
                     <label class="required">Years of Experience</label>
                     <select name="experience" required>
-                        <option value="">Select Experience</option>
+                        <option value="" selected disabled>Select Experience</option>
                         <?php foreach (AppConstants::EXPERIENCE_OPTIONS as $exp): ?>
                             <option value="<?= $exp ?>"><?= $exp ?></option>
                         <?php endforeach; ?>
@@ -66,15 +74,43 @@ include 'backend/data-queries.php';
             </div>
 
             <h3 class="form-title">CV Upload</h3>
-            <div class="row">
+
+            <?php if ($existingResume): ?>
+                <div class="cv-options">
+                    <label>
+                        <input type="radio" name="cv_option" value="existing" checked>
+                        Use existing CV
+                        <a href="<?php echo BaseConfig::$BASE_URL ?><?= $existingResume ?>" target="_blank">(View)</a>
+                    </label>
+
+                    <label>
+                        <input type="radio" name="cv_option" value="new">
+                        Upload new CV
+                    </label>
+                </div>
+            <?php else: ?>
+                <input type="hidden" name="cv_option" value="new">
+            <?php endif; ?>
+
+            <div class="row" id="newCvBox" style="<?= $existingResume ? 'display:none' : '' ?>">
                 <div class="col">
                     <label class="file-box" id="resumeLabel">
-                        <input type="file" name="resume" accept=".pdf, .doc, .docx" id="resumeInput" required>
-                        <span id="resumeText">📄 Upload your resume<br><small>PDF, DOC, DOCX (Max 5MB)</small></span>
+                        <input type="file" name="resume" accept=".pdf, .doc, .docx" id="resumeInput">
+                        <span id="resumeText">Upload your resume<br><small>PDF, DOC, DOCX (Max 5MB)</small></span>
                         <button type="button" id="removeResumeBtn" style="display:none;">X</button>
                     </label>
                 </div>
             </div>
+
+            <!-- <div class="row">
+                <div class="col">
+                    <label class="file-box" id="resumeLabel">
+                        <input type="file" name="resume" accept=".pdf, .doc, .docx" id="resumeInput" required>
+                        <span id="resumeText">Upload your resume<br><small>PDF, DOC, DOCX (Max 5MB)</small></span>
+                        <button type="button" id="removeResumeBtn" style="display:none;">X</button>
+                    </label>
+                </div>
+            </div> -->
 
 
             <h3 class="form-title">Additional Questions</h3>
@@ -82,7 +118,7 @@ include 'backend/data-queries.php';
                 <div class="col">
                     <label class="required">When can you start?</label>
                     <select name="notice" required>
-                        <option value="">Select Notice Period</option>
+                        <option value="" selected disabled>Select Notice Period</option>
                         <?php foreach (AppConstants::NOTICE_PERIOD_OPTIONS as $notice): ?>
                             <option value="<?= $notice ?>"><?= $notice ?></option>
                         <?php endforeach; ?>
@@ -103,11 +139,37 @@ include 'backend/data-queries.php';
     const resumeInput = document.getElementById('resumeInput');
     const resumeText = document.getElementById('resumeText');
     const removeBtn = document.getElementById('removeResumeBtn');
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+    const cvRadios = document.querySelectorAll('input[name="cv_option"]');
+    const newCvBox = document.getElementById('newCvBox');
+
+    cvRadios.forEach(radio => {
+        radio.addEventListener('change', function () {
+            if (this.value == 'new') {
+                newCvBox.style.display = 'block';
+                resumeInput.required = true;
+            } else {
+                newCvBox.style.display = 'none';
+                resumeInput.required = false;
+                resumeInput.value = "";
+                resetResume();
+            }
+        });
+    });
+
 
     resumeInput.addEventListener('change', function() {
         if (this.files && this.files.length > 0) {
+
+            if (this.files[0].size > MAX_FILE_SIZE) {
+                showError("Resume file size must be less than 5MB");
+                this.value = "";
+                resetResume();
+                return;
+            }
             const fileName = this.files[0].name;
-            resumeText.textContent = `📄 ${fileName}`;
+            resumeText.textContent = `${fileName}`;
             removeBtn.style.display = 'inline-block';
         } else {
             resetResume();
@@ -120,7 +182,7 @@ include 'backend/data-queries.php';
     });
 
     function resetResume() {
-        resumeText.innerHTML = `📄 Upload your resume<br><small>PDF, DOC, DOCX (Max 5MB)</small>`;
+        resumeText.innerHTML = `Upload your resume<br><small>PDF, DOC, DOCX (Max 5MB)</small>`;
         removeBtn.style.display = 'none';
     }
 

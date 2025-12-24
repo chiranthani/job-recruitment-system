@@ -24,8 +24,8 @@
     <div class="category-list">
         <?php
         $get_active_categories = getActiveCategoriesWithJobsCount();
-        $sql = mysqli_query($con_main, $get_active_categories);
-        while ($res = mysqli_fetch_array($sql)) {
+       
+        foreach ($get_active_categories as $res) {
         ?>
             <a href="job-applicant/job-search.php?category=<?php echo $res['id']; ?>">
                 <div class="category-card">

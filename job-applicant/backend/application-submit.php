@@ -19,16 +19,15 @@ try {
     $exp = htmlspecialchars(strip_tags($_POST['experience']));
     $role = htmlspecialchars(strip_tags($_POST['current_role']));
     $notice = htmlspecialchars(strip_tags($_POST['notice']));
+    $cvOption = $_POST['cv_option'] ?? 'new';
     $full_name = $first . ' ' . $last;
-    $user_id = $_SESSION['user_id'] ?? 0;
+    $user_id = $_SESSION['user_id'] ?? 4;
     $type = AppConstants::APPLIED_JOB;
 
     // duplicate check
-    $check_sql = getACandidateJob(intval($user_id),$job_id,$type);
-    $check_result = mysqli_query($con_main, $check_sql);
-    $row_count = mysqli_num_rows($check_result);
+    $check_result = getACandidateJob(intval($user_id),$job_id,$type);
 
-    if ($row_count > 0) {
+    if ($check_result) {
         echo json_encode([
             "status" => "error",
             "message" => "You have already applied for this job."
@@ -39,17 +38,31 @@ try {
     // Upload file
     $resumePath = null;
 
-    if (!empty($_FILES['resume']['name'])) {
+    if ($cvOption == 'existing') {
 
-        $fileName = time() . "_" . basename($_FILES['resume']['name']);
-        $target = "../../assets/uploads/resumes/" . $fileName;
+        $row = getCandidateDetails($user_id);
+        $resumePath = $row['cv_url'];
 
-        if (!move_uploaded_file($_FILES['resume']['tmp_name'], $target)) {
-            echo json_encode(["status" => "error", "message" => "Failed to upload resume"]);
+    } else {
+      
+        if (!isset($_FILES['resume'])) {
+            echo json_encode(["status"=>"error","message"=>"Resume required"]);
             exit;
         }
 
-        $resumePath = "uploads/resumes/" . $fileName;
+        if (!empty($_FILES['resume']['name'])) {
+
+            $fileName = time() . "_" . basename($_FILES['resume']['name']);
+            $target = "../../assets/uploads/resumes/" . $fileName;
+
+            if (!move_uploaded_file($_FILES['resume']['tmp_name'], $target)) {
+                echo json_encode(["status" => "error", "message" => "Failed to upload resume"]);
+                exit;
+            }
+
+            $resumePath = "uploads/resumes/" . $fileName;
+        }
+
     }
 
     $con_main->begin_transaction();

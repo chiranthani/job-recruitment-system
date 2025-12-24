@@ -151,6 +151,14 @@ label.required::after {
     gap: 10px;
 }
 
+.cv-options {
+    margin-bottom: 10px;
+}
+
+.cv-options input {
+    width: auto;
+}
+
 
 /* Summary Cards */
 .summary-cards {
