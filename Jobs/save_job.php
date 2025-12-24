@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $description  = $_POST['description'];
     $requirements = $_POST['requirements'];
     $location_id  = $_POST['location_id'];
-    $company_id = $_SESSION['company_id'];
+    $company_id = $_SESSION['company_id'] ?? 0;
     $user_id = $_SESSION['user_id'] ?? 0;
  
 
