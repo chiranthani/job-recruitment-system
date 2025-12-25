@@ -18,13 +18,9 @@ include 'backend/data-queries.php';
 
 <section>
     <div class="job-apply-container">
-        <?php
-            $job = getSelectedJobPostDetails($_GET['job']);
-
-        
-        ?>
+        <?php $job = getSelectedJobPostDetails($_GET['job']); ?>
            
-        <a onclick=" window.history.back()" class="back-link">← Back to Job Details</a>
+        <a onclick="window.history.back()" class="back-link">← Back to Job Details</a>
         <h2>Apply for <?php echo $job['title'] ?></h2>
         <p class="job-company">at <?php echo $job['company_name'] ?></p>
 
@@ -101,16 +97,6 @@ include 'backend/data-queries.php';
                     </label>
                 </div>
             </div>
-
-            <!-- <div class="row">
-                <div class="col">
-                    <label class="file-box" id="resumeLabel">
-                        <input type="file" name="resume" accept=".pdf, .doc, .docx" id="resumeInput" required>
-                        <span id="resumeText">Upload your resume<br><small>PDF, DOC, DOCX (Max 5MB)</small></span>
-                        <button type="button" id="removeResumeBtn" style="display:none;">X</button>
-                    </label>
-                </div>
-            </div> -->
 
 
             <h3 class="form-title">Additional Questions</h3>
@@ -200,7 +186,7 @@ include 'backend/data-queries.php';
                 let res = JSON.parse(xhr.responseText);
 
                 if (res.status == "success") {
-                    showSuccess("🎉 Application Submitted!",res.message || "Something went wrong!");
+                    showSuccess("🎉 Application Submitted!",res.message || "Successfully!");
                 } else {
                     showError(res.message || "Something went wrong!");
                 }

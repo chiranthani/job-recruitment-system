@@ -5,11 +5,9 @@
         <div class="form-group">
             <label for="statusSelect">Select Status</label>
             <select id="statusSelect" onchange="toggleInterviewDate()">
-                <option value="Pending">Pending</option>
-                <option value="Shortlisted">Shortlisted</option>
-                <option value="Interview">Interview</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Hired">Hired</option>
+                <?php foreach(AppConstants::APPLICATION_STATUS as $key => $label): ?>
+                    <option value="<?= ($label); ?>"><?= $label; ?></option>
+                <?php endforeach; ?>
             </select>
         </div>
 
@@ -19,8 +17,9 @@
         </div>
 
         <div class="modal-footer">
-            <button onclick="closeModal()">Cancel</button>
-            <button onclick="saveStatus()">Save</button>
+            <input type="hidden" id="applicationId" name="applicationId" >
+            <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-submit" onclick="saveStatus()">Save</button>
         </div>
     </div>
 </div>

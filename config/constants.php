@@ -23,6 +23,10 @@ class AppConstants {
     // job types
     const JOB_TYPES = ['Full-Time','Part-Time','Contract','Internship','Freelance'];
 
+    // job post status
+    const POST_DRAFT = 'draft';
+    const POST_PUBLISHED = 'published';
+
     // candidate job types
     const APPLIED_JOB = 'Applied Job';
     const SAVED_JOB = 'Saved Job';
@@ -60,5 +64,7 @@ class AppConstants {
         '1 Month',
         'More than 1 Month'
     ];
+
+    const APPLICATION_STATUS_FLOW = ['Applied','In Review','Interview','Offer Made','Rejected','Offer Rejected','Offer Accepted','Hired'];
 
 }

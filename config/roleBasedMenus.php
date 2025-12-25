@@ -31,7 +31,7 @@ class RoleBasedMenus
             case 2: // employer
                 echo '<a class="' . $isActive('dashboard.php') . '" href="' . $base_url . 'Employer/dashboard.php">Dashboard</a>';
                 echo '<a class="' . $isActive('job_list.php') . '" href="' . $base_url . 'Jobs/job_list.php">Job Posts</a>';
-                echo '<a class="' . $isActive('#') . '" href="' . $base_url . '#">Applications</a>';
+                echo '<a class="' . $isActive('application-overview.php') . '" href="' . $base_url . 'job-applicant/application-overview.php">Applications</a>';
                 echo '<a class="' . $isActive('company_profile.php') . '" href="' . $base_url . 'Employer/company_profile.php">Company</a>';
                 echo '<a class="' . $isActive('help.php') . '" href="' . $base_url . 'help.php">Help</a>';
                 break;
