@@ -1,4 +1,5 @@
 <?php
+session_start();
 include '../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -54,10 +55,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         //  Redirect
-        header("Location: job_list.php?success=1");
+        $_SESSION['success'] = "Job post created successfully.";
+        header("Location: job_list.php");
         exit;
 
-    } else {
-        echo "Error saving job post.";
+   } else {
+    $_SESSION['error'] = "Error saving job post. Please try again.";
+    header("Location: create_post.php");
+    exit;
     }
+
 }

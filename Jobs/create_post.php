@@ -7,6 +7,12 @@
 <link rel="stylesheet" href="job-post.css">
 
 <section class="job-wrapper">
+<?php if (isset($_SESSION['error'])) { ?>
+    <div class="alert error">
+        <?= $_SESSION['error']; ?>
+    </div>
+<?php unset($_SESSION['error']); } ?>
+
     <h2>Job Post Creation</h2>
 
     <form method="POST" action="save_job.php" class="job-form">

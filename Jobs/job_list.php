@@ -1,35 +1,126 @@
 <!-- start page common elements -->
-<?php include '../config/database.php'; ?>
-<?php include '../layouts/layout_start.php'; ?>
-<?php include '../layouts/header.php'; ?>
+<?php
+include '../config/database.php';
+include '../layouts/layout_start.php';
+include '../layouts/header.php';
+?>
 <!-- end page common elements-->
 
 <link rel="stylesheet" href="job-post.css">
 
+<?php
+/* =========================
+   BUILD FILTER CONDITIONS
+========================= */
+$where = [];
+
+/* Job Status filter */
+if (!empty($_GET['job_status']) && $_GET['job_status'] !== 'all') {
+    $job_status = $con_main->real_escape_string($_GET['job_status']);
+    $where[] = "j.job_status = '$job_status'";
+}
+
+/* Category filter */
+if (!empty($_GET['category']) && $_GET['category'] !== 'all') {
+    $category = (int) $_GET['category'];
+    $where[] = "j.category_id = $category";
+}
+
+/* Job Type filter */
+if (!empty($_GET['job_type']) && $_GET['job_type'] !== 'all') {
+    $job_type = $con_main->real_escape_string($_GET['job_type']);
+    $where[] = "j.job_type = '$job_type'";
+}
+
+/* Final Query */
+$sql = "
+    SELECT 
+        j.id,
+        j.job_title,
+        j.job_status,
+        j.job_type,
+        c.name AS category_name
+    FROM jobs j
+    LEFT JOIN job_categories c ON j.category_id = c.id
+";
+
+if (!empty($where)) {
+    $sql .= " WHERE " . implode(" AND ", $where);
+}
+
+$sql .= " ORDER BY j.id DESC";
+
+$result = $con_main->query($sql);
+?>
+
 <section class="job-list-wrapper">
+    
+<?php if (isset($_SESSION['success'])) { ?>
+    <div class="alert success">
+        <?= $_SESSION['success']; ?>
+    </div>
+<?php unset($_SESSION['success']); } ?>
 
     <h2>Job Posts</h2>
     <p class="subtitle">Manage your job postings</p>
 
-    <!-- Top Row -->
+    <!-- Top Bar -->
     <div class="top-bar">
 
-        <!-- Search -->
         <div class="search-wrapper">
             <input type="text" class="search-box" placeholder="Search by job title">
             <span class="search-icon">🔍</span>
         </div>
 
-        <!-- New Job Post -->
         <a href="create_post.php" class="new-job-btn">New Job Post</a>
     </div>
 
-    <!-- Filter Buttons -->
-    <div class="filter-row">
-        <button class="filter-btn">Category</button>
-        <button class="filter-btn">Status</button>
-        <button class="filter-btn">Job Type</button>
-    </div>
+    <!-- Filters -->
+    <form method="GET">
+
+        <div class="filter-row">
+
+            <div class="filter-item">
+                <label>Job Status</label>
+                <select name="job_status" class="filter-select" onchange="this.form.submit()">
+                    <option value="all">All</option>
+                    <option value="draft" <?= (@$_GET['job_status']=='draft')?'selected':''; ?>>Draft</option>
+                    <option value="published" <?= (@$_GET['job_status']=='published')?'selected':''; ?>>Published</option>
+                </select>
+            </div>
+
+            <div class="filter-item">
+                <label>Category</label>
+                <select name="category" class="filter-select" onchange="this.form.submit()">
+                    <option value="all">All</option>
+                    <?php
+                    $cat_q = "SELECT * FROM job_categories WHERE status = 1";
+                    $cat_r = $con_main->query($cat_q);
+                    while ($cat = $cat_r->fetch_assoc()) {
+                    ?>
+                        <option value="<?= $cat['id']; ?>"
+                            <?= (@$_GET['category']==$cat['id'])?'selected':''; ?>>
+                            <?= $cat['name']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
+            </div>
+
+            <div class="filter-item">
+                <label>Job Type</label>
+                <select name="job_type" class="filter-select" onchange="this.form.submit()">
+                    <option value="all">All</option>
+                    <option value="Full-Time" <?= (@$_GET['job_type']=='Full-Time')?'selected':''; ?>>Full Time</option>
+                    <option value="Part-Time" <?= (@$_GET['job_type']=='Part-Time')?'selected':''; ?>>Part Time</option>
+                    <option value="Internship" <?= (@$_GET['job_type']=='Internship')?'selected':''; ?>>Intern</option>
+                    <option value="Contract" <?= (@$_GET['job_type']=='Contract')?'selected':''; ?>>Contract</option>
+                    <option value="Freelance" <?= (@$_GET['job_type']=='Freelance')?'selected':''; ?>>Freelance</option>
+                </select>
+            </div>
+
+        </div>
+
+    </form>
 
     <!-- Job Table -->
     <table class="job-table">
@@ -45,34 +136,47 @@
         </thead>
 
         <tbody>
-
-            <!-- Example Row -->
+        <?php
+        if ($result->num_rows > 0) {
+            $i = 1;
+            while ($row = $result->fetch_assoc()) {
+        ?>
             <tr>
-                <td>1</td>
-                <td>Developer I</td>
-                <td>IT</td>
+                <td><?= $i++; ?></td>
+                <td><?= htmlspecialchars($row['job_title']); ?></td>
+                <td><?= htmlspecialchars($row['category_name']); ?></td>
 
                 <td>
-                    <span class="status-badge published">Published</span>
+                    <span class="status-badge <?= $row['job_status']; ?>">
+                        <?= ucfirst($row['job_status']); ?>
+                    </span>
                 </td>
 
                 <td>
                     <label class="switch">
-                        <input type="checkbox" checked>
+                        <input type="checkbox" <?= ($row['job_status']=='published')?'checked':''; ?>>
                         <span class="slider"></span>
                     </label>
                 </td>
 
                 <td class="action-buttons">
-                    <a href="#" class="view-icon">👁</a>
-                    <a href="#" class="edit-icon">✏️</a>
+                    <a href="job_view.php?id=<?= $row['id']; ?>">👁</a>
+                    <a href="job_edit.php?id=<?= $row['id']; ?>">✏️</a>
                 </td>
             </tr>
-
+        <?php
+            }
+        } else {
+            echo "<tr><td colspan='6'>No job posts found</td></tr>";
+        }
+        ?>
         </tbody>
+
     </table>
 
 </section>
 
-<?php include '../layouts/footer.php'; ?>
-<?php include '../layouts/layout_end.php'; ?>
+<?php
+include '../layouts/footer.php';
+include '../layouts/layout_end.php';
+?>
