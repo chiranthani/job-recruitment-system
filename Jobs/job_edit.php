@@ -13,9 +13,9 @@
     </div>
 <?php unset($_SESSION['error']); } ?>
 
-    <h2>Job Post Creation</h2>
+    <h2>Job Post Edit  - ----</h2>
 
-    <form method="POST" action="save_job.php" class="job-form">
+    <form method="POST" action="" class="job-form">
 
         <!-- TWO COLUMN ROW: Job Status + Deadline -->
         <div class="form-row-2col">
