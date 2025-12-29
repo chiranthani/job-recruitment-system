@@ -16,16 +16,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $company_id = $_SESSION['company_id'] ?? 0;
     $user_id = $_SESSION['user_id'] ?? 0;
  
+    $publishedDate = null;
 
+    if($job_status ==  'published'){
+        $publishedDate = date('Y-m-d');
+    }
     //  Insert job post
     $sql = "INSERT INTO job_posts 
-            (company_id, post_status, `expiry_date`, title, category_id, job_type, work_type, `description`, requirements, location_id, created_by)
+            (company_id, post_status, `expiry_date`, title, category_id, job_type, work_type, `description`, requirements, location_id, created_by,published_date)
             VALUES 
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $con_main->prepare($sql);
     $stmt->bind_param(
-        "isssissssii",
+        "isssissssiis",
         $company_id,
         $job_status,
         $deadline,
@@ -36,7 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $description,
         $requirements,
         $location_id,
-        $user_id
+        $user_id,
+        $publishedDate
     );
 
     if ($stmt->execute()) {

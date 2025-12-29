@@ -17,7 +17,7 @@ $where = [];
 /* Job Status filter */
 if (!empty($_GET['job_status']) && $_GET['job_status'] !== 'all') {
     $job_status = $con_main->real_escape_string($_GET['job_status']);
-    $where[] = "j.job_status = '$job_status'";
+    $where[] = "j.post_status = '$job_status'";
 }
 
 /* Category filter */
@@ -33,14 +33,13 @@ if (!empty($_GET['job_type']) && $_GET['job_type'] !== 'all') {
 }
 
 /* Final Query */
-$sql = "
-    SELECT 
+$sql = "SELECT 
         j.id,
-        j.job_title,
-        j.job_status,
+        j.title,
+        j.post_status,
         j.job_type,
         c.name AS category_name
-    FROM jobs j
+    FROM job_posts j
     LEFT JOIN job_categories c ON j.category_id = c.id
 ";
 
@@ -54,7 +53,7 @@ $result = $con_main->query($sql);
 ?>
 
 <section class="job-list-wrapper">
-    
+
 <?php if (isset($_SESSION['success'])) { ?>
     <div class="alert success">
         <?= $_SESSION['success']; ?>
@@ -129,32 +128,33 @@ $result = $con_main->query($sql);
                 <th>#</th>
                 <th>Title</th>
                 <th>Category</th>
+                <th>Type</th>
                 <th>Status</th>
-                <th>Active/deactive</th>
+                <th>Publish</th>
                 <th>Actions</th>
             </tr>
         </thead>
 
         <tbody>
         <?php
-        if ($result->num_rows > 0) {
+        if ($result && $result->num_rows > 0) {
             $i = 1;
             while ($row = $result->fetch_assoc()) {
         ?>
             <tr>
                 <td><?= $i++; ?></td>
-                <td><?= htmlspecialchars($row['job_title']); ?></td>
+                <td><?= htmlspecialchars($row['title']); ?></td>
                 <td><?= htmlspecialchars($row['category_name']); ?></td>
-
+                <td><?= htmlspecialchars($row['job_type']); ?></td>
                 <td>
-                    <span class="status-badge <?= $row['job_status']; ?>">
-                        <?= ucfirst($row['job_status']); ?>
+                    <span class="status-badge <?= $row['post_status']; ?>">
+                        <?= ucfirst($row['post_status']); ?>
                     </span>
                 </td>
 
                 <td>
                     <label class="switch">
-                        <input type="checkbox" <?= ($row['job_status']=='published')?'checked':''; ?>>
+                        <input type="checkbox" <?= ($row['post_status']=='published')?'checked':''; ?>>
                         <span class="slider"></span>
                     </label>
                 </td>
