@@ -1,9 +1,21 @@
 <?php
 
+/** helper function */
+function db(): mysqli
+{
+    global $con_main;
+
+    if (!$con_main instanceof mysqli) {
+        throw new Exception('Database connection not initialized');
+    }
+
+    return $con_main;
+}
+
 /** get active categories with active job post count */
 function getActiveCategoriesWithJobsCount()
 {
-    global $con_main;
+    $db = db();
     $sql = "SELECT 
                     job_categories.id,
                     job_categories.name,
@@ -15,7 +27,7 @@ function getActiveCategoriesWithJobsCount()
                 WHERE job_categories.status = ?
                 GROUP BY job_categories.id, job_categories.name, job_categories.icon_path;";
 
-    $stmt = $con_main->prepare($sql);
+    $stmt = $db->prepare($sql);
     if (!$stmt) return false;
 
     $status = AppConstants::ACTIVE_STATUS;
@@ -29,10 +41,10 @@ function getActiveCategoriesWithJobsCount()
 /** get admin approved companies list */
 function getApprovedCompanies()
 {
-    global $con_main;
+    $db = db();
 
     $sql = "SELECT * FROM `companies` WHERE `admin_approval` = ?";
-    $stmt = $con_main->prepare($sql);
+    $stmt = $db->prepare($sql);
     if (!$stmt) return false;
 
     $approval = AppConstants::COMPANY_APPROVED;
@@ -47,9 +59,10 @@ function getApprovedCompanies()
 /** get user selected job post full content */
 function getSelectedJobPostDetails($id)
 {
-    global $con_main;
+    $db = db();
     $interviewStatus = AppConstants::APPLICATION_STATUS['INTERVIEW'];
     $rejectedStatus = AppConstants::APPLICATION_STATUS['REJECTED'];
+    $hiredStatus = AppConstants::APPLICATION_STATUS['HIRED'];
 
     $sql = "SELECT
             job_posts.*,
@@ -57,8 +70,9 @@ function getSelectedJobPostDetails($id)
             locations.name AS location_name,
             job_categories.name AS category_name,
             COUNT(applications.id) AS total_applications,
-            SUM(applications.application_status = ?) AS shortlisted,
-            SUM(applications.application_status = ?) AS rejected
+            SUM(applications.application_status = ? OR applications.application_status = ?) AS shortlisted,
+            SUM(applications.application_status = ?) AS rejected,
+            SUM(applications.application_status = ?) AS hired
         FROM
             `job_posts`
         INNER JOIN companies ON companies.id = job_posts.company_id
@@ -68,10 +82,10 @@ function getSelectedJobPostDetails($id)
         WHERE
             job_posts.id = ?";
 
-    $stmt = $con_main->prepare($sql);
+    $stmt = $db->prepare($sql);
     if (!$stmt) return false;
 
-    $stmt->bind_param("ssi", $interviewStatus,$rejectedStatus,$id);
+    $stmt->bind_param("ssssi", $interviewStatus, $hiredStatus,$rejectedStatus,$hiredStatus, $id);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -81,7 +95,7 @@ function getSelectedJobPostDetails($id)
 /** get selected post benefits */
 function getSelectedJobPostBenefits($jobId)
 {
-    global $con_main;
+    $db = db();
 
     $sql = "SELECT
             job_post_benefits.*,
@@ -92,7 +106,7 @@ function getSelectedJobPostBenefits($jobId)
         WHERE
             job_post_benefits.job_post_id= ?";
 
-    $stmt = $con_main->prepare($sql);
+    $stmt = $db->prepare($sql);
     if (!$stmt) return false;
 
     $stmt->bind_param("i", $jobId);
@@ -105,11 +119,11 @@ function getSelectedJobPostBenefits($jobId)
 /** get a candidate job table row */
 function getACandidateJob($userId, $jobId, $type)
 {
-    global $con_main;
+    $db = db();
 
     $sql = "SELECT * FROM candidate_jobs WHERE job_id = ? AND user_id = ? AND `type` = ?
         LIMIT 1";
-    $stmt = $con_main->prepare($sql);
+    $stmt = $db->prepare($sql);
     if (!$stmt) return false;
 
     $stmt->bind_param("iis", $jobId, $userId, $type);
@@ -122,14 +136,14 @@ function getACandidateJob($userId, $jobId, $type)
 /*** get candidate details */
 function getCandidateDetails($userId)
 {
-    global $con_main;
+    $db = db();
 
     $sql = "SELECT candidates.*,users.first_name,users.last_name,users.email,users.profile_image 
     FROM candidates 
     INNER JOIN users ON users.id = candidates.user_id
     WHERE candidates.user_id=? ORDER BY users.id DESC LIMIT 1";
 
-    $stmt = $con_main->prepare($sql);
+    $stmt = $db->prepare($sql);
     if (!$stmt) return false;
 
     $stmt->bind_param("i", $userId);
@@ -142,7 +156,7 @@ function getCandidateDetails($userId)
 /*** get application overview card details */
 function getApplicationOverview()
 {
-    global $con_main;
+    $db = db();
 
     $appliedStatus   = AppConstants::APPLICATION_STATUS['APPLIED'];
     $interviewStatus = AppConstants::APPLICATION_STATUS['INTERVIEW'];
@@ -159,7 +173,7 @@ function getApplicationOverview()
         WHERE status = ?
     ";
 
-    $stmt = $con_main->prepare($sql);
+    $stmt = $db->prepare($sql);
     if (!$stmt) return false;
 
     $stmt->bind_param(
@@ -176,16 +190,80 @@ function getApplicationOverview()
 /** get a application details */
 function getAApplicationDetails($application)
 {
-    global $con_main;
+    $db = db();
 
 
     $sql = "SELECT * FROM applications WHERE id = ?";
 
-    $stmt = $con_main->prepare($sql);
+    $stmt = $db->prepare($sql);
     if (!$stmt) return false;
 
-    $stmt->bind_param("i",$application);
+    $stmt->bind_param("i", $application);
 
     $stmt->execute();
     return $stmt->get_result()->fetch_assoc();
 }
+
+/** get post wise application stats count data */
+function getJobPostStats($search, $page, $limit=10)
+{
+    $db = db();
+    $postStatus = AppConstants::POST_PUBLISHED;
+
+    $offset = ($page - 1) * $limit;
+    $searchLike = "%$search%";
+
+    $where = " WHERE post_status = ? ";
+    $hasSearch = !empty($search);
+
+    if ($hasSearch) {
+        $where .= " AND job_posts.title LIKE ? ";
+    }
+
+    $countSql = "SELECT COUNT(*) AS total FROM job_posts" . $where;
+    $stmt = $db->prepare($countSql);
+
+    if ($hasSearch) {
+        $stmt->bind_param("ss", $postStatus, $searchLike);
+    } else {
+        $stmt->bind_param("s", $postStatus);
+    }
+
+    $stmt->execute();
+    $totalJobs = (int)$stmt->get_result()->fetch_assoc()['total'];
+    $totalPages = max(1, ceil($totalJobs / $limit));
+
+    $sql = "SELECT 
+        job_posts.id,
+        job_posts.title,
+        COUNT(applications.id) AS total,
+        COALESCE(SUM(applications.application_status='Applied'), 0) AS new,
+        COALESCE(SUM(applications.application_status='In Review'), 0) AS reviewed,
+        COALESCE(SUM(applications.application_status='Rejected'), 0) AS rejected,
+        COALESCE(SUM(applications.application_status='Interview'), 0) AS interview,
+        COALESCE(SUM(applications.application_status='Offer Made'), 0) AS offer,
+        COALESCE(SUM(applications.application_status='Hired'), 0) AS hired
+    FROM job_posts
+    LEFT JOIN applications ON applications.job_id = job_posts.id
+    $where
+    GROUP BY job_posts.id
+    LIMIT ?, ?
+    ";
+
+    $stmt = $db->prepare($sql);
+
+    if ($hasSearch) {
+        $stmt->bind_param("ssii", $postStatus, $searchLike, $offset, $limit);
+    } else {
+        $stmt->bind_param("sii", $postStatus, $offset, $limit);
+    }
+
+    $stmt->execute();
+    $jobs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    return [
+        'jobs' => $jobs ?? [],
+        'totalPages' => $totalPages ?? 0
+    ];
+}
+

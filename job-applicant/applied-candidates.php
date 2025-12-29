@@ -33,6 +33,7 @@
                     <div class="job-stats">
                         <span>📥 Total Applied: <?php echo $job['total_applications'] ?? 0; ?></span>
                         <span>✅ Shortlisted: <?php echo $job['shortlisted'] ?? 0; ?></span>
+                        <span>    Hired: <?php echo $job['hired'] ?? 0; ?></span>
                         <span>❌ Rejected: <?php echo $job['rejected'] ?? 0; ?></span>
                     </div>
                 </div>
@@ -174,7 +175,6 @@
             selected.push(cb.value);
         });
 
-        console.log('selected:',selected);
         if (selected.length == 0) {
             showError("Please select at least one application.");
             return;
@@ -257,9 +257,6 @@
         closeModal();
     }
 
-    function closeErrorPopup() {
-        document.getElementById("errorPopup").style.display = "none";
-    }
 
 </script>
 <?php include '../layouts/footer.php'; ?>

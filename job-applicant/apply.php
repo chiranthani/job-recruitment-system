@@ -215,9 +215,6 @@ include 'backend/data-queries.php';
         window.location.replace('job-search.php');
     }
 
-    function closeErrorPopup() {
-        document.getElementById("errorPopup").style.display = "none";
-    }
 
 </script>
 

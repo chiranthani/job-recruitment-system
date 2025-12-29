@@ -276,6 +276,12 @@ label.required::after {
 }
 
 /* Search Box */
+.search-box {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    align-items: center;
+}
 .search-box input {
     padding: 8px 12px;
     border-radius: 25px;
@@ -340,6 +346,11 @@ label.required::after {
 
 .btn-info:hover { color: var(--white); background: var(--info); }
 
+.btn-danger {
+  color: var(--white);
+  background-color: var(--danger);
+   border-color: var(--danger); 
+}
 
 /* table style */
 .responsive-table {
@@ -381,6 +392,10 @@ label.required::after {
 .interview { background: #5bc0de; }
 .applied { background: var(--secondary-color); }
 .rejected { background: var(--danger); }
+.offer-made { background: #ffc107; color: #212529;}
+.offer-rejected {background: #d9534f; color: var(--white); }
+.offer-accepted {background: var(--success); color: var(--white);  }
+.hired { background: var(--primary-color); color: var(--white); }
 .light { background: var(--light); color: var(--dark); }
 
 

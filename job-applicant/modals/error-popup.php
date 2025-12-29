@@ -7,3 +7,9 @@
         <button class="btn btn-submit" onclick="closeErrorPopup()">Close</button>
     </div>
 </div>
+<script>
+    function closeErrorPopup() {
+        document.getElementById("errorPopup").style.display = "none";
+    }
+
+</script>

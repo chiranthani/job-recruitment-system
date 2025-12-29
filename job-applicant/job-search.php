@@ -162,7 +162,7 @@ include 'backend/data-queries.php';
                 <div class="job-card">
                     <div class="job-card-header">
                         <h4>${job.title}</h4>
-                        <button class="apply-btn" onclick="window.location.href='apply.php?job=${job.id}'">View</button>
+                        <button class="apply-btn" onclick="window.location.href='../Jobs/job_view.php?job=${job.id}'">View</button>
                     </div>
                     <p class="company">${job.company_name}</p>
                     <div class="job-card-about">
