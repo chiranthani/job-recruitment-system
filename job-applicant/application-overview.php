@@ -1,18 +1,19 @@
 <?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
+<?php include '../permission-check.php'; ?>
 
 <link rel="stylesheet" href="application.css">
 
-<?php 
-include '../layouts/header.php'; 
-include 'backend/data-queries.php'; 
+<?php
+include '../layouts/header.php';
+include 'backend/data-queries.php';
 $cardData = getApplicationOverview();
 
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $limit = 10;
 
-$result = getJobPostStats($search,$page,$limit);
+$result = getJobPostStats($search, $page, $limit);
 $jobs = $result['jobs'];
 $totalPages = $result['totalPages'];
 ?>
@@ -44,20 +45,26 @@ $totalPages = $result['totalPages'];
                     <p>Interview Scheduled</p>
                 </div>
             </div>
+             <div class="card">
+                <div class="card-icon">📅</div>
+                <div class="card-content">
+                    <h3><?= $cardData['offered_count'] ?></h3>
+                    <p>Pending Candidate Decision</p>
+                </div>
+            </div>
         </div>
 
 
         <h3 class="section-title">Summary</h3>
 
-      <form method="GET" id="searchForm" class="my-application-filter-bar">
+        <form method="GET" id="searchForm" class="my-application-filter-bar">
             <div class="search-box">
-                <input 
-                    type="text" 
+                <input
+                    type="text"
                     id="searchInput"
-                    name="search" 
-                    value="<?= htmlspecialchars($search) ?>" 
-                    placeholder="Search job title"
-                >
+                    name="search"
+                    value="<?= htmlspecialchars($search) ?>"
+                    placeholder="Search job title">
                 <button type="submit" class="btn btn-submit" style="height: fit-content;">Search</button>
             </div>
         </form>
@@ -90,10 +97,24 @@ $totalPages = $result['totalPages'];
                                 </a>
                             </td>
                             <td data-label="Total"><?= $job['total'] ?></td>
-                            <td data-label="New"><?= $job['new'] ?></td>
-                            <td data-label="Reviewed"><?= $job['reviewed'] ?></td>
-                            <td data-label="Rejected"><?= $job['rejected'] ?></td>
-                            <td data-label="Interview"><?= $job['interview'] ?></td>
+                            <td data-label="New">
+                                <span class="badge <?= $job['new'] > 0 ? 'status rejected' : '' ?>">
+                                    <?= $job['new'] ?>
+                                </span>
+                            </td>
+                            <td data-label="Reviewed">
+                                <span class="badge <?= $job['reviewed'] > 0 ? 'status in-review' : '' ?>">
+                                    <?= $job['reviewed'] ?>
+                                </span>
+                            </td>
+                            <td data-label="Rejected">
+                                <?= $job['rejected'] ?>
+                            </td>
+                            <td data-label="Interview">
+                                <span class="badge <?= $job['interview'] > 0 ? 'status light' : '' ?>">
+                                    <?= $job['interview'] ?>
+                                </span>
+                            </td>
                             <td data-label="Offer"><?= $job['offer'] ?></td>
                             <td data-label="Hired"><?= $job['hired'] ?></td>
                         </tr>
@@ -103,10 +124,9 @@ $totalPages = $result['totalPages'];
         </table>
         <div class="pagination">
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a 
-                    href="?page=<?= $i ?>&search=<?= urlencode($search) ?>" 
-                    class="<?= $i == $page ? 'active' : '' ?>"
-                >
+                <a
+                    href="?page=<?= $i ?>&search=<?= urlencode($search) ?>"
+                    class="<?= $i == $page ? 'active' : '' ?>">
                     <?= $i ?>
                 </a>
             <?php endfor; ?>

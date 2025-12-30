@@ -1,5 +1,6 @@
 <?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
+<?php include '../permission-check.php'; ?>
 
 <link rel="stylesheet" href="application.css">
 

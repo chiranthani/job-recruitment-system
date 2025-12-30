@@ -1,10 +1,8 @@
 <?php
-session_start();
-
 include 'config/permissions.php';
 
 $currentPath = $_SERVER['PHP_SELF'];
-$userRole    = $_SESSION["user_role"];
+$userRole    = $_SESSION["role_id"];
 $allowed     = true;
 
 

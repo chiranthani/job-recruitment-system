@@ -60,6 +60,7 @@ function getApprovedCompanies()
 function getSelectedJobPostDetails($id)
 {
     $db = db();
+    $offeredStatus = AppConstants::APPLICATION_STATUS['OFFERED'];
     $interviewStatus = AppConstants::APPLICATION_STATUS['INTERVIEW'];
     $rejectedStatus = AppConstants::APPLICATION_STATUS['REJECTED'];
     $hiredStatus = AppConstants::APPLICATION_STATUS['HIRED'];
@@ -70,7 +71,7 @@ function getSelectedJobPostDetails($id)
             locations.name AS location_name,
             job_categories.name AS category_name,
             COUNT(applications.id) AS total_applications,
-            SUM(applications.application_status = ? OR applications.application_status = ?) AS shortlisted,
+            SUM(applications.application_status = ? OR applications.application_status = ? OR applications.application_status = ?) AS shortlisted,
             SUM(applications.application_status = ?) AS rejected,
             SUM(applications.application_status = ?) AS hired
         FROM
@@ -85,7 +86,7 @@ function getSelectedJobPostDetails($id)
     $stmt = $db->prepare($sql);
     if (!$stmt) return false;
 
-    $stmt->bind_param("ssssi", $interviewStatus, $hiredStatus,$rejectedStatus,$hiredStatus, $id);
+    $stmt->bind_param("sssssi", $interviewStatus, $hiredStatus,$offeredStatus,$rejectedStatus,$hiredStatus, $id);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -160,12 +161,14 @@ function getApplicationOverview()
 
     $appliedStatus   = AppConstants::APPLICATION_STATUS['APPLIED'];
     $interviewStatus = AppConstants::APPLICATION_STATUS['INTERVIEW'];
+    $offerStatus = AppConstants::APPLICATION_STATUS['OFFERED'];
     $activeStatus = AppConstants::ACTIVE_STATUS;
 
     $sql = "SELECT
             COUNT(*) AS total_applications,
             SUM(application_status = ?) AS applied_count,
             SUM(application_status = ?) AS interview_count,
+            SUM(application_status = ?) AS offered_count,
             SUM(
                 YEARWEEK(createdAt, 1) = YEARWEEK(CURDATE(), 1)
             ) AS this_week_count
@@ -177,9 +180,10 @@ function getApplicationOverview()
     if (!$stmt) return false;
 
     $stmt->bind_param(
-        "ssi",
+        "sssi",
         $appliedStatus,
         $interviewStatus,
+        $offerStatus,
         $activeStatus
     );
 
@@ -267,3 +271,226 @@ function getJobPostStats($search, $page, $limit=10)
     ];
 }
 
+
+/** get my jobs card details */
+function getMyJobCardData() {
+    $db = db();
+    $userId = $_SESSION['user_id'] ?? 0;
+
+    $interviewStatus = AppConstants::APPLICATION_STATUS['INTERVIEW'];
+    $offeredStatus   = AppConstants::APPLICATION_STATUS['OFFERED'];
+    $hiredStatus   = AppConstants::APPLICATION_STATUS['HIRED'];
+
+    $query = "SELECT 
+            COUNT(*) AS application_count,
+            SUM(CASE WHEN application_status = ? THEN 1 ELSE 0 END) AS interview_count,
+            SUM(CASE WHEN application_status = ? THEN 1 ELSE 0 END) AS pending_decision,
+            SUM(CASE WHEN application_status = ? THEN 1 ELSE 0 END) AS hired_count
+        FROM applications
+        WHERE user_id = ?
+    ";
+
+    $stmt = $db->prepare($query);
+    $stmt->bind_param("sssi", $interviewStatus, $offeredStatus,$hiredStatus, $userId);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_assoc();
+
+    return [
+        'application_count' => $result['application_count'] ?? 0,
+        'interview_count' => $result['interview_count'] ?? 0,
+        'pending_decision' => $result['pending_decision'] ?? 0,
+        'hired_count' => $result['hired_count'] ?? 0,
+    ];
+}
+
+
+/** get applied jobs */
+function getAppliedJobs($status,$search=''){
+    $db = db();
+    $userId = $_SESSION['user_id'] ?? 0;
+    $sql = "SELECT 
+            a.id,
+            jp.title,
+            c.name AS company_name,
+            a.job_id,
+            a.application_status,
+            a.applied_at
+        FROM applications a
+        INNER JOIN job_posts jp ON jp.id = a.job_id
+        INNER JOIN companies c ON c.id = jp.company_id
+        WHERE a.user_id = ?
+    ";
+
+    $params = [$userId];
+    $types  = "i";
+
+    if ($status !== 'ALL') {
+        $sql .= " AND a.application_status = ?";
+        $params[] = $status;
+        $types .= "s";
+    }
+
+    if ($search !== '') {
+        $sql .= " AND (jp.title LIKE ? OR c.name LIKE ?)";
+        $searchTerm = "%{$search}%";
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+        $types .= "ss";
+    }
+
+    $sql .= " ORDER BY a.createdAt DESC";
+
+    $stmt = $db->prepare($sql);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row;
+    }
+    
+    return $data;
+}
+
+
+/** job search */
+function searchJobs($filters){
+    $db = db();
+
+    $search = isset($filters['search']) ? trim($filters['search']) : '';
+    $company = isset($filters['company']) ? trim($filters['company']) : '';
+    $work_type = isset($filters['work_type']) ? trim($filters['work_type']) : '';
+    $categories = isset($filters['categories']) ? $filters['categories'] : [];
+    $page  = isset($filters['page']) ? (int)$filters['page'] : 1;
+
+    $limit = 6;
+    $offset = ($page - 1) * $limit;
+
+    $query = "SELECT
+        job_posts.id,
+        job_posts.title,
+        job_posts.category_id,
+        job_posts.company_id,
+        job_posts.work_type,
+        job_posts.job_type,
+        job_posts.description,
+        job_posts.expiry_date,
+        companies.name AS company_name,
+        locations.name AS location_name,
+        job_categories.name AS category_name
+    FROM
+        `job_posts`
+    INNER JOIN companies ON companies.id = job_posts.company_id
+    INNER JOIN job_categories ON job_categories.id = job_posts.category_id
+    INNER JOIN locations ON locations.id = job_posts.location_id
+    WHERE
+        job_posts.active_status = ".AppConstants::ACTIVE_STATUS." AND job_posts.is_deleted = ".AppConstants::INACTIVE_STATUS." AND 
+        job_posts.expiry_date >= CURRENT_DATE()";
+
+    if ($search !== '') {
+        $query .= " AND job_posts.title LIKE '%" . mysqli_real_escape_string($db, $search) . "%'";
+    }
+
+    if ($company != 'all' && $company != '') {
+        $query .= " AND job_posts.company_id = '" . mysqli_real_escape_string($db, $company) . "'";
+    }
+    if ($work_type != 'all' && $work_type != '') {
+        $query .= " AND job_posts.work_type = '" . mysqli_real_escape_string($db, $work_type) . "'";
+    }
+
+    if (!empty($categories)) {
+        $categories_sql = "'" . implode("','", array_map(fn($v) => mysqli_real_escape_string($db, $v), $categories)) . "'";
+        $query .= " AND job_posts.category_id IN ($categories_sql)";
+    }
+
+
+    $query .= " ORDER BY job_posts.id DESC";
+
+    $total_result = mysqli_query($db, $query);
+    $total_records = mysqli_num_rows($total_result);
+    $total_pages = ceil($total_records / $limit);
+
+    // pagination add and fetch
+    $query .= " LIMIT $offset, $limit";
+    $final_result = mysqli_query($db, $query);
+    $jobs = [];
+
+    while ($row = mysqli_fetch_assoc($final_result)) {
+        $jobs[] = $row;
+    }
+
+    return [
+        'jobs' => $jobs,
+        'page' => $page,
+        'total_records'=>$total_records,
+        'total_pages' => $total_pages
+    ];
+}
+
+/** get applications for a job post */
+function getJobApplications($jobId, $from, $to, $search, $page = 1){
+    $db = db();
+    $limit  = 10;
+    $offset = ($page - 1) * $limit;
+
+    $where = " WHERE applications.job_id = ? ";
+    $params = [$jobId];
+    $types  = "i";
+
+    /* Search */
+    if ($search !== '') {
+        $where .= " AND (applications.candidate_name LIKE ? OR applications.candidate_email LIKE ?) ";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
+        $types .= "ss";
+    }
+
+    /* Date range */
+    if ($from && $to) {
+        $where .= " AND DATE(applications.createdAt) BETWEEN ? AND ? ";
+        $params[] = $from;
+        $params[] = $to;
+        $types .= "ss";
+    }
+
+    $countSql = "SELECT COUNT(*) total
+        FROM applications
+        INNER JOIN users ON users.id = applications.user_id
+        $where
+    ";
+    $stmt = $db->prepare($countSql);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $total = (int)$stmt->get_result()->fetch_assoc()['total'];
+    $totalPages = ceil($total / $limit);
+
+
+    $sql = "SELECT
+            applications.*,
+            users.first_name,
+            users.last_name
+        FROM applications
+        INNER JOIN users ON users.id = applications.user_id
+        $where
+        ORDER BY applications.createdAt DESC
+        LIMIT ?, ?
+    ";
+
+    $params[] = $offset;
+    $params[] = $limit;
+    $types .= "ii";
+
+    $stmt = $db->prepare($sql);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+
+    $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    return [
+        'data' => $data,
+        'total' => $total,
+        'totalPages' => $totalPages
+    ];
+}

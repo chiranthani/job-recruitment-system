@@ -3,36 +3,51 @@
 
 <link rel="stylesheet" href="application.css">
 
-<?php 
-include '../layouts/header.php'; 
+<?php
+include '../layouts/header.php';
 include 'backend/data-queries.php';
+
+$results = searchJobs($_GET);
+
+$jobs = $results['jobs'];
+$totalPages = $results['total_pages'];
+$page = $results['page'];
+$total_records = $results['total_records'];
 ?>
 
 <div class="main-container">
 
     <div class="search-top-filter">
-        <input type="text" class="job-search-box" value="<?php echo ($_GET['search'] ?? "") ?>" placeholder="Search job title...">
-            <select class="work-type-select">
-            <option value="all">All work types</option>
-            <?php 
-            foreach (AppConstants::WORK_TYPES as $type) {
-            ?>
-                <option value="<?php echo $type; ?>"><?php echo $type; ?></option>
-            <?php } ?>
+        <form method="GET" class="search-top-filter">
 
-        </select>
-        <select class="company-select">
-            <option value="all">All Companies</option>
-            <?php
-            $get_approved_companies = getApprovedCompanies();
+            <input
+                type="text"
+                name="search"
+                class="job-search-box"
+                value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
+                placeholder="Search job title...">
 
-            foreach ($get_approved_companies as $res) {
-            ?>
-                <option value="<?php echo $res['id']; ?>"><?php echo $res['name']; ?></option>
+            <select name="work_type" class="work-type-select">
+                <option value="all">All work types</option>
+                <?php foreach (AppConstants::WORK_TYPES as $type): ?>
+                    <option value="<?= $type ?>"
+                        <?= (($_GET['work_type'] ?? '') == $type) ? 'selected' : '' ?>>
+                        <?= $type ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
-            <?php } ?>
+            <select name="company" class="company-select">
+                <option value="all">All Companies</option>
+                <?php foreach (getApprovedCompanies() as $res): ?>
+                    <option value="<?= $res['id'] ?>"
+                        <?= (($_GET['company'] ?? '') == $res['id']) ? 'selected' : '' ?>>
+                        <?= $res['name'] ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
-        </select>
+            <button type="submit" class="btn">Search</button>
     </div>
 
     <div class="search-content-area">
@@ -44,28 +59,67 @@ include 'backend/data-queries.php';
             </h3>
             <div class="filter-list">
                 <?php
-                $get_active_categories = getActiveCategoriesWithJobsCount();
-
-
-                foreach ($get_active_categories as $res) {
+                $selectedCategories = $_GET['categories'] ?? [];
+                foreach (getActiveCategoriesWithJobsCount() as $res):
                 ?>
-                    <label class="filter-item"><input type="checkbox" value="<?php echo $res['id']; ?>">
-                        <span><?php echo $res['name']; ?></span> <span class="count"><?php echo $res['post_count']; ?></span>
+                    <label class="filter-item">
+                        <input
+                            type="checkbox"
+                            name="categories[]"
+                            value="<?= $res['id'] ?>"
+                            <?= in_array($res['id'], $selectedCategories) ? 'checked' : '' ?>
+                            onchange="this.form.submit()">
+                        <span><?= $res['name'] ?></span>
+                        <span class="count"><?= $res['post_count'] ?></span>
                     </label>
-
-                <?php } ?>
-
+                <?php endforeach; ?>
             </div>
         </aside>
 
-
+        </form>
         <section class="jobs-list">
-            <div id="jobs-list-cards">
+            <div>
+                <?php if ($total_records > 0): ?>
+                    <p>Found <strong><?= $total_records ?></strong> job<?= $total_records > 1 ? 's' : '' ?> matching your criteria.</p>
+                <?php else: ?>
+                    <p style="color:red;">No matching jobs found.</p>
+                <?php endif; ?>
 
             </div>
+            <?php foreach ($jobs as $job): ?>
+                <div class="job-card">
+                    <div class="job-card-header">
+                        <h4><?= htmlspecialchars($job['title']) ?></h4>
+                        <a class="apply-btn" href="../Jobs/job_view.php?job=<?= $job['id'] ?>">View</a>
+                    </div>
+
+                    <p class="company"><?= $job['company_name'] ?></p>
+
+                    <div class="job-card-about">
+                        <div><?= $job['location_name'] ?></div>
+                        <div><?= $job['job_type'] ?></div>
+                        <div class="status job-type"><?= $job['work_type'] ?></div>
+                    </div>
+
+                    <div class="job-card-des">
+                        <?= substr(strip_tags($job['description']), 0, 230) ?>...
+                    </div>
+
+                    <div class="job-card-footer">
+                        Exp date: <?= $job['expiry_date'] ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
 
 
             <div class="pagination">
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a
+                        href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>"
+                        class="<?= ($i == $page) ? 'active' : '' ?>">
+                        <?= $i ?>
+                    </a>
+                <?php endfor; ?>
             </div>
 
         </section>
@@ -85,105 +139,6 @@ include 'backend/data-queries.php';
         }
     });
 
-    const searchInput = document.querySelector(".job-search-box");
-    const companySelect = document.querySelector(".company-select");
-    const workTypeSelect = document.querySelector(".work-type-select");
-    const categoryChecks = document.querySelectorAll(".filter-item input[type=checkbox]");
-    const jobsList = document.getElementById("jobs-list-cards");
-    const paginationDiv = document.querySelector(".pagination");
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const initialCategory = urlParams.get("category") || "";
-
-    if (initialCategory) {
-        categoryChecks.forEach(c => {
-            if (c.value == initialCategory) {
-                c.checked = true;
-            }
-        });
-    }
-
-    //  event live listeners
-    searchInput.addEventListener("keyup", fetchJobs);
-    companySelect.addEventListener("change", fetchJobs);
-    workTypeSelect.addEventListener("change", fetchJobs);
-    categoryChecks.forEach(c => c.addEventListener("change", fetchJobs));
-
-    fetchJobs();
-
-    function fetchJobs(page = 1) {
-        let search = searchInput.value;
-        let company = companySelect.value;
-        let work_type = workTypeSelect.value;
-
-        if (isNaN(page) || page < 1) {
-            page = 1;
-        }
-
-        let categories = [];
-        categoryChecks.forEach(c => {
-            if (c.checked) {
-                categories.push(c.value);
-            }
-        });
-
-        let url = `backend/search.php?page=${page}&search=${encodeURIComponent(search)}&company=${company}&work_type=${encodeURIComponent(work_type)}`;
-
-        if (categories.length > 0) {
-            categories.forEach(cat => {
-                url += `&categories[]=${encodeURIComponent(cat)}`;
-            });
-        }
-
-        let xhr = new XMLHttpRequest();
-        xhr.open("GET", url);
-
-        xhr.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                let response = JSON.parse(this.responseText);
-             
-                renderJobs(response.jobs);
-                renderPagination(response.total_pages, response.page);
-            }
-        };
-        xhr.send();
-    }
-
-
-    function renderJobs(jobs) {
-        jobsList.innerHTML = "";
-        if (jobs.length == 0) {
-            jobsList.innerHTML = `<p style="margin:20px; color:red;">No matching jobs found.</p>`;
-            return;
-        }
-
-        jobs.forEach(job => {
-            jobsList.innerHTML += `
-                <div class="job-card">
-                    <div class="job-card-header">
-                        <h4>${job.title}</h4>
-                        <button class="apply-btn" onclick="window.location.href='../Jobs/job_view.php?job=${job.id}'">View</button>
-                    </div>
-                    <p class="company">${job.company_name}</p>
-                    <div class="job-card-about">
-                        <div>${job.location_name}</div>
-                        <div>${job.job_type}</div>
-                        <div class="status job-type">${job.work_type}</div>
-                    </div>
-                    <div class="job-card-des">${job.description.substring(0,230)}...</div>
-                    <div class="job-card-footer">Exp date: ${job.expiry_date}</div>
-                </div>`;
-        });
-    }
-
-    function renderPagination(total, current) {
-        let html = "";
-        for (let i = 1; i <= total; i++) {
-            html += `<a onclick="fetchJobs(${i})" class="${i == current ? 'active' : ''}">${i}</a>`;
-        }
-
-        paginationDiv.innerHTML = html;
-    }
 
 </script>
 

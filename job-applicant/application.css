@@ -179,7 +179,7 @@ label.required::after {
     border-radius: 8px;
     background: var(--white);
     gap: 10px;
-    cursor: pointer;
+    /* cursor: pointer; */
     transition: 0.3s;
 }
 
@@ -287,7 +287,7 @@ label.required::after {
     border-radius: 25px;
     border: 1px solid var(--light);
     font-size: 14px;
-    width: 220px;
+    width: 300px;
 }
 
 .search-box input:focus {
@@ -410,6 +410,8 @@ label.required::after {
     padding: 20px;
     border-radius: 12px;
     margin-bottom: 30px;
+    background-color: var(--white);
+    flex-wrap: wrap;
 }
 
 .job-left {
@@ -432,10 +434,11 @@ label.required::after {
     margin-bottom: 5px;
 }
 
-.job-meta {
+.job-meta,
+.job-stats {
     display: flex;
-    gap: 12px;
-    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
 }
 
 .job-category {
@@ -444,6 +447,9 @@ label.required::after {
     padding: 3px 10px;
     border-radius: 6px;
     font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    text-align: center;
 }
 
 .published-date {
@@ -555,6 +561,7 @@ label.required::after {
     justify-content: space-between;
     gap: 10px;
     margin: 20px 0;
+    width: 100%;
 }
 
 .job-search-box, .company-select .work-type-select {
@@ -757,13 +764,23 @@ label.required::after {
     }
 
     .job-header-card { flex-direction: column; align-items: flex-start; }
-    .job-right {align-items: flex-start; }
+    .job-right {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
 
     .search-top-filter { flex-direction: column; }
     .search-content-area { flex-direction: column; }
     .search-sidebar, .jobs-list { width: 100%; }
     .filter-bar {
         grid-template-columns: 1fr;
+    }
+
+    .job-stats {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 

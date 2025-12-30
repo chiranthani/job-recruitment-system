@@ -1,9 +1,16 @@
 <?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
+<?php include '../permission-check.php'; ?>
 
 <link rel="stylesheet" href="application.css">
 
-<?php include '../layouts/header.php'; ?>
+<?php include '../layouts/header.php'; 
+include 'backend/data-queries.php';
+$currentStatus = $_GET['status'] ?? 'ALL';
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$applications = getAppliedJobs($currentStatus, $search);
+$cardData = getMyJobCardData();
+?>
 
 <section>
     <div class="main-container">
@@ -14,22 +21,29 @@
             <div class="card">
                 <div class="card-icon">📄</div>
                 <div class="card-content">
-                    <h3>3</h3>
+                    <h3><?= $cardData['application_count']; ?></h3>
                     <p>Applications</p>
                 </div>
             </div>
             <div class="card">
                 <div class="card-icon">📅</div>
                 <div class="card-content">
-                    <h3>1</h3>
+                    <h3><?= $cardData['interview_count']; ?></h3>
                     <p>Interviews</p>
                 </div>
             </div>
             <div class="card">
-                <div class="card-icon">📅</div>
+                <div class="card-icon">💼</div>
                 <div class="card-content">
-                    <h3>1</h3>
-                    <p>Offers</p>
+                    <h3><?= $cardData['pending_decision']; ?></h3>
+                    <p>Pending Decision</p>
+                </div>
+            </div>
+             <div class="card">
+                <div class="card-icon">🏆</div>
+                <div class="card-content">
+                    <h3><?= $cardData['hired_count']; ?></h3>
+                    <p>Hired</p>
                 </div>
             </div>
         </div>
@@ -40,24 +54,64 @@
         <div class="my-application-filter-bar">
             <!-- Status Tabs -->
             <div class="status-tabs">
-                <button class="tab active" data-status="ALL">All</button>
-                <?php foreach (AppConstants::APPLICATION_STATUS as $key => $label): ?>
-                    <button class="tab" data-status="<?= ($label); ?>">
-                        <?= $label; ?>
+               <button class="tab <?= $currentStatus === 'ALL' ? 'active' : '' ?>" data-status="ALL">All</button>
+                <?php foreach (AppConstants::APPLICATION_STATUS as $label): ?>
+                    <button class="tab <?= $currentStatus === $label ? 'active' : '' ?>" data-status="<?= $label ?>">
+                        <?= $label ?>
                     </button>
                 <?php endforeach; ?>
+
             </div>
 
             <!-- Search Bar -->
             <div class="search-box">
-                <input type="text" id="jobSearch" placeholder="Search job title or company...">
+                <input type="text" id="jobSearch" value="<?= $search ?>" placeholder="Search job title or company...">
             </div>
 
         </div>
 
-        <div class="application-list" id="applicationList">
-        </div>
+    <div class="application-list">
+        <?php if (empty($applications)): ?>
+            <p>No applications found</p>
+        <?php endif; ?>
+
+        <?php foreach ($applications as $item): 
+            $statusClass = strtolower(str_replace(' ', '-', $item['application_status']));
+            $date = date('d/m/Y', strtotime($item['applied_at']));
+        ?>
+            <div class="application-item">
+                <div>
+                    <h4><?= htmlspecialchars($item['title']) ?></h4>
+                    <p class="company"><?= htmlspecialchars($item['company_name']) ?></p>
+                    <p class="date">Applied on <?= $date ?></p>
+                </div>
+
+                <div class="status-actions">
+                    <span class="status <?= $statusClass ?>">
+                        <?= $item['application_status'] ?>
+                    </span>
+
+                    <?php if ($item['application_status'] == AppConstants::APPLICATION_STATUS['OFFERED']): ?>
+                        <button class="btn btn-success"
+                            onclick="updateStatus(<?= $item['id'] ?>, '<?= AppConstants::APPLICATION_STATUS['OFFER_ACCEPTED'] ?>')">
+                            Accept Offer
+                        </button>
+
+                        <button class="btn btn-danger"
+                            onclick="updateStatus(<?= $item['id'] ?>, '<?= AppConstants::APPLICATION_STATUS['OFFER_RJECTED'] ?>')">
+                            Reject Offer
+                        </button>
+                    <?php endif; ?>
+
+                    <button class="btn btn-view"
+                        onclick="window.location.href='../Jobs/job_view.php?job=<?= $item['job_id'] ?>'">
+                        View Details
+                    </button>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
+</div>
 
 </section>
 <?php include 'modals/success-popup.php'; ?>
@@ -66,92 +120,27 @@
 <script>
     let currentStatus = 'ALL';
 
-    function loadApplications() {
-        const search = document.getElementById('jobSearch').value;
-        const list = document.getElementById('applicationList');
-
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "backend/get-applied-jobs.php", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-        xhr.onload = function() {
-            if (this.status != 200) return;
-
-            const data = JSON.parse(this.responseText);
-            list.innerHTML = '';
-
-            if (data.applications.length == 0) {
-                list.innerHTML = `<p>No applications found</p>`;
-                return;
-            }
-
-            data.applications.forEach(item => {
-                list.innerHTML += createApplicationItem(item);
-            });
-        };
-
-        xhr.send(
-            "status=" + encodeURIComponent(currentStatus) +
-            "&search=" + encodeURIComponent(search)
-        );
-    }
-
-
-    function createApplicationItem(item) {
-        const statusClass = item.application_status
-            .toLowerCase()
-            .replace(/\s+/g, '-');
-
-        let actionButtons = '';
-
-        if (item.application_status == 'Offer Made') {
-            actionButtons = `
-                <button class="btn btn-success"
-                    onclick="updateStatus(${item.id}, 'Offer Accepted')">
-                    Accept Offer
-                </button>
-                <button class="btn btn-danger"
-                    onclick="updateStatus(${item.id}, 'Offer Rejected')">
-                    Reject Offer
-                </button>
-            `;
-        }
-
-        const date = new Date(item.applied_at).toLocaleDateString('en-GB');
-
-        return `
-            <div class="application-item">
-                <div>
-                    <h4>${item.title}</h4>
-                    <p class="company">${item.company_name}</p>
-                    <p class="date">Applied on ${date}</p>
-                </div>
-                <div class="status-actions">
-                    <span class="status ${statusClass}">
-                        ${item.application_status}
-                    </span>
-                    ${actionButtons}
-                    <button class="btn btn-view" onclick="window.location.href='../Jobs/job_view.php?job=${item.job_id}'">View Details</button>
-                </div>
-            </div>
-        `;
-    }
-
-
     document.querySelectorAll('.status-tabs .tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('.status-tabs .tab')
-                .forEach(t => t.classList.remove('active'));
-
-            this.classList.add('active');
-            currentStatus = this.dataset.status;
-            loadApplications();
+        tab.addEventListener('click', function () {
+            const params = new URLSearchParams(window.location.search);
+            params.set('status', this.dataset.status);
+            params.set('search', document.getElementById('jobSearch').value);
+            window.location.href = '?' + params.toString();
         });
     });
 
-    document.getElementById('jobSearch').addEventListener('keyup', loadApplications);
+    let searchTimer;
 
-    loadApplications();
+    document.getElementById('jobSearch').addEventListener('keyup', function () {
+        clearTimeout(searchTimer);
+
+        searchTimer = setTimeout(() => {
+            const params = new URLSearchParams(window.location.search);
+            params.set('search', this.value);
+            params.set('status', '<?= $currentStatus ?>');
+            window.location.href = '?' + params.toString();
+        }, 400);
+    });
 
     function updateStatus(applicationId, newStatus) {
 
@@ -167,7 +156,7 @@
                 let res = JSON.parse(xhr.responseText);
                 if (res.status == "success") {
                     showSuccess(newStatus+" Successfully!",res.message || "Successfully!");
-                    loadApplications();
+            
                 } else {
                     showError(res.message || "Something went wrong!");
                 }                
@@ -196,6 +185,7 @@
     
     function closeSuccessPopup() {
         document.getElementById("successPopup").style.display = "none";
+        location.reload();
     }
 </script>
 

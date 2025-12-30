@@ -38,7 +38,7 @@ class RoleBasedMenus
 
             case 3: // admin
                 echo '<a class="' . $isActive('#') . '" href="' . $base_url . '#">Dashboard</a>';
-                echo '<a class="' . $isActive('#') . '" href="' . $base_url . '#">Users</a>';
+                echo '<a class="' . $isActive('admin_user_list.php') . '" href="' . $base_url . 'user-management/admin_user_list.php">Users</a>';
                 echo '<a class="' . $isActive('employer_verification.php') . '" href="' . $base_url . 'Admin/employer_verification.php">Companies</a>';
                 echo '<a class="' . $isActive('help.php') . '" href="' . $base_url . 'help.php">Help</a>';
                 break;
