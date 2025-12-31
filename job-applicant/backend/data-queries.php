@@ -494,3 +494,20 @@ function getJobApplications($jobId, $from, $to, $search, $page = 1){
         'totalPages' => $totalPages
     ];
 }
+
+/** get company details */
+function getCompanyDetails($companyId) {
+    $db = db();
+    $approved = AppConstants::COMPANY_APPROVED;
+
+    $sql = "SELECT id, name, description, address, website_link
+        FROM companies
+        WHERE id = ? AND admin_approval = ?
+    ";
+
+    $stmt = $db->prepare($sql);
+    $stmt->bind_param("is", $companyId,$approved);
+    $stmt->execute();
+
+    return $stmt->get_result()->fetch_assoc();
+}

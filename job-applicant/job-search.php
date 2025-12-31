@@ -93,7 +93,7 @@ $total_records = $results['total_records'];
                         <a class="apply-btn" href="../Jobs/job_view.php?job=<?= $job['id'] ?>">View</a>
                     </div>
 
-                    <p class="company"><?= $job['company_name'] ?></p>
+                    <a href="company-jobs.php?company_id=<?= $job['company_id'] ?>"><p class="company"><?= $job['company_name'] ?></p></a>
 
                     <div class="job-card-about">
                         <div><?= $job['location_name'] ?></div>

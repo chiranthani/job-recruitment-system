@@ -296,6 +296,27 @@ label.required::after {
     box-shadow: 0 0 2px var(--primary-color);
 }
 
+/* company jobs */
+.company-layout {
+    display: flex;
+    gap: 24px;
+}
+
+.company-sidebar {
+    width: 320px;
+}
+
+.company-card {
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.company-jobs-list {
+    flex: 1;
+}
+
 
 /* buttons */
 .btn {
@@ -781,6 +802,13 @@ label.required::after {
     .job-stats {
         flex-direction: column;
         align-items: flex-start;
+    }
+    .company-layout {
+        flex-direction: column;
+    }
+
+    .company-sidebar {
+        width: 100%;
     }
 }
 
