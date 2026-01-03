@@ -60,6 +60,7 @@ Manage user account statuses
 
 Approve/reject company registrations
 
+---
 
 ## Installation Guide
 
