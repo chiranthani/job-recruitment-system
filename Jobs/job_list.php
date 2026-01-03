@@ -210,8 +210,9 @@ $approval_status = $data['admin_approval'];
                 </td>
 
                 <td class="action-buttons">
-                    <a href="job_view.php?id=<?= $row['id']; ?>">👁</a>
+                    <a href="job_view.php?job=<?= $row['id']; ?>">👁</a>
                     <a href="job_edit.php?id=<?= $row['id']; ?>">✏️</a>
+                    <a href="../job-applicant/application-overview.php?search=<?= $row['title']; ?>" title="View Applications">📄</a>
                 </td>
             </tr>
         <?php

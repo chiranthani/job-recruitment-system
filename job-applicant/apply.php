@@ -6,7 +6,7 @@
 
 <?php include '../layouts/header.php'; 
 include 'backend/data-queries.php';
-    $userId = $_SESSION['user_id'] ?? 4;
+    $userId = $_SESSION['user_id'] ?? 0;
 
     $candidate = getCandidateDetails($userId);
 

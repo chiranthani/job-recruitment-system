@@ -8,14 +8,10 @@ include '../layouts/header.php';
    GET JOB ID
 ============================ */
 
-if (!isset($_GET['id']) || empty($_GET['id'])) {
-    header("Location: job_list.php");
-    exit;
-}
 
-$job_id = (int) $_GET['id'];
+$job_id = (int) $_GET['job'] ?? 0;
 $userRole = $_SESSION['role_id'] ?? 0;
-
+$userId = $_SESSION['user_id'] ?? 0;
 /* =========================
    FETCH JOB DETAILS
 ============================ */
@@ -38,10 +34,6 @@ $stmt->bind_param("i", $job_id);
 $stmt->execute();
 $job = $stmt->get_result()->fetch_assoc();
 
-if (!$job) {
-    header("Location: job_list.php");
-    exit;
-}
 
 /* =========================
    FETCH BENEFITS
@@ -108,15 +100,44 @@ while ($b = $benRes->fetch_assoc()) {
         } ?>
     </div>
 
-    <?php if($userRole == 1): ?>
-    <!-- Apply Section -->
-    <div class="apply-box">
-        PLEASE CLICK THE APPLY BUTTON TO SEND YOUR DETAILS VIA <?= htmlspecialchars($job['company_name']); ?>
-        <br>
-        <button class="apply-button">Apply for Job</button>
-    </div>
-    <?php endif?>
+    <?php if ($userRole == 1): ?>
+        <!-- Apply Section -->
+        <!-- check applied or not -->
+        <?php
 
+        $sql = "SELECT
+                COUNT(*) AS total
+            FROM
+                `candidate_jobs`
+            WHERE
+                `type` = 'Applied Job' AND job_id = ? AND user_id = ?";
+
+        $stmt = $con_main->prepare($sql);
+        $stmt->bind_param("ii", $job_id, $userId);
+        $stmt->execute();
+        $appliedCount = $stmt->get_result()->fetch_assoc();
+
+        $is_applied = $appliedCount['total'] > 0 ? true : false;
+              ?>
+        <?php if (!$is_applied): ?>
+            <div class="apply-box">
+                PLEASE CLICK THE APPLY BUTTON TO SEND YOUR DETAILS VIA <?= htmlspecialchars($job['company_name']); ?>
+                <br>
+                <a href="../job-applicant/apply.php?job=<?= $_GET['job'] ?>" class="new-job-btn" style="margin-top: 5px;">Apply for Job</a>
+            </div>
+        <?php else : ?>
+            <div class="alert success">
+                Your are already applied for this job.
+            </div>
+        <?php endif ?>
+
+    <?php else: ?>
+        <div class="apply-box">
+            Please sign in to apply
+            <br />
+            <a href="../login.php" class="new-job-btn" style="margin-top: 5px;">Sign in</a>
+        </div>
+    <?php endif ?>
 </section>
 
 <?php
