@@ -9,10 +9,19 @@ include '../layouts/header.php';
 <link rel="stylesheet" href="job-post.css">
 
 <?php
+
 /* =========================
    BUILD FILTER CONDITIONS
-========================= */
+  ========================= */
+
+/* Search by Job Title */
 $where = [];
+
+/* Search by Job Title */
+if (!empty($_GET['search'])) {
+    $search = $con_main->real_escape_string($_GET['search']);
+    $where[] = "j.title LIKE '%$search%'";
+}
 
 /* Job Status filter */
 if (!empty($_GET['job_status']) && $_GET['job_status'] !== 'all') {
@@ -41,15 +50,29 @@ $sql = "SELECT
         c.name AS category_name
     FROM job_posts j
     LEFT JOIN job_categories c ON j.category_id = c.id
+    WHERE is_deleted = 0
 ";
 
 if (!empty($where)) {
-    $sql .= " WHERE " . implode(" AND ", $where);
+    $sql .= " AND " . implode(" AND ", $where);
 }
 
 $sql .= " ORDER BY j.id DESC";
 
 $result = $con_main->query($sql);
+
+$user_id = $_SESSION['user_id'] ?? 0;
+// get company details
+$query = "SELECT c.*, u.email, u.first_name, u.last_name, u.last_login 
+          FROM companies c 
+          JOIN users u ON u.company_id = c.id 
+          WHERE u.id = ?";
+$stmt = $con_main->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result2 = $stmt->get_result();
+$data = $result2->fetch_assoc();
+$approval_status = $data['admin_approval'];
 ?>
 
 <section class="job-list-wrapper">
@@ -63,20 +86,45 @@ $result = $con_main->query($sql);
     <h2>Job Posts</h2>
     <p class="subtitle">Manage your job postings</p>
 
-    <!-- Top Bar -->
+     <?php if ($approval_status == 'PENDING'): ?>
+            <div class="alert error">
+                <strong>⏳ Verification Pending</strong><br>
+                Your company profile is awaiting admin approval. You'll be able to post jobs once your account is verified.
+            </div>
+        <?php elseif ($approval_status == 'REJECTED'): ?>
+            <div class="alert error">
+                <strong>❌ Verification Rejected</strong><br>
+                Your company profile verification was rejected. Please contact support for more information.
+            </div>
+        <?php endif; ?>
+<form method="GET">
+    
+<!-- Top Bar -->
     <div class="top-bar">
 
         <div class="search-wrapper">
-            <input type="text" class="search-box" placeholder="Search by job title">
+            <input type="text"
+                    id="searchInput"
+                    name="search"
+                    class="search-box"
+                    placeholder="Search by job title"
+                    value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
             <span class="search-icon">🔍</span>
+
+            <?php if (!empty($_GET['search'])) { ?>
+            <a href="job_list.php" class="clear-search-btn">✖</a>
+            <?php } ?>
+
         </div>
 
-        <a href="create_post.php" class="new-job-btn">New Job Post</a>
+        <a href="create_post.php"
+         class="new-job-btn <?php echo ($approval_status == 'APPROVED') ? '' : 'disabled'; ?>" 
+         <?php echo ($approval_status == 'APPROVED') ? '' : 'onclick="return false;"'; ?>
+          >New Job Post</a>
     </div>
 
     <!-- Filters -->
-    <form method="GET">
-
+   
         <div class="filter-row">
 
             <div class="filter-item">
@@ -142,7 +190,7 @@ $result = $con_main->query($sql);
             while ($row = $result->fetch_assoc()) {
         ?>
             <tr>
-                <td><?= $i++; ?></td>
+                <td><?= $row['id']; ?></td>
                 <td><?= htmlspecialchars($row['title']); ?></td>
                 <td><?= htmlspecialchars($row['category_name']); ?></td>
                 <td><?= htmlspecialchars($row['job_type']); ?></td>
@@ -154,8 +202,10 @@ $result = $con_main->query($sql);
 
                 <td>
                     <label class="switch">
-                        <input type="checkbox" <?= ($row['post_status']=='published')?'checked':''; ?>>
-                        <span class="slider"></span>
+                         <input type="checkbox"
+                                <?= ($row['post_status']=='published')?'checked':''; ?>
+                                onchange="toggleStatus(<?= $row['id']; ?>, this)">
+                    <span class="slider"></span>
                     </label>
                 </td>
 
@@ -176,7 +226,49 @@ $result = $con_main->query($sql);
 
 </section>
 
-<?php
-include '../layouts/footer.php';
-include '../layouts/layout_end.php';
-?>
+<?php include '../layouts/footer.php'; ?>
+
+<script>
+
+/* ===============
+   AUTO SEARCH 
+================== */
+
+let searchTimer;
+
+document.getElementById('searchInput').addEventListener('keyup', function () {
+    clearTimeout(searchTimer);
+
+    searchTimer = setTimeout(() => {
+        this.closest('form').submit();
+    }, 500);
+});
+
+
+/* ===================
+   TOGGLE JOB STATUS 
+======================*/
+
+function toggleStatus(jobId, checkbox) {
+    let status = checkbox.checked ? 'published' : 'draft';
+
+    fetch('toggle_job_status.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'job_id=' + jobId + '&status=' + status
+    })
+    .then(res => res.text())
+    .then(result => {
+        if (result !== 'success') {
+            alert('Failed to update status');
+            checkbox.checked = !checkbox.checked; 
+        } else {
+            location.reload();
+        }
+    });
+}
+</script>
+
+<?php include '../layouts/layout_end.php'; ?>
