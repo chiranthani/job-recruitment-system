@@ -25,7 +25,7 @@ This system allows employers to post and manage job listings, track applicants, 
 ---
 
 ## Features
-**For Job Seekers:** 
+# For Job Seekers:
 
 Register and create a personal profile
 
@@ -36,7 +36,8 @@ Apply to jobs with CV upload
 Track application status (Applied, In Review, Interview, Offered, Hired, ...)
 
 
-**For Employers:**
+
+# For Employers:
 
 Company registration and profile management
 
@@ -51,7 +52,7 @@ Manage applicants, schedule interviews, and update status
 Track applications and download CVs
 
 
-**Admin Features:**
+# Admin Features:
 
 Dashboard with company statistics and quick actions for system management
 
