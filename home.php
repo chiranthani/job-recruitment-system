@@ -27,7 +27,7 @@
        
         foreach ($get_active_categories as $res) {
         ?>
-            <a href="job-applicant/job-search.php?category=<?php echo $res['id']; ?>">
+            <a href="job-applicant/job-search.php?categories[]=<?= $res['id']; ?>">
                 <div class="category-card">
                     <img src="assets/images/category_icons/it.png" alt="category image">
                     <h3><?php echo $res['name']; ?></h3>

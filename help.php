@@ -21,15 +21,14 @@
             <ul>
                 <li>Click on "Sign Up" or "Register" button</li>
                 <li>Select "Job Seeker" as your account type</li>
-                <li>Fill in your personal details (name, email, password)</li>
-                <li>Verify your email address</li>
+                <li>Fill in your personal details (name, email, password etc..)</li>
             </ul>
 
             <h3>2. Searching for Jobs</h3>
             <ul>
                 <li>Use the search bar on the home page to find jobs by keywords</li>
                 <li>Browse jobs by category</li>
-                <li>Filter jobs by location, job type, and work type</li>
+                <li>Filter jobs by work type, and company wise</li>
                 <li>Click on a job to view full details</li>
             </ul>
 
@@ -59,7 +58,7 @@
             <ul>
                 <li>Click on "Sign Up" and select "Employer"</li>
                 <li>Provide your company details and registration number</li>
-                <li>Submit required verification documents</li>
+                <li>Submit required details</li>
                 <li>Wait for admin approval (usually 1-2 business days)</li>
             </ul>
 
@@ -137,7 +136,6 @@
                 <li>Keep your profile information up to date</li>
                 <li>Use a professional email address</li>
                 <li>Upload clear and well-formatted documents</li>
-                <li>Check your email regularly for notifications</li>
                 <li>Contact support if you encounter any issues</li>
             </ul>
         </div>
@@ -147,7 +145,7 @@
             <h2>Need More Help?</h2>
             <p>If you have questions or need assistance, please contact our support team:</p>
             <ul>
-                <li>Email: support@jobsxx.com</li>
+                <li>Email: support@careerbridge.com</li>
                 <li>Phone: +94 11 234 5678</li>
                 <li>Working Hours: Monday - Friday, 9:00 AM - 5:00 PM</li>
             </ul>

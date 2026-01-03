@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 // Redirect based on role
                 if ($user['role_id'] == 3) {
-                    header('Location: Admin/employer_verification.php');
+                    header('Location: Admin/dashboard.php');
                 } elseif ($user['role_id'] == 2) {
                     header('Location: Employer/dashboard.php');
                 } else {
@@ -63,14 +63,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Jobs XX</title>
+    <title>Login - CareerBridge</title>
     <link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body class="login-body">
     <div class="login-container">
         <div class="login-card">
-            <div class="logo">
-                <h1>Jobs XX</h1>
+            <div class="logo-header">
+                <h1 class="logo">
+                    <span class="logo-career">Career</span><span class="logo-bridge">Bridge</span>
+                </h1>
                 <p>Login to your account</p>
             </div>
             
