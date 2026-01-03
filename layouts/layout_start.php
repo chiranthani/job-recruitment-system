@@ -9,7 +9,7 @@ include_once __DIR__ . '/../config/roleBasedMenus.php';
 <head>
     <meta charset="utf-8">
 
-    <title>Job Recruitment System </title>
+    <title>CareerBridge | Job Recruitment </title>
 
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">

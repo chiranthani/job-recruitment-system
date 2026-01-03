@@ -11,9 +11,7 @@ $username = $_SESSION['username'] ?? 'Guest';
     <header class="header">
         <div class="header-logo">
             <a href="<?php echo BaseConfig::$BASE_URL; ?>home.php">
-            <h1 class="logo">
-                <span class="logo-career">Career</span><span class="logo-bridge">Bridge</span>
-            </h1>
+                <img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/logo.png" width="130px" />
             </a>
         </div>
 

@@ -90,18 +90,18 @@ $cardData = getMyJobCardData();
                     <span class="status <?= $statusClass ?>">
                         <?= $item['application_status'] ?>
                     </span>
+                 <?php if ($item['application_status'] == AppConstants::APPLICATION_STATUS['OFFERED']): ?>
+                    <button class="btn btn-success"
+                        onclick="submitStatus(<?= $item['id'] ?>, '<?= AppConstants::APPLICATION_STATUS['OFFER_ACCEPTED'] ?>')">
+                        Accept Offer
+                    </button>
 
-                    <?php if ($item['application_status'] == AppConstants::APPLICATION_STATUS['OFFERED']): ?>
-                        <button class="btn btn-success"
-                            onclick="updateStatus(<?= $item['id'] ?>, '<?= AppConstants::APPLICATION_STATUS['OFFER_ACCEPTED'] ?>')">
-                            Accept Offer
-                        </button>
+                    <button class="btn btn-danger"
+                        onclick="submitStatus(<?= $item['id'] ?>, '<?= AppConstants::APPLICATION_STATUS['OFFER_RJECTED'] ?>')">
+                        Reject Offer
+                    </button>
+                <?php endif; ?>
 
-                        <button class="btn btn-danger"
-                            onclick="updateStatus(<?= $item['id'] ?>, '<?= AppConstants::APPLICATION_STATUS['OFFER_RJECTED'] ?>')">
-                            Reject Offer
-                        </button>
-                    <?php endif; ?>
 
                     <button class="btn btn-view"
                         onclick="window.location.href='../Jobs/job_view.php?job=<?= $item['job_id'] ?>'">
@@ -110,12 +110,32 @@ $cardData = getMyJobCardData();
                 </div>
             </div>
         <?php endforeach; ?>
+        <form id="statusForm" method="POST" action="backend/update-application-status.php" style="display:none;">
+            <input type="hidden" name="application_id" id="application_id">
+            <input type="hidden" name="status" id="status">
+        </form>
     </div>
 </div>
 
 </section>
 <?php include 'modals/success-popup.php'; ?>
 <?php include 'modals/error-popup.php'; ?>
+
+<?php if (isset($_GET['success'])): ?>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    showSuccess("Success",<?= json_encode($_GET['success']) ?>);
+});
+</script>
+<?php endif; ?>
+
+<?php if (isset($_GET['error'])): ?>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    showError(<?= json_encode($_GET['error']) ?>);
+});
+</script>
+<?php endif; ?>
 
 <script>
     let currentStatus = 'ALL';
@@ -142,33 +162,13 @@ $cardData = getMyJobCardData();
         }, 400);
     });
 
-    function updateStatus(applicationId, newStatus) {
-
+    function submitStatus(applicationId, newStatus) {
         if (!confirm("Are you sure you want to set status as '" + newStatus + "'?")) {
             return;
         }
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "backend/update-application-status.php", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-        xhr.onload = function() {
-            if (xhr.status == 200) {
-                let res = JSON.parse(xhr.responseText);
-                if (res.status == "success") {
-                    showSuccess(newStatus+" Successfully!",res.message || "Successfully!");
-            
-                } else {
-                    showError(res.message || "Something went wrong!");
-                }                
-            } else {
-                showError("Server error! Try again later.");
-            }
-        };
-
-        xhr.send(
-            "application_id=" + encodeURIComponent(applicationId) +
-            "&status=" + encodeURIComponent(newStatus)
-        );
+        document.getElementById('application_id').value = applicationId;
+        document.getElementById('status').value = newStatus;
+        document.getElementById('statusForm').submit();
     }
 
     // Popup handling
@@ -185,7 +185,16 @@ $cardData = getMyJobCardData();
     
     function closeSuccessPopup() {
         document.getElementById("successPopup").style.display = "none";
-        location.reload();
+        clearQueryParams();
+    }
+
+    function clearQueryParams() {
+        const url = new URL(window.location.href);
+
+        url.searchParams.delete('success');
+        url.searchParams.delete('error');
+
+        window.history.replaceState({}, document.title, url.pathname + url.search);
     }
 </script>
 

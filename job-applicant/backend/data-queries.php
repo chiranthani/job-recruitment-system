@@ -379,7 +379,8 @@ function searchJobs($filters){
         job_posts.expiry_date,
         companies.name AS company_name,
         locations.name AS location_name,
-        job_categories.name AS category_name
+        job_categories.name AS category_name,
+        DATEDIFF(job_posts.expiry_date, CURDATE()) AS days_left
     FROM
         `job_posts`
     INNER JOIN companies ON companies.id = job_posts.company_id
@@ -510,4 +511,26 @@ function getCompanyDetails($companyId) {
     $stmt->execute();
 
     return $stmt->get_result()->fetch_assoc();
+}
+
+/** get candidate jobs - applied or saved */
+function getAppliedJobIds($userId,$type)
+{
+    $db = db();
+
+    $stmt = $db->prepare("SELECT job_id 
+        FROM candidate_jobs 
+        WHERE user_id = ? AND `type`=?
+    ");
+    $stmt->bind_param("is", $userId,$type);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $appliedJobs = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $appliedJobs[] = $row['job_id'];
+    }
+
+    return $appliedJobs;
 }

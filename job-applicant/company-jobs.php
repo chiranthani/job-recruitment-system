@@ -13,6 +13,10 @@ $totalPages = $jobslist['total_pages'];
 $page = $jobslist['page'];
 $total_records = $jobslist['total_records'];
 
+$userId = $_SESSION['user_id'] ?? 0;
+$appliedType = AppConstants::APPLIED_JOB;
+$appliedJobs = getAppliedJobIds($userId,$appliedType) ?? [];
+
 if (!$company) {
     echo "<p style='margin:20px;color:red;'>Company not found.</p>";
     exit;
@@ -54,7 +58,12 @@ if (!$company) {
                 <div class="job-card">
                     <div class="job-card-header" style="margin-bottom:10px">
                         <h4><?= htmlspecialchars($job['title']) ?></h4>
-                        <a href="../Jobs/job_view.php?job=<?= $job['id'] ?>" class="buttn buttn-outline">View</a>
+                        <div>
+                            <?php if (in_array($job['id'], $appliedJobs)): ?>
+                            <span class="applied-badge">✔ Applied</span>
+                            <?php endif ?>
+                         <a href="../Jobs/job_view.php?job=<?= $job['id'] ?>" class="buttn buttn-outline">View</a>
+                        </div>
                     </div>
 
                     <div class="job-card-about">

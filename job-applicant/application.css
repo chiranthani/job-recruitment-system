@@ -676,6 +676,7 @@ label.required::after {
     padding: 15px;
     margin-bottom: 15px;
     box-shadow: 0px 0px 8px rgba(0,0,0,0.1);
+    width: 100%;
 }
 .job-card-header{
     display: flex;
@@ -691,6 +692,16 @@ label.required::after {
     font-size: 16px;
     margin: 5px 0;
 }
+
+.applied-badge {
+    color: var(--success);
+    font-weight: 600;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
 
 .apply-btn {
     padding: 8px 14px;

@@ -13,11 +13,17 @@ $jobs = $results['jobs'];
 $totalPages = $results['total_pages'];
 $page = $results['page'];
 $total_records = $results['total_records'];
+
+// get cadidate applied jobs
+$userId = $_SESSION['user_id'] ?? 0;
+$appliedType = AppConstants::APPLIED_JOB;
+$appliedJobs = getAppliedJobIds($userId,$appliedType) ?? [];
 ?>
 
 <div class="main-container">
-
-    <div class="search-top-filter">
+   <h2 class="page-title">Search Jobs</h2>
+        <p class="page-sub-title">Find new opportunities</p>
+    <div>
         <form method="GET" class="search-top-filter">
 
             <input
@@ -90,7 +96,12 @@ $total_records = $results['total_records'];
                 <div class="job-card">
                     <div class="job-card-header">
                         <h4><?= htmlspecialchars($job['title']) ?></h4>
-                        <a class="apply-btn" href="../Jobs/job_view.php?job=<?= $job['id'] ?>">View</a>
+                       <div>
+                         <?php if (in_array($job['id'], $appliedJobs)): ?>
+                            <span class="applied-badge">✔ Applied</span>
+                        <?php endif ?>
+                         <a class="apply-btn" href="../Jobs/job_view.php?job=<?= $job['id'] ?>">View</a>
+                       </div>
                     </div>
 
                     <a href="company-jobs.php?company_id=<?= $job['company_id'] ?>"><p class="company"><?= $job['company_name'] ?></p></a>
@@ -106,7 +117,7 @@ $total_records = $results['total_records'];
                     </div>
 
                     <div class="job-card-footer">
-                        Exp date: <?= $job['expiry_date'] ?>
+                        Exp date: <?= $job['expiry_date'] ?> (⏰ <?= max(0, (int)$job['days_left']); ?> days left)
                     </div>
                 </div>
             <?php endforeach; ?>

@@ -4,40 +4,48 @@ include '../../config/database.php';
 include '../../config/constants.php';
 include 'data-queries.php';
 
-header('Content-Type: application/json');
+// helper function
+function redirectBack($path,$type,$message){
+    header("Location: {$path}?{$type}=" . urlencode($message));
+    exit;
+}
 
-$applicationId = (int)($_POST['application_id'] ?? 0);
-$status = trim($_POST['status']) ?? '';
+$applicationId = filter_input(INPUT_POST, 'application_id', FILTER_VALIDATE_INT) ?? 0;
+$status = trim($_POST['status'] ?? '');
 $interviewDate = $_POST['interview_date'] ?? null;
 $isCandidate = $_SESSION['role_id'] == AppConstants::ROLE_JOB_SEEKER ? true : false;
+
+$redirectPath = $isCandidate ? '../my-jobs.php' : '../applied-candidates.php';
 
 $applicationData = getAApplicationDetails($applicationId);
 
 /* common validation */
-if (!$applicationId || !in_array($status, AppConstants::APPLICATION_STATUS)) {
-    echo json_encode(["status" => "error", "message" => "Invalid data"]);
-    exit;
+if ($applicationId <= 0 || !in_array($status, AppConstants::APPLICATION_STATUS, true)) {
+    redirectBack($redirectPath, 'error', 'Invalid request data');
+}
+
+if (!$applicationData) {
+    redirectBack($redirectPath, 'error', 'Application not found');
 }
 
 /** recuriter validations */
 if(!$isCandidate){
     if ($status == AppConstants::APPLICATION_STATUS['INTERVIEW'] && empty($interviewDate)) {
-        echo json_encode(["status" => "error", 'message' => 'Interview date required']);
-        exit;
+        redirectBack($redirectPath, 'error', 'Interview date is required');
     }
 
     $newIndex = array_search($status, AppConstants::APPLICATION_STATUS_FLOW);
 
     /* new status reverse update block [to applied] */
-    if (0 == $newIndex) {
-        echo json_encode(["status" => "error",'message' => 'Reverse status [Applied] update is not allowed','newIndex'=>$newIndex]);
-        exit;
+     if ($newIndex == false || $newIndex == 0) {
+        redirectBack($redirectPath,'error','Reverse or invalid status update is not allowed');
     }
 }else{
     /** candidate validation */
-    if (!in_array($status, [AppConstants::APPLICATION_STATUS['OFFER_ACCEPTED'],AppConstants::APPLICATION_STATUS['OFFER_RJECTED']])) {
-        echo json_encode(["status" => "error", "message" => "Invalid status"]);
-        exit;
+    $allowedCandidateStatuses = [AppConstants::APPLICATION_STATUS['OFFER_ACCEPTED'],AppConstants::APPLICATION_STATUS['OFFER_RJECTED']];
+
+    if (!in_array($status, $allowedCandidateStatuses, true)) {
+        redirectBack($redirectPath, 'error', 'You are not allowed to set this status');
     }
 }
 
@@ -52,6 +60,11 @@ $sql = "UPDATE applications
 ";
 
 $stmt = $con_main->prepare($sql);
+if (!$stmt) {
+    error_log('Prepare failed: ' . $con_main->error);
+    redirectBack($redirectPath, 'error', 'System error occurred');
+}
+
 $stmt->bind_param(
     "ssi",
     $status,
@@ -60,7 +73,8 @@ $stmt->bind_param(
 );
 
 if ($stmt->execute()) {
-    echo json_encode(["status" => "success",'message'=>"Status updated successfully!"]);
-} else {
-    echo json_encode(["status" => "error",  'message' => 'Update error']);
+    redirectBack($redirectPath, 'success', 'Status updated successfully');
 }
+
+error_log('Execution failed: ' . $stmt->error);
+redirectBack($redirectPath, 'error', 'Failed to update status');

@@ -216,6 +216,14 @@ include 'backend/data-queries.php';
         window.location.replace('job-search.php');
     }
 
+    function clearQueryParams() {
+        const url = new URL(window.location.href);
+
+        url.searchParams.delete('success');
+        url.searchParams.delete('error');
+
+        window.history.replaceState({}, document.title, url.pathname + url.search);
+    }
 
 </script>
 
