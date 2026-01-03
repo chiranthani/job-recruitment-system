@@ -13,19 +13,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $description  = $_POST['description'];
     $requirements = $_POST['requirements'];
     $location_id  = $_POST['location_id'];
-    $company_id = $_SESSION['company_id'] ?? 0;
-    $user_id = $_SESSION['user_id'] ?? 0;
- 
+    $company_id   = $_SESSION['company_id'] ?? 0;
+    $user_id      = $_SESSION['user_id'] ?? 0;
+
+    /* =========================
+       DEADLINE VALIDATION
+    ========================= */
+
+    if (!empty($deadline)) {
+        $today = date('Y-m-d');
+
+        if ($deadline < $today) {
+            $_SESSION['error'] = "Application deadline cannot be a past date.";
+            header("Location: create_post.php");
+            exit;
+        }
+    }
+
+    /* =========================
+       PUBLISHED DATE LOGIC
+    ========================= */
+
     $publishedDate = null;
 
-    if($job_status ==  'published'){
+    if ($job_status === 'published') {
         $publishedDate = date('Y-m-d');
     }
-    //  Insert job post
+
+    /* =========================
+       INSERT JOB POST
+    ========================= */
+    
     $sql = "INSERT INTO job_posts 
-            (company_id, post_status, `expiry_date`, title, category_id, job_type, work_type, `description`, requirements, location_id, created_by,published_date)
-            VALUES 
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            (company_id, post_status, expiry_date, title, category_id, job_type, work_type, description, requirements, location_id, created_by, published_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $con_main->prepare($sql);
     $stmt->bind_param(
@@ -48,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $job_post_id = $stmt->insert_id;
 
-        //  Insert benefits
+        /* INSERT BENEFITS */
         if (!empty($_POST['benefits'])) {
             foreach ($_POST['benefits'] as $benefit_id) {
                 $sqlBenefit = "INSERT INTO job_post_benefits (job_post_id, benefit_id)
@@ -59,15 +80,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
-        //  Redirect
+
         $_SESSION['success'] = "Job post created successfully.";
         header("Location: job_list.php");
         exit;
 
-   } else {
-    $_SESSION['error'] = "Error saving job post. Please try again.";
-    header("Location: create_post.php");
-    exit;
+    } else {
+        $_SESSION['error'] = $stmt->error;
+        header("Location: create_post.php");
+        exit;
     }
-
 }

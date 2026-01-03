@@ -1,137 +1,204 @@
-<!-- start page common elements -->
-<?php include '../config/database.php'; ?>
-<?php include '../layouts/layout_start.php'; ?>
-<?php include '../layouts/header.php'; ?>
-<!-- end page common elements-->
+<?php
+include '../config/database.php';
+include '../layouts/layout_start.php';
+include '../layouts/header.php';
+
+/* =========================
+   GET JOB ID
+========================= */
+if (!isset($_GET['id']) || empty($_GET['id'])) {
+    $_SESSION['error'] = "Invalid job post.";
+    header("Location: job_list.php");
+    exit;
+}
+
+$job_id = (int) $_GET['id'];
+
+/* =========================
+   FETCH JOB DETAILS
+========================= */
+$sql = "SELECT * FROM job_posts WHERE id = ?";
+$stmt = $con_main->prepare($sql);
+$stmt->bind_param("i", $job_id);
+$stmt->execute();
+$job = $stmt->get_result()->fetch_assoc();
+
+if (!$job) {
+    $_SESSION['error'] = "Job not found.";
+    header("Location: job_list.php");
+    exit;
+}
+
+/* =========================
+   FETCH SELECTED BENEFITS
+========================= */
+$selectedBenefits = [];
+$benefitSql = "SELECT benefit_id FROM job_post_benefits WHERE job_post_id = ?";
+$benefitStmt = $con_main->prepare($benefitSql);
+$benefitStmt->bind_param("i", $job_id);
+$benefitStmt->execute();
+$benefitResult = $benefitStmt->get_result();
+
+while ($row = $benefitResult->fetch_assoc()) {
+    $selectedBenefits[] = $row['benefit_id'];
+}
+?>
 
 <link rel="stylesheet" href="job-post.css">
 
 <section class="job-wrapper">
+
 <?php if (isset($_SESSION['error'])) { ?>
     <div class="alert error">
         <?= $_SESSION['error']; ?>
     </div>
 <?php unset($_SESSION['error']); } ?>
 
-    <h2>Job Post Edit  - ----</h2>
+<h2>Job Post Edit - <?= htmlspecialchars($job['title']); ?></h2>
 
-    <form method="POST" action="" class="job-form">
+<form method="POST" action="update_job.php" class="job-form">
 
-        <!-- TWO COLUMN ROW: Job Status + Deadline -->
-        <div class="form-row-2col">
+<input type="hidden" name="job_id" value="<?= $job_id; ?>">
 
-            <div>
-                <label>* Job Status:</label>
-                <select name="job_status" class="input-box" required>
-                    <option value="draft" selected>Draft</option>
-                    <option value="published">Published</option>
-                    
-                </select>
-            </div>
+<!-- Job Status + Deadline -->
+<div class="form-row-2col">
 
-            <div>
-                <label>Application Deadline:</label>
-                <input type="date" name="deadline" class="input-box">
-            </div>
+    <div>
+        <label>* Job Status:</label>
+        <select name="job_status" class="input-box" required>
+            <option value="draft" <?= ($job['post_status']=='draft')?'selected':''; ?>>Draft</option>
+            <option value="published" <?= ($job['post_status']=='published')?'selected':''; ?>>Published</option>
+        </select>
+    </div>
 
-        </div>
+    <div>
+        <label>Application Deadline:</label>
+        <input type="date" name="deadline" class="input-box"
+               value="<?= $job['expiry_date']; ?>">
+    </div>
 
-        <!-- Job Title -->
-        <div class="form-row">
-            <label>* Job Title:</label>
-            <input type="text" name="job_title" class="input-box-full" required>
-        </div>
+</div>
 
-        <!-- Category -->
-        <div class="form-row">
-            <label>* Category:</label>
-            <select name="category" class="input-box-full" required>
-                <option value="" selected disabled>Select Category</option>
-                <?php
-                $query = "SELECT * from job_categories where `status`=1";
-                $result = $con_main->query($query);
-                while ($job_categories = $result->fetch_assoc()) {
-                ?>
-                    <option value="<?php echo ($job_categories['id']) ?>"><?php echo ($job_categories['name'])  ?></option>
-                <?php } ?>
-            </select>
-        </div>
+<!-- Job Title -->
+<div class="form-row">
+    <label>* Job Title:</label>
+    <input type="text" name="job_title" class="input-box-full" required
+           value="<?= htmlspecialchars($job['title']); ?>">
+</div>
 
+<!-- Category -->
+<div class="form-row">
+    <label>* Category:</label>
+    <select name="category" class="input-box-full" required>
+        <option disabled>Select Category</option>
+        <?php
+        $catQ = "SELECT * FROM job_categories WHERE status=1";
+        $catR = $con_main->query($catQ);
+        while ($cat = $catR->fetch_assoc()) {
+        ?>
+            <option value="<?= $cat['id']; ?>"
+                <?= ($job['category_id']==$cat['id'])?'selected':''; ?>>
+                <?= $cat['name']; ?>
+            </option>
+        <?php } ?>
+    </select>
+</div>
 
-        <div class="form-row-2col">
-            <!-- Job Type -->
-            <div class="form-row">
-                <label>* Job Type:</label>
-                <select name="job_type" class="input-box" required>
-                    <option value="" selected disabled>Job Type</option>
-                    <option value="Full-Time">Full Time</option>
-                    <option value="Part-Time">Part Time</option>
-                    <option value="Internship">Intern</option>
-                    <option value="Contract">Contract</option>
-                    <option value="Freelance">Freelance</option>
-                </select>
-            </div>
-            <div>
-                  <label>* Work Type:</label>
-                <select name="work_type" class="input-box" required>
-                    <option vlaue="" selected disabled>Job Type</option>
-                    <option value="On-site">On site</option>
-                    <option value="Remote">Remote</option>
-                    <option value="Hybrid">Hybrid</option>
-                </select>
-            </div>
-        </div>
+<!-- Job Type + Work Type -->
+<div class="form-row-2col">
 
+    <div>
+        <label>* Job Type:</label>
+        <select name="job_type" class="input-box" required>
+            <?php
+            $types = ['Full-Time','Part-Time','Internship','Contract','Freelance'];
+            foreach ($types as $type) {
+            ?>
+                <option value="<?= $type; ?>"
+                    <?= ($job['job_type']==$type)?'selected':''; ?>>
+                    <?= $type; ?>
+                </option>
+            <?php } ?>
+        </select>
+    </div>
 
-        <!-- Description -->
-        <div class="form-row">
-            <label>* Description:</label>
-            <textarea name="description" class="textarea" required></textarea>
-        </div>
+    <div>
+        <label>* Work Type:</label>
+        <select name="work_type" class="input-box" required>
+            <?php
+            $workTypes = ['On-site','Remote','Hybrid'];
+            foreach ($workTypes as $wt) {
+            ?>
+                <option value="<?= $wt; ?>"
+                    <?= ($job['work_type']==$wt)?'selected':''; ?>>
+                    <?= $wt; ?>
+                </option>
+            <?php } ?>
+        </select>
+    </div>
 
-        <!-- Requirements -->
-        <div class="form-row">
-            <label>* Requirements:</label>
-            <textarea name="requirements" class="textarea" required></textarea>
-        </div>
+</div>
 
-        <!-- Benefits -->
-        <div class="form-row" required>
-            <label>* Benefits:</label>
-            <div class="checkbox-group">
-                <?php
-                $query = "SELECT * from benefits";
-                $result = $con_main->query($query);
-                while ($benefit = $result->fetch_assoc()) {
-                ?>
-                    <label><input type="checkbox"  name="benefits[]" class="benefits-checkbox" value="<?php echo ($benefit['id']) ?>"> <?php echo ($benefit['name']); ?></label>
-                <?php } ?>
-            </div>
-        </div>
+<!-- Description -->
+<div class="form-row">
+    <label>* Description:</label>
+    <textarea name="description" class="textarea" required><?= htmlspecialchars($job['description']); ?></textarea>
+</div>
 
-        <!-- Job Location -->
-        <div class="form-row" required>
-            <label>* Job Location:</label>
-            <select class="input-box"  name="location_id">
-                <option value="" selected disabled>Job Location</option>
-                <?php
-                $query = "SELECT * from locations where `status`=1";
-                $result = $con_main->query($query);
-                while ($locations = $result->fetch_assoc()) {
-                ?>
-                    <option value="<?php echo ($locations['id']) ?>"><?php echo ($locations['name'])  ?></option>
-                <?php } ?>
-            </select>
-        </div>
+<!-- Requirements -->
+<div class="form-row">
+    <label>* Requirements:</label>
+    <textarea name="requirements" class="textarea" required><?= htmlspecialchars($job['requirements']); ?></textarea>
+</div>
 
-        <!-- Save + Close Buttons -->
-        <div class="form-actions">
-            <button type="submit" class="save-btn">Save</button>
-            <button type="button" class="close-btn">Close</button>
-        </div>
+<!-- Benefits -->
+<div class="form-row">
+    <label>* Benefits:</label>
+    <div class="checkbox-group">
+        <?php
+        $benQ = "SELECT * FROM benefits";
+        $benR = $con_main->query($benQ);
+        while ($b = $benR->fetch_assoc()) {
+        ?>
+            <label>
+                <input type="checkbox"
+                       name="benefits[]"
+                       class="benefits-checkbox"
+                       value="<?= $b['id']; ?>"
+                       <?= in_array($b['id'],$selectedBenefits)?'checked':''; ?>>
+                <?= $b['name']; ?>
+            </label>
+        <?php } ?>
+    </div>
+</div>
 
-    </form>
+<!-- Location -->
+<div class="form-row">
+    <label>* Job Location:</label>
+    <select name="location_id" class="input-box" required>
+        <?php
+        $locQ = "SELECT * FROM locations WHERE status=1";
+        $locR = $con_main->query($locQ);
+        while ($loc = $locR->fetch_assoc()) {
+        ?>
+            <option value="<?= $loc['id']; ?>"
+                <?= ($job['location_id']==$loc['id'])?'selected':''; ?>>
+                <?= $loc['name']; ?>
+            </option>
+        <?php } ?>
+    </select>
+</div>
+
+<!-- Buttons -->
+<div class="form-actions">
+    <button type="submit" class="save-btn">Update</button>
+    <button type="button" class="close-btn" onclick="history.back()">Cancel</button>
+</div>
+
+</form>
 </section>
 
-<?php include '../layouts/footer.php'; ?>
-<?php include '../layouts/layout_end.php'; ?>
+<?php
+include '../layouts/footer.php';
+include '../layouts/layout_end.php';
+?>
