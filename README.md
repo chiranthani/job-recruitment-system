@@ -80,8 +80,8 @@ Create a new MySQL database and import the SQL file from the /sql folder.
 
 Configure database connection in /config/database.php with your credentials:
 ```bash
-$host = 'localhost';
-$user = 'root';
+$servername = 'localhost';
+$username = 'root';
 $password = '';
 $dbname = 'your_database_name';
 ```
