@@ -19,12 +19,30 @@ body {
     background: #f5f5f5;
 }
 
+.logo {
+    font-size: 32px;
+    letter-spacing: 0.5px;
+    margin: 0;
+    text-transform:capitalize !important
+}
+
+.logo-career {
+    font-weight: 700;
+    color: #14213d;
+}
+
+.logo-bridge {
+    font-weight: 600;
+    color: #635dfd;
+}
+
+
 /* =================== HEADER =================== */
 
 .header {
     display: flex;
     align-items: center;
-    padding: 15px 20px;
+    padding: 12px 20px;
     gap: 60px;
     background: var(--white);
     border-bottom: 1px solid #ddd;
@@ -37,13 +55,8 @@ body {
     gap: 10px;
 }
 
-.logo-icon {
-    font-size: 26px;
-}
-
-.logo-text {
-    font-size: 20px;
-    font-weight: bold;
+.header-logo a{
+    text-decoration: none;
 }
 
 .nav {

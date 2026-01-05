@@ -1,4 +1,4 @@
-<?php // mysqli_close($con_main);  ?>
+<?php $con_main->close(); ?>
 </body>
 
 </html>
