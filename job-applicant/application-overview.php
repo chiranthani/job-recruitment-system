@@ -25,14 +25,14 @@ $totalPages = $result['totalPages'];
 
         <div class="summary-cards">
             <div class="card">
-                <div class="card-icon">📄</div>
+                <div class="card-icon">🗓️</div>
                 <div class="card-content">
                     <h3><?= $cardData['this_week_count'] ?></h3>
                     <p>This Week</p>
                 </div>
             </div>
             <div class="card">
-                <div class="card-icon">📅</div>
+                <div class="card-icon">⏳</div>
                 <div class="card-content">
                     <h3><?= $cardData['applied_count'] ?></h3>
                     <p>Pending Review</p>
@@ -46,7 +46,7 @@ $totalPages = $result['totalPages'];
                 </div>
             </div>
              <div class="card">
-                <div class="card-icon">📅</div>
+                <div class="card-icon">📨</div>
                 <div class="card-content">
                     <h3><?= $cardData['offered_count'] ?></h3>
                     <p>Pending Candidate Decision</p>
@@ -60,12 +60,13 @@ $totalPages = $result['totalPages'];
         <form method="GET" id="searchForm" class="my-application-filter-bar">
             <div class="search-box">
                 <input
-                    type="text"
-                    id="searchInput"
+                    type="search"
                     name="search"
                     value="<?= htmlspecialchars($search) ?>"
-                    placeholder="Search job title">
-                <button type="submit" class="btn btn-submit" style="height: fit-content;">Search</button>
+                    placeholder="Search job title"
+                    onsearch="this.form.submit()"
+                >
+                <button type="submit" class="btn btn-submit">Search</button>
             </div>
         </form>
 
@@ -94,7 +95,9 @@ $totalPages = $result['totalPages'];
                             <td data-label="Title">
                                 <a href="applied-candidates.php?job_id=<?= $job['id'] ?>" class="job-link">
                                     <?= htmlspecialchars($job['title']) ?>
+                                    <span  class="status" style="color: gray;" ><?= $job['is_deleted'] ? '(Deleted)' : '' ?></span>
                                 </a>
+                                
                             </td>
                             <td data-label="Total"><?= $job['total'] ?></td>
                             <td data-label="New">
@@ -115,7 +118,11 @@ $totalPages = $result['totalPages'];
                                     <?= $job['interview'] ?>
                                 </span>
                             </td>
-                            <td data-label="Offer"><?= $job['offer'] ?></td>
+                            <td data-label="Offer">
+                                 <span class="badge <?= $job['offer'] > 0 ? 'status light' : '' ?>">
+                                    <?= $job['offer'] ?>
+                                </span>
+                            </td>
                             <td data-label="Hired"><?= $job['hired'] ?></td>
                         </tr>
                     <?php endforeach; ?>
