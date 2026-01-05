@@ -25,6 +25,7 @@ $username = $_SESSION['username'] ?? 'Guest';
                 <span class="icon" title="<?php echo $username; ?>"><img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/default_profile_image.png" class="menu-icon" alt="profile" /></span>
                 <a href="<?php echo BaseConfig::$BASE_URL; ?>logout.php"><span class="icon"><img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/logout.png" class="menu-icon" alt="logout" /></span></a>
             <?php else: ?>
+                                <button class="buttn buttn-outline" onclick="location.href='<?php echo BaseConfig::$BASE_URL; ?>user-management/signup.php'">Register as Job Seeker</button>
                 <button class="buttn buttn-outline" onclick="location.href='<?php echo BaseConfig::$BASE_URL; ?>Employer/register.php'">Register as Employer</button>
                 <button class="buttn buttn-sign-in" onclick="location.href='<?php echo BaseConfig::$BASE_URL; ?>login.php'">Sign In</button>
             <?php endif; ?>
