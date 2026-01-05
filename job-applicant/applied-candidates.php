@@ -131,12 +131,29 @@ $totalApplications = $results['total'];
 <?php include 'modals/application_status_change.php'; ?>
 <?php include 'modals/success-popup.php'; ?>
 <?php include 'modals/error-popup.php'; ?>
+
+<?php if (isset($_GET['success'])): ?>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    showSuccess("Success",<?= json_encode($_GET['success']) ?>);
+});
+</script>
+<?php endif; ?>
+
+<?php if (isset($_GET['error'])): ?>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    showError(<?= json_encode($_GET['error']) ?>);
+});
+</script>
+<?php endif; ?>
+
 <script>
     function openStatusModal(id, status, interview = '') {
         document.getElementById('statusModal').style.display = 'flex';
-        document.getElementById('statusSelect').value = status;
-        document.getElementById('interviewDate').value = interview;
-        document.getElementById('applicationId').value = id;
+        document.getElementById('status').value = status;
+        document.getElementById('interview_date').value = interview;
+        document.getElementById('application_id').value = id;
         toggleInterviewDate();
     }
 
@@ -187,45 +204,6 @@ $totalApplications = $results['total'];
     }
 
 
-    /** save status update */
-    function saveStatus() {
-        let applicationId = document.getElementById('applicationId').value;
-        let status = document.getElementById('statusSelect').value;
-        let interviewDate = document.getElementById('interviewDate').value;
-
-        if (status == 'Interview' && interviewDate == '') {
-            showError("Please select interview date & time");
-            return;
-        }
-
-        let formData = new FormData();
-        formData.append('application_id', applicationId);
-        formData.append('status', status);
-        formData.append('interview_date', interviewDate);
-
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "backend/update-application-status.php", true);
-
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 200) {
-                    let res = JSON.parse(xhr.responseText);
-
-                    if (res.status == "success") {
-                        showSuccess("Update Successfully!", res.message);
-                        closeModal();
-                    } else {
-                        showError(res.message || 'Update failed');
-                    }
-                } else {
-                    showError('Server error');
-                }
-            }
-        };
-
-        xhr.send(formData);
-    }
-
     // Popup handling
     function showError(msg) {
         document.getElementById("errorMessage").textContent = msg;
@@ -241,12 +219,13 @@ $totalApplications = $results['total'];
     function closeSuccessPopup() {
         document.getElementById("successPopup").style.display = "none";
         closeModal();
+        clearQueryParams();
         location.reload();
     }
 
     function clearQueryParams() {
         const url = new URL(window.location.href);
-
+    
         url.searchParams.delete('success');
         url.searchParams.delete('error');
 
