@@ -213,11 +213,11 @@ function getJobPostStats($search, $page, $limit=10)
 {
     $db = db();
     $postStatus = AppConstants::POST_PUBLISHED;
-
+    $companyId = $_SESSION['company_id'] ?? 0;
     $offset = ($page - 1) * $limit;
     $searchLike = "%$search%";
 
-    $where = " WHERE post_status = ? ";
+    $where = " WHERE job_posts.company_id = ?";
     $hasSearch = !empty($search);
 
     if ($hasSearch) {
@@ -228,9 +228,9 @@ function getJobPostStats($search, $page, $limit=10)
     $stmt = $db->prepare($countSql);
 
     if ($hasSearch) {
-        $stmt->bind_param("ss", $postStatus, $searchLike);
+        $stmt->bind_param("is", $companyId, $searchLike);
     } else {
-        $stmt->bind_param("s", $postStatus);
+        $stmt->bind_param("i", $companyId);
     }
 
     $stmt->execute();
@@ -240,6 +240,7 @@ function getJobPostStats($search, $page, $limit=10)
     $sql = "SELECT 
         job_posts.id,
         job_posts.title,
+        job_posts.is_deleted,
         COUNT(applications.id) AS total,
         COALESCE(SUM(applications.application_status='Applied'), 0) AS new,
         COALESCE(SUM(applications.application_status='In Review'), 0) AS reviewed,
@@ -251,15 +252,16 @@ function getJobPostStats($search, $page, $limit=10)
     LEFT JOIN applications ON applications.job_id = job_posts.id
     $where
     GROUP BY job_posts.id
+    ORDER BY job_posts.is_deleted ASC
     LIMIT ?, ?
     ";
 
     $stmt = $db->prepare($sql);
 
     if ($hasSearch) {
-        $stmt->bind_param("ssii", $postStatus, $searchLike, $offset, $limit);
+        $stmt->bind_param("isii", $companyId, $searchLike, $offset, $limit);
     } else {
-        $stmt->bind_param("sii", $postStatus, $offset, $limit);
+        $stmt->bind_param("iii", $companyId, $offset, $limit);
     }
 
     $stmt->execute();
