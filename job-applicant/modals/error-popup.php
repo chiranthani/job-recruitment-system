@@ -10,6 +10,7 @@
 <script>
     function closeErrorPopup() {
         document.getElementById("errorPopup").style.display = "none";
+        clearQueryParams();
     }
 
 </script>

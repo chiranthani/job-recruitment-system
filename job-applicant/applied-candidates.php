@@ -243,6 +243,16 @@ $totalApplications = $results['total'];
         closeModal();
         location.reload();
     }
+
+    function clearQueryParams() {
+        const url = new URL(window.location.href);
+
+        url.searchParams.delete('success');
+        url.searchParams.delete('error');
+
+        window.history.replaceState({}, document.title, url.pathname + url.search);
+    }
+
 </script>
 <?php include '../layouts/footer.php'; ?>
 <?php include '../layouts/layout_end.php'; ?>

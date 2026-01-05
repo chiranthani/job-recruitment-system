@@ -1,7 +1,7 @@
 <div class="modal-overlay" id="statusModal">
     <div class="modal-container">
         <div class="modal-header">Update Status</div>
-
+        <form method="POST" action="../backend/update-application-status.php">
         <div class="form-group">
             <label for="statusSelect">Select Status</label>
             <select id="statusSelect" onchange="toggleInterviewDate()">
@@ -18,8 +18,9 @@
 
         <div class="modal-footer">
             <input type="hidden" id="applicationId" name="applicationId" >
-            <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
-            <button class="btn btn-submit" onclick="saveStatus()">Save</button>
+            <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-submit">Save</button>
         </div>
+        </form>
     </div>
 </div>
