@@ -8,5 +8,6 @@ $ACCESS_RULES = [
     "/job-applicant/my-jobs.php" => [AppConstants::ROLE_JOB_SEEKER],
     "/job-applicant/applied-candidates.php"  => [AppConstants::ROLE_EMPLOYER],
     "/job-applicant/application-overview.php" => [AppConstants::ROLE_EMPLOYER],
+    "notifications.php" => [AppConstants::ROLE_JOB_SEEKER,AppConstants::ROLE_EMPLOYER,AppConstants::ROLE_ADMIN]
 ];
 ?>

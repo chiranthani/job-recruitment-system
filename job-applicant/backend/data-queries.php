@@ -200,7 +200,11 @@ function getAApplicationDetails($application)
     $db = db();
 
 
-    $sql = "SELECT * FROM applications WHERE id = ?";
+    $sql = "SELECT applications.*, job_posts.title,job_posts.company_id,companies.name AS company_name 
+    FROM applications 
+    INNER JOIN job_posts ON job_posts.id = applications.job_id
+    INNER JOIN companies ON companies.id = job_posts.company_id
+    WHERE applications.id = ?";
 
     $stmt = $db->prepare($sql);
     if (!$stmt) return false;
@@ -250,7 +254,8 @@ function getJobPostStats($search, $page, $limit=10)
         COALESCE(SUM(applications.application_status='Rejected'), 0) AS rejected,
         COALESCE(SUM(applications.application_status='Interview'), 0) AS interview,
         COALESCE(SUM(applications.application_status='Offer Made'), 0) AS offer,
-        COALESCE(SUM(applications.application_status='Hired'), 0) AS hired
+        COALESCE(SUM(applications.application_status='Hired'), 0) AS hired,
+        COALESCE(SUM(applications.application_status='Offer Accepted' || applications.application_status='Offer Rejected' ), 0) AS offer_responses
     FROM job_posts
     LEFT JOIN applications ON applications.job_id = job_posts.id
     $where
@@ -319,7 +324,8 @@ function getAppliedJobs($status,$search=''){
             c.name AS company_name,
             a.job_id,
             a.application_status,
-            a.applied_at
+            a.applied_at,
+            a.interview_at
         FROM applications a
         INNER JOIN job_posts jp ON jp.id = a.job_id
         INNER JOIN companies c ON c.id = jp.company_id
@@ -538,4 +544,113 @@ function getAppliedJobIds($userId,$type)
     }
 
     return $appliedJobs;
+}
+
+/** get unread notification count for a user */
+function getUnreadNotificationCount($userId) {
+
+    $db = db();
+
+    $count = 0;
+    if ($userId > 0) {
+        $stmt = $db->prepare("SELECT COUNT(*) AS total 
+             FROM notifications 
+             WHERE user_id = ? AND is_read = 0"
+        );
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $count = (int)$result['total'];
+    }
+
+    return $count;
+}
+
+/** get notification list */
+function getNotificationsList($userId,$page,$limit = 6) {
+    $db = db();
+
+   $result = [
+        'notifications' => [],
+        'total' => 0,
+        'page' => $page,
+        'last_page' => 1
+    ];
+    if ($userId <= 0) return $result;
+
+    $stmtCount = $db->prepare("SELECT COUNT(*) AS total FROM notifications WHERE user_id = ?");
+    $stmtCount->bind_param("i", $userId);
+    $stmtCount->execute();
+    $total = (int)$stmtCount->get_result()->fetch_assoc()['total'];
+    $result['total'] = $total;
+
+    // calculate last page
+    if ($limit > 0) {
+        $lastPage = ceil($total / $limit);
+        $result['last_page'] = $lastPage;
+        $offset = ($page - 1) * $limit;
+    } else {
+        $offset = 0;
+    }
+
+    // fetch notifications
+    $sql = "SELECT id, message, is_read, created_at
+            FROM notifications
+            WHERE user_id = ?
+            ORDER BY created_at DESC";
+
+    if ($limit > 0) {
+        $sql .= " LIMIT ? OFFSET ?";
+    }
+
+    $stmt = $db->prepare($sql);
+    if ($limit > 0) {
+        $stmt->bind_param("iii", $userId, $limit, $offset);
+    } else {
+        $stmt->bind_param("i", $userId);
+    }
+
+    $stmt->execute();
+    $result['notifications'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    return $result;
+}
+
+/**get employer users of a company */
+function getCompanyEmployerUsers($companyId)
+{
+    $db = db();
+    $roleEmployer = AppConstants::ROLE_EMPLOYER;
+    $active = AppConstants::ACTIVE_STATUS;
+    $inactive = AppConstants::INACTIVE_STATUS;
+
+    $sql = "SELECT id, email 
+    FROM users 
+    WHERE 
+    company_id = ? AND role_id = ? AND is_deleted = ? AND `status` =?";
+              
+    $stmt = $db->prepare($sql);
+    $stmt->bind_param("iiii", $companyId, $roleEmployer,$inactive,$active);
+    $stmt->execute();
+
+    return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+}
+
+/** get job post main details */
+function getAJobPostDetails($jobId)
+{
+    $db = db();
+
+    $sql = "SELECT job_posts.*,companies.name AS company_name 
+    FROM job_posts 
+    INNER JOIN companies ON companies.id = job_posts.company_id
+    WHERE job_posts.id = ?";
+
+    $stmt = $db->prepare($sql);
+    if (!$stmt) return false;
+
+    $stmt->bind_param("i", $jobId);
+
+    $stmt->execute();
+    return $stmt->get_result()->fetch_assoc();
 }

@@ -1,6 +1,8 @@
 <?php
+session_start();
 include '../../config/database.php';
 include '../../config/constants.php';
+include '../../helpers/notifications.php';
 include 'data-queries.php';
 
 header("Content-Type: application/json");
@@ -21,7 +23,8 @@ try {
     $notice = htmlspecialchars(strip_tags($_POST['notice']));
     $cvOption = $_POST['cv_option'] ?? 'new';
     $full_name = $first . ' ' . $last;
-    $user_id = $_SESSION['user_id'] ?? 4;
+    $user_id = $_SESSION['user_id'] ?? 0;
+
     $type = AppConstants::APPLIED_JOB;
 
     // duplicate check
@@ -60,7 +63,7 @@ try {
                 exit;
             }
 
-            $resumePath = "uploads/resumes/" . $fileName;
+            $resumePath = "assets/uploads/resumes/" . $fileName;
         }
 
     }
@@ -108,6 +111,15 @@ try {
 
     $con_main->commit();
 
+    // send notification
+    $jobData = getAJobPostDetails($job_id);
+    $employers = getCompanyEmployerUsers($jobData['company_id']);
+
+    foreach ($employers as $employer) {
+        createNotification($con_main,$employer['id'],$user_id,$main_stmt->insert_id,AppConstants::NOTIFICATION_TYPES['0'],
+        "New application received for '{$jobData['title']}' from {$full_name}.");
+    }
+
     echo json_encode([
         "status" => "success",
         "message" => "Your application has been sent successfully."
@@ -118,6 +130,6 @@ try {
 } catch (Exception $e) {
     $con_main->rollback();
 
-    echo json_encode(["status" => "error","message" =>"Something went wrong!", "data" => $e->getMessage()]);
+    echo json_encode(["status" => "error","message" =>"Something went wrong!",'user'=>$user_id, "data" => $e->getMessage()]);
     exit;
 }

@@ -66,7 +66,7 @@ include 'backend/data-queries.php';
             <div class="row">
                 <div class="col">
                     <label class="required">Current Role</label>
-                    <input type="text" name="current_role" placeholder="Senior Software Engineer">
+                    <input type="text" name="current_role" placeholder="Enter current role">
                 </div>
             </div>
 

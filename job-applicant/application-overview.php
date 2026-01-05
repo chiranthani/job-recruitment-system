@@ -81,6 +81,7 @@ $totalPages = $result['totalPages'];
                     <th>Rejected</th>
                     <th>Interview</th>
                     <th>Offer</th>
+                    <th>Offer Responses</th>
                     <th>Hired</th>
                 </tr>
             </thead>
@@ -122,6 +123,11 @@ $totalPages = $result['totalPages'];
                                  <span class="badge <?= $job['offer'] > 0 ? 'status light' : '' ?>">
                                     <?= $job['offer'] ?>
                                 </span>
+                            </td>
+                            <td data-label="Offer Responses">
+                               <span class="badge <?= $job['offer_responses'] > 0 ? 'status offer-accepted' : '' ?>">
+                                    <?= $job['offer_responses'] ?>
+                                </span>    
                             </td>
                             <td data-label="Hired"><?= $job['hired'] ?></td>
                         </tr>

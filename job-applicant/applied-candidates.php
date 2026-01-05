@@ -99,7 +99,7 @@ $totalApplications = $results['total'];
                 <?php else: ?>
                     <?php foreach ($applications as $r):
                         $statusClass = strtolower(str_replace(' ', '-', $r['application_status']));
-                        $cv = $r['cv_url'] ? $base_url . 'assets/' . $r['cv_url'] : '#';
+                        $cv = $r['cv_url'] ? $base_url .''.$r['cv_url'] : '#';
                     ?>
                         <tr>
                             <td data-label="Select"><?= $r['application_status'] == AppConstants::APPLICATION_STATUS['APPLIED'] ? '<input type="checkbox" class="rowCheckbox" value="' . $r['id'] . '">' : '' ?></td>
@@ -110,7 +110,14 @@ $totalApplications = $results['total'];
                             <td data-label="Current Role"><?= $r['current_role'] ?? '-' ?></td>
                             <td data-label="Notice Period"><?= $r['notice_period'] ?? '-' ?></td>
                             <td data-label="Applied At"><?= $r['applied_at'] ?></td>
-                            <td data-label="Status"><span class="status-pill <?= $statusClass ?>"><?= $r['application_status'] ?></span></td>
+                            <td data-label="Status">
+                                <span class="status-pill <?= $statusClass ?>"><?= $r['application_status'] ?></span>
+                                <?php if ($r['application_status'] === AppConstants::APPLICATION_STATUS['INTERVIEW'] && !empty($r['interview_at'])): ?>
+                                    <div class="interview-date">
+                                        <?= date('d M Y, h:i A', strtotime($r['interview_at'])) ?>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <a href="<?= $cv ?>" target="_blank" class="btn btn-info">👁 CV</a>
                                 <button class="btn btn-view" onclick="openStatusModal(<?= $r['id'] ?>,'<?= $r['application_status'] ?>','<?= $r['interview_at'] ?? '' ?>')">Change Status</button>
@@ -158,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function toggleInterviewDate() {
-        let sel = document.getElementById('statusSelect').value;
+        let sel = document.getElementById('status').value;
         document.getElementById('interviewBox').style.display = (sel == 'Interview') ? 'block' : 'none';
     }
 

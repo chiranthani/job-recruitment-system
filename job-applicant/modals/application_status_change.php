@@ -13,7 +13,7 @@
 
         <div class="form-group" id="interviewBox" style="display:none;">
             <label>Interview Date & Time</label>
-            <input type="datetime-local" id="interview_date">
+            <input type="datetime-local" id="interview_date" name="interview_date">
         </div>
 
         <div class="modal-footer">

@@ -2,6 +2,7 @@
 session_start();
 include '../../config/database.php';
 include '../../config/constants.php';
+include '../../helpers/notifications.php';
 include 'data-queries.php';
 
 // helper function
@@ -31,6 +32,10 @@ if ($applicationId <= 0 || !in_array($status, AppConstants::APPLICATION_STATUS, 
 
 if (!$applicationData) {
     redirectBack($redirectPath, 'error', 'Application not found',$isCandidate,$applicationData['job_id']);
+}
+
+if ($applicationData['application_status'] == $status) {
+    redirectBack($redirectPath, 'success', 'Application is already '. strtolower($status).' status!',$isCandidate,$applicationData['job_id']);
 }
 
 /** recuriter validations */
@@ -78,6 +83,45 @@ $stmt->bind_param(
 );
 
 if ($stmt->execute()) {
+
+    // notification send
+    $candidateId= $applicationData['user_id'];
+    $jobTitle = $applicationData['title'];
+    $candidateName = $applicationData['candidate_name'];
+    $companyName = $applicationData['company_name'];
+    $senderId  = $_SESSION['user_id'];
+    $employers = getCompanyEmployerUsers($applicationData['company_id']);
+
+    // logged person employer
+    if (!$isCandidate) {
+        if ($status == AppConstants::APPLICATION_STATUS['INTERVIEW']) {
+            createNotification($con_main,$candidateId,$senderId,$applicationId,AppConstants::NOTIFICATION_TYPES['1'],
+            "You have been shortlisted for an interview at {$companyName} for the position of '{$jobTitle}'.");
+        }
+
+        if ($status == AppConstants::APPLICATION_STATUS['OFFERED']) {
+            createNotification($con_main,$candidateId,$senderId,$applicationId,AppConstants::NOTIFICATION_TYPES['2'],
+                "An offer has been made by {$companyName} for the position of '{$jobTitle}'. Check My Jobs to review the offer."
+            );
+        }
+    }
+
+    if ($isCandidate) {
+        foreach ($employers as $employer) {
+            if ($status == AppConstants::APPLICATION_STATUS['OFFER_ACCEPTED']) {
+                createNotification($con_main,$employer['id'],$senderId,$applicationId,AppConstants::NOTIFICATION_TYPES['3'],
+                    "'{$candidateName}' accepted the offer for '{$jobTitle}'."
+                );
+            }
+            if ($status == AppConstants::APPLICATION_STATUS['OFFER_RJECTED']) {
+                createNotification($con_main,$employer['id'],$senderId,$applicationId,AppConstants::NOTIFICATION_TYPES['4'],
+                    "'{$candidateName}' rejected the offer for '{$jobTitle}'."
+                );
+            }
+        }
+       
+    }
+
     redirectBack($redirectPath, 'success', 'Status updated successfully',$isCandidate,$applicationData['job_id']);
 }
 
