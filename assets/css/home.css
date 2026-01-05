@@ -86,12 +86,16 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   transition: 0.3s ease-in-out;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 85%;
 }
 
 .category-card img {
   width: 55px;
   height: 55px;
-  margin-bottom: 12px;
+  margin: 0 auto 12px; /* center horizontally */
+  display: block;
 }
 
 .category-card h3 {
@@ -104,6 +108,7 @@
 .category-card p {
   font-size: 14px;
   color: #6c757d;
+  margin-top: auto;
 }
 
 .category-card:hover {

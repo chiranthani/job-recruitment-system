@@ -31,7 +31,10 @@
 
             <div>
                 <label>Application Deadline:</label>
-                <input type="date" name="deadline" class="input-box">
+                <input type="date"
+                        name="deadline"
+                        class="input-box"
+                        min="<?= date('Y-m-d'); ?>">
             </div>
 
         </div>

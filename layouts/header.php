@@ -10,8 +10,9 @@ $username = $_SESSION['username'] ?? 'Guest';
 
     <header class="header">
         <div class="header-logo">
-            <span class="logo-icon">[ ]</span>
-            <span class="logo-text">Jobs XX</span>
+            <a href="<?php echo BaseConfig::$BASE_URL; ?>home.php">
+                <img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/logo.png" width="130px" />
+            </a>
         </div>
 
         <!-- Desktop -->
