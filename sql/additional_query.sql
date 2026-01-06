@@ -15,3 +15,10 @@ CREATE TABLE notifications (
     is_read TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+/**  date: 6/1/2025 **/
+ALTER TABLE `candidates` CHANGE `createdAt` `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE `candidates` CHANGE `updatedAt` `updatedAt` DATETIME NULL DEFAULT NULL;
+ALTER TABLE `user_skills` CHANGE `createdAt` `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE `user_skills` CHANGE `updatedAt` `updatedAt` DATETIME NULL DEFAULT NULL;
+ALTER TABLE `user_skills` CHANGE `status` `status` TINYINT(1) NOT NULL DEFAULT '1';

@@ -1,41 +1,46 @@
-/* style.css */
+/* style.css - Clean Version */
 :root {
-    --ink-color: #2c2c2c;
-    --paper-line: #a2c2e1;
-    --bg-color: #fdfdfd;
+    --ink-color: #000000;
+    --bg-color: #ffffff; /* bg color for all UI */
+    --accent-gray: #3ef053;
+
+    /* Functional Colors */
+    --color-green: #2d6a4f;  /* Add / View */
+    --color-amber: #ffb703;  /* Update */
+    --color-red: #c1121f;    /* Delete / Remove */
 }
 
+/*  */
 
 /* Sketchy container style */
 .container {
-    background: #fff;
+    background: #ebf6a3;
     width: 90%;
-    max-width: 800px;
+    max-width: 850px;
     margin: 20px auto;
-    padding: 30px;
-    /* Irregular border for hand-drawn look */
+    padding: 40px;
+    /* Keeps the hand-drawn border effect without the background lines */
     border: 3px solid var(--ink-color);
-    border-radius: 2% 3% 1% 4% / 3% 1% 4% 2%; 
-    box-shadow: 5px 5px 0px rgba(0,0,0,0.1);
+    border-radius: 10px 15px 12px 18px / 15px 12px 18px 10px; 
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.05);
     position: relative;
 }
 
 h1, h2, h3 {
     text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    text-transform: capitalize;
     margin-top: 0;
 }
 
-/* Red asterisks */
+/* Red asterisks for required fields */
 .required {
-    color: red;
+    color: #e63946;
     font-weight: bold;
 }
 
-/* Form grouping */
+/* Form Layouts */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     display: flex;
     flex-direction: column;
 }
@@ -43,20 +48,21 @@ h1, h2, h3 {
 .form-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 25px;
 }
+
 .form-row .form-group {
     flex: 1;
-    min-width: 200px;
+    min-width: 220px;
 }
 
 label {
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     display: block;
 }
 
-/* Inputs that look like lines */
+/* Clean Input Styling */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -75,6 +81,7 @@ textarea {
     box-sizing: border-box;
 }
 
+/* Textarea specific */
 textarea {
     resize: vertical;
     border: 2px solid var(--ink-color); /* Box for textarea */
@@ -82,72 +89,95 @@ textarea {
 }
 
 /* Buttons with sketchy borders */
-.btn {
+.btn-add, .btn-view {
     font-family: inherit;
-    background: #fff;
-    border: 3px solid var(--ink-color);
-    padding: 10px 25px;
-    font-size: 1rem;
+    border: 2px solid var(--ink-color);
+    padding: 10px 22px;
+    font-size: 0.95rem;
     font-weight: bold;
     cursor: pointer;
-    /* Irregular border radius */
-    border-radius: 5% 2% 6% 3% / 3% 6% 2% 5%;
+    border-radius: 8px 12px 6px 10px;
     transition: all 0.2s ease;
     text-decoration: none;
     display: inline-block;
-    text-align: center;
     color: var(--ink-color);
+    background: #00b333;
 }
 
-.btn:hover {
-    background: #f0f0f0;
-    box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+.btn-update {
+    font-family: inherit;
+    border: 2px solid var(--ink-color);
+    padding: 10px 22px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px 12px 6px 10px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    color: var(--ink-color);
+    background: #ff8103;
 }
 
-.btn-block {
-    display: block;
-    width: 100%;
+.btn-delete {
+    font-family: inherit;
+    border: 2px solid var(--ink-color);
+    padding: 10px 22px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px 12px 6px 10px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    color: var(--ink-color);
+    background: #ff0000;
+}
+
+
+.btn-add:hover, .btn-delete:hover, .btn-update:hover, .btn-view:hover {
+    background:  #00e1ff;
+    transform: translateY(-2px);;
+}
+
+.btn-add:hover, .btn-delete:hover, .btn-update:hover, .btn-view:hover {
+    transform: translateY(0);
 }
 
 /* Tabs styling */
 .tabs {
     display: flex;
+    gap: 10px;
     border-bottom: 2px solid var(--ink-color);
-    margin-bottom: 30px;
+    margin-bottom: 35px;
 }
 
 .tab-link {
-    padding: 10px 20px;
+    padding: 12px 25px;
     text-decoration: none;
     color: var(--ink-color);
-    border: 2px solid transparent;
     font-weight: bold;
+    border: 2px solid var(--ink-color);
+    border-bottom: none;
+    background: #eee;
+    border-radius: 8px 8px 0 0;
 }
 
 .tab-link.active {
-    border: 2px solid var(--ink-color);
-    border-bottom: none;
     background: #fff;
     position: relative;
-    top: 2px;
-    border-radius: 5% 5% 0 0;
+    top: 2px; /* Overlap the bottom border */
 }
 
-/* Utilities */
-.text-center { text-align: center; }
-.mt-20 { margin-top: 20px; }
-.d-flex { display: flex; }
-.justify-between { justify-content: space-between; }
-
-/* Popup Modal Styles (For Image 1) */
+/* Success Popup Modal */
 .modal-overlay {
-    display: none; /* Hidden by default */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.8); /* Whiteish transparent background */
+    background-color: rgba(0, 0, 0, 0.4); /* Darkened overlay for focus */
     z-index: 1000;
     justify-content: center;
     align-items: center;
@@ -155,45 +185,76 @@ textarea {
 
 .modal-content {
     background: #fff;
-    padding: 40px;
+    padding: 50px;
     border: 4px solid var(--ink-color);
-    /* Very sketchy border for the popup */
-    border-radius: 2% 5% 3% 8% / 7% 3% 6% 2%;
-    max-width: 500px;
+    border-radius: 20px;
+    max-width: 550px;
     text-align: center;
-    position: relative;
-    box-shadow: 10px 10px 0 rgba(0,0,0,0.1);
+    box-shadow: 15px 15px 0px rgba(0,0,0,0.1);
 }
 
 .checkmark-circle {
-    width: 80px;
-    height: 80px;
-    border: 5px solid var(--ink-color);
+    width: 90px;
+    height: 90px;
+    border: 4px solid var(--ink-color);
     border-radius: 50%;
-    margin: 0 auto 20px;
+    margin: 0 auto 25px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 50px;
-    /* Irregular circle */
-    border-radius: 45% 55% 50% 50% / 50% 45% 55% 50%;
+    font-size: 55px;
 }
 
-/* Admin Table Styles */
+/* Admin Specific */
 .admin-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 25px;
+    background: white;
 }
 
 .admin-table th, .admin-table td {
     border: 2px solid var(--ink-color);
-    padding: 10px;
+    padding: 12px;
     text-align: left;
 }
 
-.admin-actions .btn {
-    padding: 2px 5px;
-    font-size: 0.8rem;
-    margin-right: 2px;
+.admin-table th {
+    background: var(--accent-gray);
 }
+
+/* Skills Tag Input Styles */
+.skill-tag {
+    background-color: #2d6a4f; /* Green background */
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid var(--ink-color);
+}
+
+.skill-tag span {
+    cursor: pointer;
+    background: rgba(0,0,0,0.2);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.skill-tag span:hover {
+    background: var(--color-red);
+}
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.mt-20 { margin-top: 20px; }
+.d-flex { display: flex; }
+.justify-between { justify-content: space-between; }
