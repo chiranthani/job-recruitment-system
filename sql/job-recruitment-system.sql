@@ -39,7 +39,7 @@ CREATE TABLE `applications` (
   `current_role` varchar(255) DEFAULT NULL,
   `cv_url` varchar(255) NOT NULL,
   `notice_period` varchar(100) DEFAULT NULL,
-  `applied_at` date NOT NULL DEFAULT current_timestamp(),
+  `applied_at` date NOT NULL,
   `interview_at` timestamp NULL DEFAULT NULL,
   `feedback` varchar(255) DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT 1,
