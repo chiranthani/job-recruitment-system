@@ -7,35 +7,92 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: signup.php");
     exit();
 }
+$success_trigger = false;
 
 // 1. Fetch Locations (Cities) from database
 $location_query = "SELECT id, name FROM locations WHERE status = 1 ORDER BY name ASC";
 $locations_result = $con_main->query($location_query);
 
 // 2. Fetch Skill Suggestions from database
-$skills_query = "SELECT name FROM skills WHERE status = 1";
+$skills_query = "SELECT id,name FROM skills WHERE status = 1";
 $skills_result = $con_main->query($skills_query);
 $skill_suggestions = [];
 while($row = $skills_result->fetch_assoc()) {
-    $skill_suggestions[] = $row['name'];
+    $skill_suggestions[] = $row;
 }
 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Update 'candidates' table
-    // $contact = mysqli_real_escape_string($con_main, $_POST['contact_no']);
-    // $loc_id = (int)$_POST['location_id'];
-    // $p_code = (int)$_POST['postal_code'];
-    // $job = mysqli_real_escape_string($con_main, $_POST['job_title']);
-    // $bio = mysqli_real_escape_string($con_main, $_POST['brief_bio']);
+    $contact = trim($_POST['contact_no']);
+    $loc_id = (int)$_POST['location_id'];
+    $p_code = (int)$_POST['postal_code'];
+    $first_name = trim($_POST['first_name']);
+    $last_name = trim($_POST['last_name']);
+    $country = trim($_POST['country']);
+    $job = trim($_POST['job_title']);
+    $bio = trim($_POST['brief_bio']);
+    $user_id = $_SESSION['user_id'];
+    $cv_url = '';
 
-    // $save_profile_sql = "INSERT INTO candidates (user_id, contact_no, country, location_id, postal_code, job_title, bio, cv_url, status) 
-    //                      VALUES ('$user_id', '$contact', 'Sri Lanka', '$loc_id', '$p_code', '$job', '$bio', '$cv_url', 1)
-    //                      ON DUPLICATE KEY UPDATE 
-    //                      contact_no='$contact', location_id='$loc_id', postal_code='$p_code', job_title='$job', bio='$bio', 
-    //                      cv_url=IF('$cv_url'='', cv_url, '$cv_url')";
+    // cv upload
+    if (!empty($_FILES['resume']['name'])) {
 
-    // if ($$con_main->query($save_profile_sql)) {
-    //     $success_trigger = true; 
-    // }
+            $fileName = time() . "_" . basename($_FILES['resume']['name']);
+            $target = "../assets/uploads/resumes/" . $fileName;
+
+            if (!move_uploaded_file($_FILES['resume']['tmp_name'], $target)) {
+                $messge = "Failed to upload resume";
+            }
+
+            $cv_url = "assets/uploads/resumes/" . $fileName;
+    }
+
+    // check candidate availability
+        $check_sql = "SELECT id FROM candidates WHERE user_id = '$user_id' LIMIT 1";
+        $result = mysqli_query($con_main, $check_sql);
+     
+        // if already have candidate need to be update, otherwise insert
+        if (mysqli_num_rows($result) > 0) {
+            $query = "UPDATE candidates SET 
+            contact_no = '$contact',location_id = '$loc_id',postal_code = '$p_code',job_title = '$job',bio  = '$bio',cv_url = '$cv_url',status = 1
+                WHERE user_id = '$user_id'";
+        } else {
+            $query = "INSERT INTO candidates (user_id,contact_no,country,location_id,postal_code,job_title,bio,cv_url,status)
+                VALUES ('$user_id','$contact','$country','$loc_id','$p_code','$job','$bio','$cv_url',1)";
+        }
+       
+        if ($con_main->query($query)) {
+            // update user name
+            $user_query = "UPDATE users SET first_name = '$first_name',last_name = '$last_name', last_login = NOW(), login_count = login_count + 1 WHERE id = '$user_id'";
+            mysqli_query($con_main, $user_query);
+
+            // fetch updated user info
+            $user_result = mysqli_query($con_main, "SELECT username, role_id FROM users WHERE id = '$user_id' LIMIT 1");
+
+            if ($row = mysqli_fetch_assoc($user_result)) {
+                $_SESSION['username'] = $row['username'];
+                $_SESSION['role_id']  = $row['role_id'];
+
+                $success_trigger = true;
+            }
+
+            // add skills
+            if ($success_trigger && !empty($_POST['skills'])) {
+
+                $skills = explode(',', $_POST['skills']);
+
+                // remove old skills (if avaible)
+                mysqli_query($con_main, "DELETE FROM user_skills WHERE user_id = '$user_id'");
+
+                foreach ($skills as $skill) {
+                    $skill = mysqli_real_escape_string($con_main, trim($skill));
+                    mysqli_query(
+                        $con_main,"INSERT INTO user_skills (user_id, skill_id) VALUES ('$user_id', '$skill')"
+                    );
+                }
+            }
+        }
+    }
 ?>
 
 <title>Job Seeker Profile</title>
@@ -58,7 +115,7 @@ while($row = $skills_result->fetch_assoc()) {
             <a href="javascript:void(0)" class="tab-link" onclick="navigateToStep(2)">Professional Info</a>
         </div>
 
-        <form id="multiStepProfileForm">
+        <form id="multiStepProfileForm" method="POST" enctype="multipart/form-data">
             
             <div id="step1-content">
                 <p>Fill in the following information so companies know who you are and what you are looking for...</p>
@@ -81,14 +138,14 @@ while($row = $skills_result->fetch_assoc()) {
                     <div class="form-row">
                         <div class="form-group">
                         <label>Country <span class="required">*</span></label>
-                        <select name="country" id="country-select" onchange="updateRegions()" required>
+                        <select name="country" id="country" onchange="updateRegions()" required>
                         <option value="Sri Lanka" selected>Sri Lanka</option>
                         </select>
                         <small style="color: #656363ff;">Service currently only available in Sri Lanka.</small>
                     </div>
                     <div class="form-group">
                         <label>City<span class="required">*</span></label>
-                        <select name="city" id="city-select" required>
+                        <select name="location_id" id="location_id" required>
                         <option value="">Select City</option>
                         <?php while($loc = $locations_result->fetch_assoc()): ?>
                         <option value="<?php echo $loc['id']; ?>"><?php echo $loc['name']; ?></option>
@@ -120,10 +177,10 @@ while($row = $skills_result->fetch_assoc()) {
             <div class="form-group">
                 <label>Key Skills</label>
                 <div class="tag-container" id="tagsContainer">
-                    <input type="text" class="tag-input" id="skillsInput" list="skill-suggestions" placeholder="Type skill and press Enter">
+                    <input type="text" class="tag-input" id="skillsInput" list="skill-options" placeholder="Type skill and press Enter">
                     <datalist id="skill-options">
-                    <?php foreach($skill_suggestions as $suggestion): ?>
-                    <option value="<?php echo htmlspecialchars($suggestion); ?>">
+                    <?php foreach ($skill_suggestions as $skill): ?>
+                    <option value="<?= htmlspecialchars($skill['name']) ?>" data-id="<?= $skill['id'] ?>">
                     <?php endforeach; ?>
                     </datalist>
                 </div>
@@ -138,7 +195,7 @@ while($row = $skills_result->fetch_assoc()) {
 
                 <div class="d-flex justify-between mt-20">
                     <button type="button" class="btn-update" onclick="navigateToStep(1)">Back</button>
-                    <button type="button" class="btn-add" onclick="showPopup('successModal')">Finish Registration</button>
+                    <button type="submit" class="btn-add" >Finish Registration</button>
                 </div>
             </div>
 
@@ -153,7 +210,7 @@ while($row = $skills_result->fetch_assoc()) {
             
             <div class="form-row mt-20" style="justify-content: center; gap: 10px;">
             <button class="btn-add" onclick="window.location.href='profile.php'">Complete your Profile</button>
-            <button class="btn-add" onclick="window.location.href='dashboard.php'">Start Browsing Jobs</button>
+            <button class="btn-add" onclick="window.location.href='../job-applicant/job-search.php'">Start Browsing Jobs</button>
             </div>
         </div>
     </div>

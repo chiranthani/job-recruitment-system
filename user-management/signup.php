@@ -9,6 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Sanitize inputs
     $email = mysqli_real_escape_string($con_main, $_POST['email']);
     $password = $_POST['password'];
+    $username = $_POST['username'];
     $confirm_password = $_POST['confirm_password'];
 
     // Basic Validation
@@ -16,9 +17,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = "Passwords do not match!";
     } else {
         // Check if user already exists
-        $check = $con_main->query("SELECT id FROM users WHERE email = '$email'");
+        $check = $con_main->query("SELECT id FROM users WHERE username = '$username'");
         if ($check->num_rows > 0) {
-            $message = "Email already registered!";
+            $message = "Username already registered!";
         } else {
             // Hash password for security
             $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
@@ -28,14 +29,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Insert into database
             // We use email as the default username for now
             $sql = "INSERT INTO users (email, username, password, role_id, status) 
-                    VALUES ('$email', '$email', '$hashed_pass', '$role_id', '$status')";
+                    VALUES ('$email', '$username', '$hashed_pass', '$role_id', '$status')";
 
             if ($con_main->query($sql) === TRUE) {
                 // SUCCESS: Save the new User ID to the session
                 $_SESSION['user_id'] = $con_main->insert_id;
-                
+
                 // REDIRECT: This is what loads profile.php
-                header("Location: ../login.php");
+                header("Location: profile.php");
                 exit(); 
             } else {
                 $message = "Database Error: " . $con_main->error;
@@ -47,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 <link rel="stylesheet" href="style.css">
-<script src="script.js"></script>
+
 <?php include '../layouts/header.php'; ?>
 <div class="container">
     <h1>Let's Get Started</h1>
@@ -62,6 +63,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="form-group">
             <label for="email">Email Address <span class="required">*</span></label>
             <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
+        </div>
+        <div class="form-group">
+            <label for="username">Username <span class="required">*</span></label>
+            <input type="text" id="username" name="username"  required>
         </div>
 
         <div class="form-group">

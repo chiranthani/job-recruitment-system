@@ -10,14 +10,7 @@
     --color-red: #c1121f;    /* Delete / Remove */
 }
 
-body {
-    font-family: 'TimesNewroman', 'cursive', sans-serif;
-    color: var(--ink-color);
-    margin: 0;
-    padding: 20px;
-    background-color: var(--bg-color); /* bg color */
-    line-height: 1.6;
-}
+/*  */
 
 /* Sketchy container style */
 .container {

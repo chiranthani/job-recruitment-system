@@ -45,78 +45,90 @@ function navigateToStep(stepNumber) {
 
 
 // 3. Interactive Tag Input for Skills
-    // const skillsInput = document.getElementById('skillsInput');
-    // const tagsContainer = document.getElementById('tagsContainer');
-    // const hiddenSkillsInput = document.getElementById('hiddenSkillsInput');
+document.addEventListener('DOMContentLoaded', () => {
+    const skillsInput = document.getElementById('skillsInput');
+    const tagsContainer = document.getElementById('tagsContainer');
+    const hiddenSkillsInput = document.getElementById('hiddenSkillsInput');
+    const options = document.querySelectorAll('#skill-options option');
+    
+    const skillMap = {};
+    options.forEach(opt => {
+        skillMap[opt.value] = opt.dataset.id;
+    });
+    if (skillsInput && tagsContainer && hiddenSkillsInput) {
+        let skillIds = [];
+        let skillNames = [];
 
-    // if (skillsInput && tagsContainer && hiddenSkillsInput) {
-    //     let skills = [];
-    //     function updateHiddenInput() { hiddenSkillsInput.value = skills.join(','); }
-    //     function renderTags() {
-    //         tagsContainer.querySelectorAll('.tag').forEach(tag => tag.remove());
-    //         skills.forEach((skill, index) => {
-    //             const tag = document.createElement('div');
-    //             tag.className = 'tag';
-    //             tag.innerHTML = `${skill} <span class="close" data-index="${index}">&times;</span>`;
-    //             tagsContainer.insertBefore(tag, skillsInput);
-    //         });
-    //     }
+        function updateHiddenInput() { hiddenSkillsInput.value = skillIds.join(','); }
+        function renderTags() {
+            tagsContainer.querySelectorAll('.tag').forEach(tag => tag.remove());
+            skillNames.forEach((skill, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.innerHTML = `${skill} <span class="close" data-index="${index}">&times;</span>`;
+                tagsContainer.insertBefore(tag, skillsInput);
+            });
+        }
 
-    //     skillsInput.addEventListener('keydown', function(e) {
-    //         if (e.key === 'Enter' || e.key === ',') {
-    //             e.preventDefault();
-    //             const val = this.value.trim().replace(',', '');
-    //             if (val && !skills.includes(val)) {
-    //                 skills.push(val);
-    //                 this.value = '';
-    //                 renderTags();
-    //                 updateHiddenInput();
-    //             }
-    //         }
-    //     });
-
-    //     tagsContainer.addEventListener('click', function(e) {
-    //         if (e.target.classList.contains('close')) {
-    //             const index = e.target.dataset.index;
-    //             skills.splice(index, 1);
-    //             renderTags();
-    //             updateHiddenInput();
-    //         }
-    //     });
-    // }
-
-    document.addEventListener('DOMContentLoaded', () => {
-    const sInput = document.getElementById('skills-input');
-    const sContainer = document.getElementById('skills-container');
-    const hHiddenInput = document.getElementById('hidden-skills');
-    let skillsArray = [];
-
-    if (sInput) {
-        sInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+        skillsInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ',') {
                 e.preventDefault();
-                const val = sInput.value.trim();
-                
-                if (val !== "" && !skillsArray.includes(val)) {
-                    skillsArray.push(val);
-                    renderSkillsUI(sContainer, sInput, hHiddenInput, skillsArray);
-                    sInput.value = "";
+                const name = skillsInput.value.trim();
+
+                if (skillMap[name] && !skillIds.includes(skillMap[name])) {
+                    skillNames.push(name);
+                    skillIds.push(skillMap[name]);
+                    skillsInput.value = '';
+                    renderTags();
+                    updateHiddenInput();
                 }
             }
         });
+
+        tagsContainer.addEventListener('click', e => {
+                if (e.target.classList.contains('close')) {
+                    const i = e.target.dataset.index;
+                    skillNames.splice(i, 1);
+                    skillIds.splice(i, 1);
+                    renderTags();
+                    updateHiddenInput();
+                }
+            });
     }
 });
 
-function renderSkillsUI(container, inputEl, hiddenField, array) {
-    container.querySelectorAll('.skill-tag').forEach(t => t.remove());
-    array.forEach(skill => {
-        const div = document.createElement('div');
-        div.className = 'skill-tag';
-        div.innerHTML = `${skill} <span class="remove-btn" onclick="removeSkill('${skill}')">x</span>`;
-        container.insertBefore(div, inputEl);
-    });
-    hiddenField.value = array.join(',');
-}
+//     document.addEventListener('DOMContentLoaded', () => {
+//     const sInput = document.getElementById('skills-input');
+//     const sContainer = document.getElementById('skills-container');
+//     const hHiddenInput = document.getElementById('hidden-skills');
+//     let skillsArray = [];
+
+//     if (sInput) {
+//         sInput.addEventListener('keydown', (e) => {
+//             if (e.key === 'Enter') {
+//                 e.preventDefault();
+//                 const val = sInput.value.trim();
+                
+//                 if (val !== "" && !skillsArray.includes(val)) {
+//                     skillsArray.push(val);
+//                     renderSkillsUI(sContainer, sInput, hHiddenInput, skillsArray);
+//                     sInput.value = "";
+//                 }
+//             }
+//         });
+//     }
+// });
+
+// function renderSkillsUI(container, inputEl, hiddenField, array) {
+//     container.querySelectorAll('.skill-tag').forEach(t => t.remove());
+//     array.forEach(skill => {
+//         const div = document.createElement('div');
+//         div.className = 'skill-tag';
+//         div.innerHTML = `${skill} <span class="remove-btn" onclick="removeSkill('${skill}')">x</span>`;
+//         container.insertBefore(div, inputEl);
+//     });
+//     hiddenField.value = array.join(',');
+// }
 
 
 // admin_user_form image upload
