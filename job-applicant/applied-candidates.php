@@ -71,8 +71,10 @@ $totalApplications = $results['total'];
 
             </div>
         </form>
+        <form method="POST" action="backend/mark-reviewed.php" id="markReviewedForm">
+            <input type="hidden" name="job_id" value="<?= $jobId ?>">
         <div style="display: flex; justify-content:space-between;gap:10px">
-            <button class="btn btn-submit" onclick="markAsReviewed()">Mark as Reviewed</button>
+            <button type="submit" class="btn btn-submit">Mark as Reviewed</button>
             <span><strong><?= $totalApplications ?></strong> Application(s) Found</span>
         </div>
 
@@ -102,7 +104,11 @@ $totalApplications = $results['total'];
                         $cv = $r['cv_url'] ? $base_url .''.$r['cv_url'] : '#';
                     ?>
                         <tr>
-                            <td data-label="Select"><?= $r['application_status'] == AppConstants::APPLICATION_STATUS['APPLIED'] ? '<input type="checkbox" class="rowCheckbox" value="' . $r['id'] . '">' : '' ?></td>
+                            <td>
+                                <?php if ($r['application_status'] == AppConstants::APPLICATION_STATUS['APPLIED']): ?>
+                                    <input type="checkbox" name="application_ids[]" value="<?= $r['id'] ?>">
+                                <?php endif; ?>
+                            </td>
                             <td data-label="Name"><?= htmlspecialchars($r['candidate_name']) ?></td>
                             <td data-label="Email"><?= htmlspecialchars($r['candidate_email']) ?></td>
                             <td data-label="Contact Number"><?= $r['contact_number'] ?? '-' ?></td>
@@ -120,14 +126,14 @@ $totalApplications = $results['total'];
                             </td>
                             <td>
                                 <a href="<?= $cv ?>" target="_blank" class="btn btn-info">👁 CV</a>
-                                <button class="btn btn-view" onclick="openStatusModal(<?= $r['id'] ?>,'<?= $r['application_status'] ?>','<?= $r['interview_at'] ?? '' ?>')">Change Status</button>
+                                <button type="button" class="btn btn-view" onclick="openStatusModal(<?= $r['id'] ?>,'<?= $r['application_status'] ?>','<?= $r['interview_at'] ?? '' ?>')">Change Status</button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>
         </table>
-
+        </form>
         <div class="pagination">
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <a href="?job_id=<?= $jobId ?>&from=<?= $fromDate ?>&to=<?= $toDate ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
@@ -139,23 +145,20 @@ $totalApplications = $results['total'];
 <?php include 'modals/success-popup.php'; ?>
 <?php include 'modals/error-popup.php'; ?>
 
-<?php if (isset($_GET['success'])): ?>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    showSuccess("Success",<?= json_encode($_GET['success']) ?>);
-});
-</script>
-<?php endif; ?>
-
-<?php if (isset($_GET['error'])): ?>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    showError(<?= json_encode($_GET['error']) ?>);
-});
-</script>
-<?php endif; ?>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+
+        if (params.has('success')) {
+            showSuccess("Success", params.get('success'));
+        }
+
+        if (params.has('error')) {
+            showError(params.get('error'));
+        }
+    });
+
     function openStatusModal(id, status, interview = '') {
         document.getElementById('statusModal').style.display = 'flex';
         document.getElementById('status').value = status;
@@ -175,39 +178,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     function toggleSelectAll(masterCheckbox) {
-        const checkboxes = document.querySelectorAll(".rowCheckbox");
+        const checkboxes = document.querySelectorAll("#markReviewedForm input[name='application_ids[]']");
         checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
-    }
-
-    /** mark as reviewed - bullk */
-    function markAsReviewed() {
-        let selected = [];
-        document.querySelectorAll(".rowCheckbox:checked").forEach(cb => {
-            selected.push(cb.value);
-        });
-
-        if (selected.length == 0) {
-            showError("Please select at least one application.");
-            return;
-        }
-
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "backend/mark-reviewed.php", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-        xhr.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                let res = JSON.parse(this.responseText);
-                if (res.status == "success") {
-                    showSuccess("Update Successfully!", res.message);
-
-                } else {
-                    showError(res.message);
-                }
-            }
-        };
-
-        xhr.send("ids=" + encodeURIComponent(selected.join(",")));
     }
 
 
