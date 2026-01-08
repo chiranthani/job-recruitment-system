@@ -1,44 +1,60 @@
 <?php 
-// 1. Start the session to "remember" the user across pages
+/**
+ * User Registration (Signup) Page
+ * This file handles the creation of new candidate accounts.
+ */
 
+// Include database connection and layout initialization
 include '../config/database.php'; 
 include '../layouts/layout_start.php';
+
+// Initialize message variable for error reporting
 $message = ""; 
 
+// --- 1. HANDLE FORM SUBMISSION ---
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Sanitize inputs
+    
+    // Sanitize user inputs to prevent basic SQL Injection
     $email = mysqli_real_escape_string($con_main, $_POST['email']);
+    $username = mysqli_real_escape_string($con_main, $_POST['username']);
     $password = $_POST['password'];
-    $username = $_POST['username'];
     $confirm_password = $_POST['confirm_password'];
 
-    // Basic Validation
+    // --- 2. VALIDATION ---
+    // Ensure the user typed the same password twice
     if ($password !== $confirm_password) {
         $message = "Passwords do not match!";
     } else {
-        // Check if user already exists
+        // Check if the username is already taken in the database
         $check = $con_main->query("SELECT id FROM users WHERE username = '$username'");
+        
         if ($check->num_rows > 0) {
             $message = "Username already registered!";
         } else {
-            // Hash password for security
+            // --- 3. SECURITY & PREPARATION ---
+            // Hash the password using the current standard (bcrypt)
+            // Never store plain-text passwords in the database!
             $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
+            
+            // Set default values for new candidates
             $role_id = 1; // 1 = Candidate (Job Seeker)
-            $status = 1;  // 1 = Active
+            $status = 1;  // 1 = Active account by default
 
-            // Insert into database
-            // We use email as the default username for now
+            // --- 4. DATABASE INSERTION ---
             $sql = "INSERT INTO users (email, username, password, role_id, status) 
                     VALUES ('$email', '$username', '$hashed_pass', '$role_id', '$status')";
 
             if ($con_main->query($sql) === TRUE) {
-                // SUCCESS: Save the new User ID to the session
+                // --- 5. SUCCESS HANDLING ---
+                // Store the newly created User ID in a session variable
+                // This "logs in" the user immediately
                 $_SESSION['user_id'] = $con_main->insert_id;
 
-                // REDIRECT: This is what loads profile.php
+                // Redirect the user to their profile setup page
                 header("Location: profile.php");
                 exit(); 
             } else {
+                // Handle database errors (e.g., connection lost)
                 $message = "Database Error: " . $con_main->error;
             }
         }
@@ -46,15 +62,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-
 <link rel="stylesheet" href="style.css">
 
 <?php include '../layouts/header.php'; ?>
+
 <div class="container">
     <h1>Let's Get Started</h1>
     
     <?php if ($message != ""): ?>
-        <div style="color: red; border: 1px solid red; padding: 10px; margin-bottom: 15px; text-align: center;">
+        <div style="color: red; border: 1px solid red; padding: 10px; margin-bottom: 15px; text-align: center; border-radius: 5px; background-color: #fffafa;">
             <?php echo $message; ?>
         </div>
     <?php endif; ?>
@@ -64,30 +80,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <label for="email">Email Address <span class="required">*</span></label>
             <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
         </div>
+
         <div class="form-group">
             <label for="username">Username <span class="required">*</span></label>
-            <input type="text" id="username" name="username"  required>
+            <input type="text" id="username" name="username" placeholder="Choose a unique username" required>
         </div>
 
         <div class="form-group">
             <label for="password">Password <span class="required">*</span></label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" name="password" placeholder="At least 8 characters" required>
         </div>
 
         <div class="form-group">
             <label for="confirm_password">Confirm Password <span class="required">*</span></label>
-            <input type="password" id="confirm_password" name="confirm_password" required>
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-type your password" required>
         </div>
 
         <div class="form-group">
-            <label style="display: flex; align-items: center;">
+            <label style="display: flex; align-items: center; cursor: pointer;">
                 <input type="checkbox" required style="width: auto; margin-right: 15px;">
                 I Agree to the Terms and Conditions
             </label>
         </div>
 
         <div class="text-center mt-20">
-            <button type="submit" class="btn-add">Create Profile</button>
+            <button type="submit" class="btn-add" style="width: 100%; padding: 12px;">Create Profile</button>
         </div>
 
         <p class="text-center mt-20" style="color: #f81818ff; font-weight:bold ">

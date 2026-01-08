@@ -65,9 +65,8 @@ include '../layouts/layout_start.php';
                 <input type="text" name="last_name" value="<?php echo $user['last_name'] ?? ''; ?>" required>
             </div>
             <div class="form-group">
-                <label>Region <span class="required">*</span></label>
-                <select name="region" id="region-select" required>
-                    <option value="Western">Western</option> </select>
+                <label>Email <span class="required">*</span></label>
+                <input type="text" name="email" value="<?php echo $user['email'] ?? ''; ?>" required>
             </div>
         </div>
 
