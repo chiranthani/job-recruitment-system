@@ -71,8 +71,10 @@ $totalApplications = $results['total'];
 
             </div>
         </form>
+        <form method="POST" action="backend/mark-reviewed.php" id="markReviewedForm">
+            <input type="hidden" name="job_id" value="<?= $jobId ?>">
         <div style="display: flex; justify-content:space-between;gap:10px">
-            <button class="btn btn-submit" onclick="markAsReviewed()">Mark as Reviewed</button>
+            <button type="submit" class="btn btn-submit">Mark as Reviewed</button>
             <span><strong><?= $totalApplications ?></strong> Application(s) Found</span>
         </div>
 
@@ -99,10 +101,14 @@ $totalApplications = $results['total'];
                 <?php else: ?>
                     <?php foreach ($applications as $r):
                         $statusClass = strtolower(str_replace(' ', '-', $r['application_status']));
-                        $cv = $r['cv_url'] ? $base_url . 'assets/' . $r['cv_url'] : '#';
+                        $cv = $r['cv_url'] ? $base_url .''.$r['cv_url'] : '#';
                     ?>
                         <tr>
-                            <td data-label="Select"><?= $r['application_status'] == AppConstants::APPLICATION_STATUS['APPLIED'] ? '<input type="checkbox" class="rowCheckbox" value="' . $r['id'] . '">' : '' ?></td>
+                            <td>
+                                <?php if ($r['application_status'] == AppConstants::APPLICATION_STATUS['APPLIED']): ?>
+                                    <input type="checkbox" name="application_ids[]" value="<?= $r['id'] ?>">
+                                <?php endif; ?>
+                            </td>
                             <td data-label="Name"><?= htmlspecialchars($r['candidate_name']) ?></td>
                             <td data-label="Email"><?= htmlspecialchars($r['candidate_email']) ?></td>
                             <td data-label="Contact Number"><?= $r['contact_number'] ?? '-' ?></td>
@@ -110,17 +116,24 @@ $totalApplications = $results['total'];
                             <td data-label="Current Role"><?= $r['current_role'] ?? '-' ?></td>
                             <td data-label="Notice Period"><?= $r['notice_period'] ?? '-' ?></td>
                             <td data-label="Applied At"><?= $r['applied_at'] ?></td>
-                            <td data-label="Status"><span class="status-pill <?= $statusClass ?>"><?= $r['application_status'] ?></span></td>
+                            <td data-label="Status">
+                                <span class="status-pill <?= $statusClass ?>"><?= $r['application_status'] ?></span>
+                                <?php if ($r['application_status'] === AppConstants::APPLICATION_STATUS['INTERVIEW'] && !empty($r['interview_at'])): ?>
+                                    <div class="interview-date">
+                                        <?= date('d M Y, h:i A', strtotime($r['interview_at'])) ?>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <a href="<?= $cv ?>" target="_blank" class="btn btn-info">👁 CV</a>
-                                <button class="btn btn-view" onclick="openStatusModal(<?= $r['id'] ?>,'<?= $r['application_status'] ?>','<?= $r['interview_at'] ?? '' ?>')">Change Status</button>
+                                <button type="button" class="btn btn-view" onclick="openStatusModal(<?= $r['id'] ?>,'<?= $r['application_status'] ?>','<?= $r['interview_at'] ?? '' ?>')">Change Status</button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>
         </table>
-
+        </form>
         <div class="pagination">
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <a href="?job_id=<?= $jobId ?>&from=<?= $fromDate ?>&to=<?= $toDate ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
@@ -131,17 +144,31 @@ $totalApplications = $results['total'];
 <?php include 'modals/application_status_change.php'; ?>
 <?php include 'modals/success-popup.php'; ?>
 <?php include 'modals/error-popup.php'; ?>
+
+
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+
+        if (params.has('success')) {
+            showSuccess("Success", params.get('success'));
+        }
+
+        if (params.has('error')) {
+            showError(params.get('error'));
+        }
+    });
+
     function openStatusModal(id, status, interview = '') {
         document.getElementById('statusModal').style.display = 'flex';
-        document.getElementById('statusSelect').value = status;
-        document.getElementById('interviewDate').value = interview;
-        document.getElementById('applicationId').value = id;
+        document.getElementById('status').value = status;
+        document.getElementById('interview_date').value = interview;
+        document.getElementById('application_id').value = id;
         toggleInterviewDate();
     }
 
     function toggleInterviewDate() {
-        let sel = document.getElementById('statusSelect').value;
+        let sel = document.getElementById('status').value;
         document.getElementById('interviewBox').style.display = (sel == 'Interview') ? 'block' : 'none';
     }
 
@@ -151,80 +178,10 @@ $totalApplications = $results['total'];
 
 
     function toggleSelectAll(masterCheckbox) {
-        const checkboxes = document.querySelectorAll(".rowCheckbox");
+        const checkboxes = document.querySelectorAll("#markReviewedForm input[name='application_ids[]']");
         checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
     }
 
-    /** mark as reviewed - bullk */
-    function markAsReviewed() {
-        let selected = [];
-        document.querySelectorAll(".rowCheckbox:checked").forEach(cb => {
-            selected.push(cb.value);
-        });
-
-        if (selected.length == 0) {
-            showError("Please select at least one application.");
-            return;
-        }
-
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "backend/mark-reviewed.php", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-        xhr.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                let res = JSON.parse(this.responseText);
-                if (res.status == "success") {
-                    showSuccess("Update Successfully!", res.message);
-
-                } else {
-                    showError(res.message);
-                }
-            }
-        };
-
-        xhr.send("ids=" + encodeURIComponent(selected.join(",")));
-    }
-
-
-    /** save status update */
-    function saveStatus() {
-        let applicationId = document.getElementById('applicationId').value;
-        let status = document.getElementById('statusSelect').value;
-        let interviewDate = document.getElementById('interviewDate').value;
-
-        if (status == 'Interview' && interviewDate == '') {
-            showError("Please select interview date & time");
-            return;
-        }
-
-        let formData = new FormData();
-        formData.append('application_id', applicationId);
-        formData.append('status', status);
-        formData.append('interview_date', interviewDate);
-
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "backend/update-application-status.php", true);
-
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 200) {
-                    let res = JSON.parse(xhr.responseText);
-
-                    if (res.status == "success") {
-                        showSuccess("Update Successfully!", res.message);
-                        closeModal();
-                    } else {
-                        showError(res.message || 'Update failed');
-                    }
-                } else {
-                    showError('Server error');
-                }
-            }
-        };
-
-        xhr.send(formData);
-    }
 
     // Popup handling
     function showError(msg) {
@@ -241,8 +198,19 @@ $totalApplications = $results['total'];
     function closeSuccessPopup() {
         document.getElementById("successPopup").style.display = "none";
         closeModal();
+        clearQueryParams();
         location.reload();
     }
+
+    function clearQueryParams() {
+        const url = new URL(window.location.href);
+    
+        url.searchParams.delete('success');
+        url.searchParams.delete('error');
+
+        window.history.replaceState({}, document.title, url.pathname + url.search);
+    }
+
 </script>
 <?php include '../layouts/footer.php'; ?>
 <?php include '../layouts/layout_end.php'; ?>

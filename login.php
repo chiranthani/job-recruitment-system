@@ -1,5 +1,6 @@
 <?php
 session_start();
+include 'config/baseConfig.php';
 include 'config/database.php';
 
 // Redirect if already logged in
@@ -70,9 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="login-container">
         <div class="login-card">
             <div class="logo-header">
-                <h1 class="logo">
-                    <span class="logo-career">Career</span><span class="logo-bridge">Bridge</span>
-                </h1>
+               <img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/logo.png" width="180px" />
                 <p>Login to your account</p>
             </div>
             

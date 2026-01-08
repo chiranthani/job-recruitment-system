@@ -67,4 +67,11 @@ class AppConstants {
 
     const APPLICATION_STATUS_FLOW = ['Applied','In Review','Interview','Offer Made','Rejected','Offer Rejected','Offer Accepted','Hired'];
 
+    const NOTIFICATION_TYPES = [
+        'NEW_APPLICATION',
+        'INTERVIEW_SCHEDULED',
+        'OFFER_MADE',
+        'OFFER_ACCEPTED',
+        'OFFER_REJECTED'
+    ];
 }

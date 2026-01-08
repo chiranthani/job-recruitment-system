@@ -2,42 +2,60 @@
 session_start();
 include '../../config/database.php';
 include '../../config/constants.php';
+include '../../helpers/notifications.php';
 include 'data-queries.php';
 
-header('Content-Type: application/json');
+// helper function
+function redirectBack($path,$type,$message,$isJobseeker,$job){
+    $query = [ $type => $message];
+    if (!$isJobseeker) {
+        $query['job_id'] = $job;
+    }
+    $queryString = http_build_query($query);
+    header("Location: {$path}?{$queryString}");
+    exit;
+}
 
-$applicationId = (int)($_POST['application_id'] ?? 0);
-$status = trim($_POST['status']) ?? '';
+$applicationId = filter_input(INPUT_POST, 'application_id', FILTER_VALIDATE_INT) ?? 0;
+$status = trim($_POST['status'] ?? '');
 $interviewDate = $_POST['interview_date'] ?? null;
 $isCandidate = $_SESSION['role_id'] == AppConstants::ROLE_JOB_SEEKER ? true : false;
+
+$redirectPath = $isCandidate ? '../my-jobs.php' : '../applied-candidates.php';
 
 $applicationData = getAApplicationDetails($applicationId);
 
 /* common validation */
-if (!$applicationId || !in_array($status, AppConstants::APPLICATION_STATUS)) {
-    echo json_encode(["status" => "error", "message" => "Invalid data"]);
-    exit;
+if ($applicationId <= 0 || !in_array($status, AppConstants::APPLICATION_STATUS, true)) {
+    redirectBack($redirectPath, 'error', 'Invalid request data',$isCandidate,$applicationData['job_id']);
+}
+
+if (!$applicationData) {
+    redirectBack($redirectPath, 'error', 'Application not found',$isCandidate,$applicationData['job_id']);
+}
+
+if ($applicationData['application_status'] == $status) {
+    redirectBack($redirectPath, 'success', 'Application is already '. strtolower($status).' status!',$isCandidate,$applicationData['job_id']);
 }
 
 /** recuriter validations */
 if(!$isCandidate){
     if ($status == AppConstants::APPLICATION_STATUS['INTERVIEW'] && empty($interviewDate)) {
-        echo json_encode(["status" => "error", 'message' => 'Interview date required']);
-        exit;
+        redirectBack($redirectPath, 'error', 'Interview date is required',$isCandidate,$applicationData['job_id']);
     }
 
     $newIndex = array_search($status, AppConstants::APPLICATION_STATUS_FLOW);
 
     /* new status reverse update block [to applied] */
-    if (0 == $newIndex) {
-        echo json_encode(["status" => "error",'message' => 'Reverse status [Applied] update is not allowed','newIndex'=>$newIndex]);
-        exit;
+     if ($newIndex == false || $newIndex == 0) {
+        redirectBack($redirectPath,'error','Reverse or invalid status update is not allowed',$isCandidate,$applicationData['job_id']);
     }
 }else{
     /** candidate validation */
-    if (!in_array($status, [AppConstants::APPLICATION_STATUS['OFFER_ACCEPTED'],AppConstants::APPLICATION_STATUS['OFFER_RJECTED']])) {
-        echo json_encode(["status" => "error", "message" => "Invalid status"]);
-        exit;
+    $allowedCandidateStatuses = [AppConstants::APPLICATION_STATUS['OFFER_ACCEPTED'],AppConstants::APPLICATION_STATUS['OFFER_RJECTED']];
+
+    if (!in_array($status, $allowedCandidateStatuses, true)) {
+        redirectBack($redirectPath, 'error', 'You are not allowed to set this status',$isCandidate,$applicationData['job_id']);
     }
 }
 
@@ -52,6 +70,11 @@ $sql = "UPDATE applications
 ";
 
 $stmt = $con_main->prepare($sql);
+if (!$stmt) {
+    error_log('Prepare failed: ' . $con_main->error);
+    redirectBack($redirectPath, 'error', 'System error occurred',$isCandidate,$applicationData['job_id']);
+}
+
 $stmt->bind_param(
     "ssi",
     $status,
@@ -60,7 +83,47 @@ $stmt->bind_param(
 );
 
 if ($stmt->execute()) {
-    echo json_encode(["status" => "success",'message'=>"Status updated successfully!"]);
-} else {
-    echo json_encode(["status" => "error",  'message' => 'Update error']);
+
+    // notification send
+    $candidateId= $applicationData['user_id'];
+    $jobTitle = $applicationData['title'];
+    $candidateName = $applicationData['candidate_name'];
+    $companyName = $applicationData['company_name'];
+    $senderId  = $_SESSION['user_id'];
+    $employers = getCompanyEmployerUsers($applicationData['company_id']);
+
+    // logged person employer
+    if (!$isCandidate) {
+        if ($status == AppConstants::APPLICATION_STATUS['INTERVIEW']) {
+            createNotification($con_main,$candidateId,$senderId,$applicationId,AppConstants::NOTIFICATION_TYPES['1'],
+            "You have been shortlisted for an interview at {$companyName} for the position of '{$jobTitle}'.");
+        }
+
+        if ($status == AppConstants::APPLICATION_STATUS['OFFERED']) {
+            createNotification($con_main,$candidateId,$senderId,$applicationId,AppConstants::NOTIFICATION_TYPES['2'],
+                "An offer has been made by {$companyName} for the position of '{$jobTitle}'. Check My Jobs to review the offer."
+            );
+        }
+    }
+
+    if ($isCandidate) {
+        foreach ($employers as $employer) {
+            if ($status == AppConstants::APPLICATION_STATUS['OFFER_ACCEPTED']) {
+                createNotification($con_main,$employer['id'],$senderId,$applicationId,AppConstants::NOTIFICATION_TYPES['3'],
+                    "'{$candidateName}' accepted the offer for '{$jobTitle}'."
+                );
+            }
+            if ($status == AppConstants::APPLICATION_STATUS['OFFER_RJECTED']) {
+                createNotification($con_main,$employer['id'],$senderId,$applicationId,AppConstants::NOTIFICATION_TYPES['4'],
+                    "'{$candidateName}' rejected the offer for '{$jobTitle}'."
+                );
+            }
+        }
+       
+    }
+
+    redirectBack($redirectPath, 'success', 'Status updated successfully',$isCandidate,$applicationData['job_id']);
 }
+
+error_log('Execution failed: ' . $stmt->error);
+redirectBack($redirectPath, 'error', 'Failed to update status',$isCandidate,$applicationData['job_id']);
