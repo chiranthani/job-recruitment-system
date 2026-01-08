@@ -28,12 +28,13 @@ include '../layouts/layout_start.php';
 <?php include '../layouts/header.php'; ?>
 
 <div class="container" style="position: relative;">
+    <div class="user-card">
     <h1><?php echo $user_id ? 'Update User Details' : 'User Registration'; ?></h1>
     
-    <form action="process_user.php" method="POST" enctype="multipart/form-data" style="margin-top: 60px;">
+    <form action="process_user.php" method="POST" enctype="multipart/form-data" style="margin-top: 70px;">
         <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
 
-        <div style="position: absolute; top: 20px; right: 20px; text-align: center; z-index: 10;">
+        <div style="position: absolute; top: 30px; right: 55px; text-align: center; z-index: 10;">
             <div id="image-preview" style="width: 100px; height: 100px; border: 3px solid var(--ink-color); border-radius: 50%; margin: 0 auto 10px; display: flex; justify-content: center; align-items: center; font-size: 40px; overflow: hidden; background-color: #f9f9f9;">
                 <span id="placeholder-icon" style="<?php echo !empty($user['profile_image']) ? 'display:none;' : ''; ?>">👤</span>
                 <img id="user-img" src="../<?php echo $user['profile_image'] ?? ''; ?>" 
@@ -65,9 +66,8 @@ include '../layouts/layout_start.php';
                 <input type="text" name="last_name" value="<?php echo $user['last_name'] ?? ''; ?>" required>
             </div>
             <div class="form-group">
-                <label>Region <span class="required">*</span></label>
-                <select name="region" id="region-select" required>
-                    <option value="Western">Western</option> </select>
+                <label>Email <span class="required">*</span></label>
+                <input type="text" name="email" value="<?php echo $user['email'] ?? ''; ?>" required>
             </div>
         </div>
 
@@ -147,6 +147,7 @@ include '../layouts/layout_start.php';
             <?php endif; ?>
         </div>
     </form>
+    </div>
 </div>
 
 <script src="script.js"></script>
