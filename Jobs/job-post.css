@@ -81,8 +81,8 @@ textarea {
     margin-bottom: 10px;
 }
 .benefits-checkbox {
-    transform: scale(1.4);   /* increase size */
-    margin-right: 8px;       /* space from text */
+    transform: scale(1.4);   
+    margin-right: 8px;       
     cursor: pointer;
 }
 
@@ -94,8 +94,8 @@ textarea {
 }
 
 .save-btn {
-    background: #fff;
-    color: #000;
+    background: #2563eb;
+    color: #fff;
     padding: 12px 35px;
     border-radius: 6px;
     border: none;
@@ -103,11 +103,11 @@ textarea {
 }
 
 .close-btn {
-    background: #444;
-    color: #fff;
+    background: #ffffff;
+    color: #333;
     padding: 12px 35px;
     border-radius: 6px;
-    border: none;
+    border: 1px solid #dcdcdc;
     font-size: 16px;
 }
 
@@ -357,6 +357,18 @@ h2 {
     margin-right: 10px;
     cursor: pointer;
     text-decoration: none;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 6px;
+}
+
+.delete-btn:hover {
+    color: #dc2626; /* red on hover */
 }
 
 

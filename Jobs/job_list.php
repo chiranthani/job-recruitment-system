@@ -3,6 +3,7 @@
 include '../config/database.php';
 include '../layouts/layout_start.php';
 include '../layouts/header.php';
+include '../permission-check.php';
 ?>
 <!-- end page common elements-->
 
@@ -41,6 +42,8 @@ if (!empty($_GET['job_type']) && $_GET['job_type'] !== 'all') {
     $where[] = "j.job_type = '$job_type'";
 }
 
+$companyId = $_SESSION['company_id'] ?? 0;
+
 /* Final Query */
 $sql = "SELECT 
         j.id,
@@ -50,7 +53,7 @@ $sql = "SELECT
         c.name AS category_name
     FROM job_posts j
     LEFT JOIN job_categories c ON j.category_id = c.id
-    WHERE is_deleted = 0
+    WHERE j.is_deleted = 0 AND j.company_id= $companyId
 ";
 
 if (!empty($where)) {
@@ -201,18 +204,40 @@ $approval_status = $data['admin_approval'];
                 </td>
 
                 <td>
-                    <label class="switch">
-                         <input type="checkbox"
-                                <?= ($row['post_status']=='published')?'checked':''; ?>
-                                onchange="toggleStatus(<?= $row['id']; ?>, this)">
-                    <span class="slider"></span>
+                    <form method="POST" action="toggle_job_status.php">
+
+                        <input type="hidden" name="job_id" value="<?= $row['id']; ?>">
+
+                        <input type="hidden" name="status"
+                                value="<?= ($row['post_status']=='published') ? 'draft' : 'published'; ?>">
+
+                        <label class="switch">
+                            <input type="checkbox"
+                                    <?= ($row['post_status']=='published') ? 'checked' : ''; ?>
+                                    onchange="this.form.submit()">
+                        <span class="slider"></span>
                     </label>
-                </td>
+
+                </form>
+            </td>
+
 
                 <td class="action-buttons">
                     <a href="job_view.php?job=<?= $row['id']; ?>">👁</a>
                     <a href="job_edit.php?id=<?= $row['id']; ?>">✏️</a>
                     <a href="../job-applicant/application-overview.php?search=<?= $row['title']; ?>" title="View Applications">📄</a>
+                    <form method="POST"
+                        action="delete_job.php"
+                        style="display:inline;"
+                        onsubmit="return confirm('Are you sure you want to delete this job post?');">
+
+                        <input type="hidden" name="job_id" value="<?= $row['id']; ?>">
+
+                        <button type="submit" class="delete-btn" title="Delete">
+                            🗑️
+                    </button>
+
+                </form>
                 </td>
             </tr>
         <?php
@@ -245,31 +270,5 @@ document.getElementById('searchInput').addEventListener('keyup', function () {
     }, 500);
 });
 
-
-/* ===================
-   TOGGLE JOB STATUS 
-======================*/
-
-function toggleStatus(jobId, checkbox) {
-    let status = checkbox.checked ? 'published' : 'draft';
-
-    fetch('toggle_job_status.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: 'job_id=' + jobId + '&status=' + status
-    })
-    .then(res => res.text())
-    .then(result => {
-        if (result !== 'success') {
-            alert('Failed to update status');
-            checkbox.checked = !checkbox.checked; 
-        } else {
-            location.reload();
-        }
-    });
-}
-</script>
 
 <?php include '../layouts/layout_end.php'; ?>
