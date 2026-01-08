@@ -41,7 +41,7 @@ if ($search_query !== '') {
 
 // Append Date Range filter (Uses reg_date column)
 if ($date_range > 0) {
-    $filter_sql .= " AND reg_date >= DATE_SUB(NOW(), INTERVAL $date_range DAY)";
+    $filter_sql .= " AND createdAt >= DATE_SUB(NOW(), INTERVAL $date_range DAY)";
 }
 
 
@@ -79,16 +79,17 @@ include '../layouts/layout_start.php';
 
 <?php include '../layouts/header.php'; ?>
 
-<div class="container" style="max-width: 1000px;">
+<div class="container">
+    <div class="user-card">
     <h1 style="text-align: left;">User List View</h1>
 
-    <div class="d-flex justify-between mt-20" style="border-bottom: 2px dashed var(--ink-color); padding-bottom: 20px; margin-bottom: 20px;">
-        <div style="flex: 2; margin-right: 20px; display: flex; align-items: center; border: 2px solid var(--ink-color); padding: 5px; border-radius: 10px;">
+    <div class="d-flex justify-between mt-20" style="padding-bottom: 20px; margin-bottom: 20px;">
+        <div style="flex: 2; margin-right: 20px; display: flex; align-items: center; border: 1px solid var(--ink-color); padding: 5px; border-radius: 10px;">
             <span style="font-size: 1.5rem; margin-right: 10px;">🔍</span>
             <input type="text" id="searchInput" placeholder="Search by Name, Email or ID" style="border: none; flex: 1;" 
                    value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>" oninput="liveSearch()">
         </div>
-        <a href="../admin_user_form.php" class="btn-add" style="text-decoration: none;">+ Add New User</a>
+        <a href="admin_user_form.php" class="btn-add">+ Add New User</a>
     </div>
 
     <div class="d-flex justify-between" style="align-items: flex-end;">
@@ -100,7 +101,7 @@ include '../layouts/layout_start.php';
         <div class="d-flex" style="gap: 20px;">
             <div class="form-group" style="margin-bottom: 0;">
                 <label>Status</label>
-                <select id="statusFilter" name="status" onchange="filterByStatus()" style="border: 2px solid var(--ink-color); padding: 8px; border-radius: 5px; width: 100%;">
+                <select id="statusFilter" name="status" onchange="filterByStatus()" style="border: 1px solid var(--ink-color); padding: 8px; border-radius: 5px; width: 100%;">
                     <option value="" <?php echo ($status_filter === '') ? 'selected' : ''; ?>>All Status</option>
                     <option value="1" <?php echo ($status_filter === '1') ? 'selected' : ''; ?>>Active</option>
                     <option value="0" <?php echo ($status_filter === '0') ? 'selected' : ''; ?>>Inactive</option>
@@ -109,7 +110,7 @@ include '../layouts/layout_start.php';
 
             <div class="form-group" style="margin-bottom: 0;">
                 <label>Date Range</label>
-                <select id="dateFilter" onchange="filterByDate()" style="border: 2px solid var(--ink-color); padding: 8px; border-radius: 5px;">
+                <select id="dateFilter" onchange="filterByDate()" style="border: 1px solid var(--ink-color); padding: 8px; border-radius: 5px;">
                     <option value="" <?php echo ($date_range == 0) ? 'selected' : ''; ?>>All Time</option>
                     <option value="7" <?php echo ($date_range == 7) ? 'selected' : ''; ?>>Last 7 Days</option>
                     <option value="30" <?php echo ($date_range == 30) ? 'selected' : ''; ?>>Last 30 Days</option>
@@ -176,7 +177,7 @@ include '../layouts/layout_start.php';
             <button class="btn-add" style="opacity: 0.5; cursor: not-allowed;" disabled>Next</button>
         <?php endif; ?>
     </div>
-    
+    </div>
 </div>
 
 <script src="script.js"></script>

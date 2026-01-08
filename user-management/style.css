@@ -2,7 +2,7 @@
 :root {
     --ink-color: #000000;
     --bg-color: #ffffff; /* bg color for all UI */
-    --accent-gray: #3ef053;
+    --accent-gray: #e3e3e3;
 
     /* Functional Colors */
     --color-green: #2d6a4f;  /* Add / View */
@@ -14,18 +14,23 @@
 
 /* Sketchy container style */
 .container {
-    background: #ebf6a3;
     width: 90%;
-    max-width: 850px;
-    margin: 20px auto;
-    padding: 40px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
     /* Keeps the hand-drawn border effect without the background lines */
-    border: 3px solid var(--ink-color);
+    /* border: none;
     border-radius: 10px 15px 12px 18px / 15px 12px 18px 10px; 
-    box-shadow: 8px 8px 0px rgba(0,0,0,0.05);
-    position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    position: relative; */
 }
 
+.user-card{
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
 h1, h2, h3 {
     text-align: center;
     text-transform: capitalize;
@@ -72,7 +77,7 @@ select,
 textarea {
     font-family: inherit;
     border: none;
-    border-bottom: 2px solid var(--ink-color);
+    border-bottom: 1px solid var(--ink-color);
     background: transparent;
     padding: 8px 5px;
     font-size: 1rem;
@@ -84,29 +89,29 @@ textarea {
 /* Textarea specific */
 textarea {
     resize: vertical;
-    border: 2px solid var(--ink-color); /* Box for textarea */
+    border: 1px solid var(--ink-color); /* Box for textarea */
     height: 100px;
 }
 
 /* Buttons with sketchy borders */
 .btn-add, .btn-view {
     font-family: inherit;
-    border: 2px solid var(--ink-color);
+    border: none;
     padding: 10px 22px;
     font-size: 0.95rem;
-    font-weight: bold;
+    /* font-weight: bold; */
     cursor: pointer;
     border-radius: 8px 12px 6px 10px;
     transition: all 0.2s ease;
     text-decoration: none;
-    display: inline-block;
-    color: var(--ink-color);
-    background: #00b333;
+    display: inline-block;           
+    background: #007bff;               
+    color: #ffffff;
 }
 
 .btn-update {
     font-family: inherit;
-    border: 2px solid var(--ink-color);
+    border: none;
     padding: 10px 22px;
     font-size: 0.95rem;
     font-weight: bold;
@@ -116,12 +121,12 @@ textarea {
     text-decoration: none;
     display: inline-block;
     color: var(--ink-color);
-    background: #ff8103;
+    background: var(--accent-gray);
 }
 
 .btn-delete {
     font-family: inherit;
-    border: 2px solid var(--ink-color);
+    border: none;
     padding: 10px 22px;
     font-size: 0.95rem;
     font-weight: bold;
@@ -136,7 +141,7 @@ textarea {
 
 
 .btn-add:hover, .btn-delete:hover, .btn-update:hover, .btn-view:hover {
-    background:  #00e1ff;
+    background:  #005bb5;
     transform: translateY(-2px);;
 }
 
@@ -214,7 +219,7 @@ textarea {
 }
 
 .admin-table th, .admin-table td {
-    border: 2px solid var(--ink-color);
+    border: 1px solid var(--ink-color);
     padding: 12px;
     text-align: left;
 }
