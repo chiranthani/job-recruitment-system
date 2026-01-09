@@ -19,6 +19,89 @@ $roles_result = $con_main->query($roles_query);
 $location_query = "SELECT id, name FROM locations WHERE status = 1 ORDER BY name ASC";
 $locations_result = $con_main->query($location_query);
 
+// --- 3. FORM PROCESSING (POST REQUEST) ---
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Sanitize and capture inputs for the users table
+    $user_id    = isset($_POST['user_id']) ? (int)$_POST['user_id'] : 0;
+    $first_name = mysqli_real_escape_string($con_main, trim($_POST['first_name']));
+    $last_name  = mysqli_real_escape_string($con_main, trim($_POST['last_name']));
+    $gender     = mysqli_real_escape_string($con_main, $_POST['gender']);
+    $status     = (int)$_POST['status'];
+    $email      = mysqli_real_escape_string($con_main, trim($_POST['email']));
+    $username   = mysqli_real_escape_string($con_main, trim($_POST['username']));
+    $role_id    = (int)$_POST['role_id'];
+    $password   = $_POST['password'];
+
+    // --- 3a. IMAGE UPLOAD LOGIC ---
+    $profile_img_url = '';
+    if (!empty($_FILES['profile_image']['name'])) {
+        $fileName = time() . "_" . basename($_FILES['profile_image']['name']);
+        $target = "../assets/uploads/profile_pics/" . $fileName;
+
+        if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $target)) {
+            $profile_img_url = "assets/uploads/profile_pics/" . $fileName;
+        }
+    }
+
+    // --- 3b. ADD vs UPDATE (UPSERT) LOGIC ---
+    if ($user_id > 0) {
+        // --- UPDATE LOGIC ---
+        $pass_update = "";
+        if (!empty($password)) {
+            $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
+            $pass_update = ", password = '$hashed_pass'";
+        }
+
+        $img_update = "";
+        if ($profile_img_url != '') {
+            $img_update = ", profile_image = '$profile_img_url'";
+        }
+
+        $query = "UPDATE users SET 
+                  first_name = '$first_name', 
+                  last_name = '$last_name', 
+                  gender = '$gender', 
+                  status = '$status', 
+                  email = '$email', 
+                  username = '$username', 
+                  role_id = '$role_id'
+                  $pass_update
+                  $img_update
+                  WHERE id = '$user_id'";
+        
+        $action_label = "updated";
+    } else {
+        // --- ADD LOGIC ---
+        // 1. Check if email already exists before adding
+        $check_email = mysqli_query($con_main, "SELECT id FROM users WHERE email = '$email' LIMIT 1");
+        
+        if (mysqli_num_rows($check_email) > 0) {
+            $message = "Error: This email is already registered.";
+            $query = false; // Prevent execution
+        } else {
+            $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
+            $query = "INSERT INTO users (first_name, last_name, gender, status, email, username, password, role_id, profile_image)
+                      VALUES ('$first_name', '$last_name', '$gender', '$status', '$email', '$username', '$hashed_pass', '$role_id', '$profile_img_url')";
+            
+            $action_label = "added";
+        }
+    }
+
+    // --- 3c. EXECUTION ---
+    if ($query && $con_main->query($query)) {
+        // Successful operation
+        $success_trigger = true;
+        $message = "User $action_label successfully!";
+        
+        // Update Session if the admin just edited their own account
+        if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
+            $_SESSION['username'] = $username;
+        }
+    } elseif (!isset($message)) {
+        $message = "Database Error: " . $con_main->error;
+    }
+}
+
 include '../layouts/layout_start.php'; 
 ?>
 
@@ -109,11 +192,6 @@ include '../layouts/layout_start.php';
         </div>
 
         <div class="form-row">
-            <div class="form-group"><label>Address <span class="required">*</span></label><textarea name="address" style="height: 60px;"></textarea></div>
-            <div class="form-group"><label>Password <span class="required">*</span></label><input type="password" name="password" <?php echo $user_id ? '' : 'required'; ?>></div>
-        </div>
-
-        <div class="form-row">
             <div class="form-group">
                 <label>Status <span class="required">*</span></label>
                 <select name="status">
@@ -121,11 +199,10 @@ include '../layouts/layout_start.php';
                     <option value="0" <?php echo (isset($user['status']) && $user['status'] == 0) ? 'selected' : ''; ?>>Inactive</option>
                 </select>
             </div>
-            <div class="form-group"><label>Confirm Password <span class="required">*</span></label><input type="password" name="confirm_password"></div>
+            <div class="form-group"><label>Password <span class="required">*</span></label><input type="password" name="password" <?php echo $user_id ? '' : 'required'; ?>></div>
         </div>
 
         <div class="form-row">
-            <div class="form-group"></div>
             <div class="form-group">
                 <label>User Role <span class="required">*</span></label>
                 <select name="role_id" required>
@@ -137,7 +214,10 @@ include '../layouts/layout_start.php';
                     <?php endwhile; ?>
                 </select>
             </div>
+            <div class="form-group"><label>Confirm Password <span class="required">*</span></label><input type="password" name="confirm_password"></div>
         </div>
+
+        <div class="form-row">  
 
         <div class="mt-20">
             <button type="submit" name="btn_action" value="add" class="btn-add">Add</button>
