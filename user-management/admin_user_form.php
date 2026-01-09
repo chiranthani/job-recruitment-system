@@ -5,19 +5,14 @@ include '../config/database.php';
 $user_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $user = [];
 if ($user_id > 0) {
-    // Select based on users table structure
     $user_query = "SELECT * FROM users WHERE id = $user_id";
     $user_result = $con_main->query($user_query);
     $user = $user_result->fetch_assoc();
 }
 
-// 2. Fetch Roles from the database
-$roles_query = "SELECT id, name FROM roles WHERE status = 1 ORDER BY id ASC";
-$roles_result = $con_main->query($roles_query);
-
-// 3. Fetch Cities/Towns (Locations)
-$location_query = "SELECT id, name FROM locations WHERE status = 1 ORDER BY name ASC";
-$locations_result = $con_main->query($location_query);
+// 2. Fetch Roles and Locations
+$roles_result = $con_main->query("SELECT id, name FROM roles WHERE status = 1 ORDER BY id ASC");
+$locations_result = $con_main->query("SELECT id, name FROM locations WHERE status = 1 ORDER BY name ASC");
 
 // --- 3. FORM PROCESSING (POST REQUEST) ---
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -136,10 +131,8 @@ include '../layouts/layout_start.php';
                 <input type="text" name="first_name" value="<?php echo $user['first_name'] ?? ''; ?>" required>
             </div>
             <div class="form-group">
-                 <label>Country <span class="required">*</span></label>
-                 <select name="country" id="country-select" onchange="updateRegions()" required>
-                    <option value="Sri Lanka" selected>Sri Lanka</option></select>
-                    <small style="color: #656363ff;">Service currently only available in Sri Lanka.</small>
+                <label>Email <span class="required">*</span></label>
+                <input type="text" name="email" value="<?php echo $user['email'] ?? ''; ?>" required>
             </div>
         </div>
 
@@ -149,8 +142,8 @@ include '../layouts/layout_start.php';
                 <input type="text" name="last_name" value="<?php echo $user['last_name'] ?? ''; ?>" required>
             </div>
             <div class="form-group">
-                <label>Email <span class="required">*</span></label>
-                <input type="text" name="email" value="<?php echo $user['email'] ?? ''; ?>" required>
+                <label>User name <span class="required">*</span></label>
+                <input type="text" name="username" value="<?php echo $user['username'] ?? ''; ?>" required>
             </div>
         </div>
 
@@ -163,33 +156,12 @@ include '../layouts/layout_start.php';
                     <label style="display:inline; margin-left: 10px;"><input type="radio" name="gender" value="Other" <?php echo (isset($user['gender']) && $user['gender'] == 'Other') ? 'checked' : ''; ?>> Other</label>
                 </div>
             </div>
-            <div class="form-group"><label>Postal code/zip</label><input type="text" name="postal_code"></div>
+            <div class="form-group">
+                <label>Password <span class="required">*</span></label><input type="password" name="password" <?php echo $user_id ? '' : 'required'; ?>></div>
         </div>
 
         <div class="form-row">
-            <div class="form-group"><label>Date of Birth <span class="required">*</span></label><input type="date" name="dob"></div>
-            <div class="form-group">
-                <label>Town <span class="required">*</span></label>
-                <select name="location_id" id="city-select" required>
-                    <option value="">Select Town</option>
-                    <?php while($loc = $locations_result->fetch_assoc()): ?>
-                        <option value="<?php echo $loc['id']; ?>" <?php echo (isset($user['location_id']) && $user['location_id'] == $loc['id']) ? 'selected' : ''; ?>>
-                            <?php echo $loc['name']; ?>
-                        </option>
-                    <?php endwhile; ?>
-                </select>
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label>Contact Number <span class="required">*</span></label>
-                <input type="text" name="contact_no">
-            </div>
-            <div class="form-group">
-                <label>User name <span class="required">*</span></label>
-                <input type="text" name="username" value="<?php echo $user['username'] ?? ''; ?>" required>
-            </div>
         </div>
 
         <div class="form-row">
@@ -200,11 +172,12 @@ include '../layouts/layout_start.php';
                     <option value="0" <?php echo (isset($user['status']) && $user['status'] == 0) ? 'selected' : ''; ?>>Inactive</option>
                 </select>
             </div>
-            <div class="form-group"><label>Password <span class="required">*</span></label><input type="password" name="password" <?php echo $user_id ? '' : 'required'; ?>></div>
+            <div class="form-group">
+                <label>Confirm Password <span class="required">*</span></label><input type="password" name="confirm_password"></div>
         </div>
 
         <div class="form-row">
-            <div class="form-group">
+        <div class="form-group">
                 <label>User Role <span class="required">*</span></label>
                 <select name="role_id" required>
                     <option value="">Select Role</option>
@@ -215,13 +188,18 @@ include '../layouts/layout_start.php';
                     <?php endwhile; ?>
                 </select>
             </div>
-            <div class="form-group"><label>Confirm Password <span class="required">*</span></label><input type="password" name="confirm_password"></div>
+            <div class="form-group"></div>
         </div>
+
+        <div class="form-row"></div>
 
         <div class="form-row">  
 
         <div class="mt-20">
-            <button type="submit" name="btn_action" value="add" class="btn-add">Add</button>
+    <div class="mt-20 d-flex" style="gap: 10px;">
+        <button type="button" class="btn-add" onclick="navigateToStep(2)">Next</button>
+        <button type="button" class="btn-delete" onclick="clearForm()">Clear Form</button>
+    </div>
             <?php if($user_id > 0): ?>
                 <button type="submit" name="btn_action" value="update" class="btn-update" style="margin-left: 20px;">Update</button>
             <?php endif; ?>

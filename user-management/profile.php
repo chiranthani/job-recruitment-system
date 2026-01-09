@@ -10,10 +10,8 @@ include '../layouts/layout_start.php';
 
 // --- 1. ACCESS CONTROL ---
 // Ensure only logged-in users can access this page
-if (!isset($_SESSION['user_id'])) {
-    header("Location: signup.php");
-    exit();
-}
+$user_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$message = "";
 
 // Success flag to trigger the "Welcome" popup modal
 $success_trigger = false;
@@ -31,82 +29,67 @@ while($row = $skills_result->fetch_assoc()) {
     $skill_suggestions[] = $row;
 }
 
-// --- 3. FORM PROCESSING (POST REQUEST) ---
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Sanitize and capture basic inputs
-    $contact    = mysqli_real_escape_string($con_main, trim($_POST['contact_no']));
-    $loc_id     = (int)$_POST['location_id'];
-    $p_code     = (int)$_POST['postal_code'];
+// 2. THE ADD/UPDATE BUTTON LOGIC (Processing the POST request)
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['btn_action'])) {
+    
+    // Capture and sanitize inputs
+    $u_id       = (int)$_POST['user_id'];
     $first_name = mysqli_real_escape_string($con_main, trim($_POST['first_name']));
     $last_name  = mysqli_real_escape_string($con_main, trim($_POST['last_name']));
-    $country    = mysqli_real_escape_string($con_main, trim($_POST['country']));
-    $job        = mysqli_real_escape_string($con_main, trim($_POST['job_title']));
-    $bio        = mysqli_real_escape_string($con_main, trim($_POST['brief_bio']));
-    $user_id    = $_SESSION['user_id'];
-    $cv_url     = '';
+    $email      = mysqli_real_escape_string($con_main, trim($_POST['email']));
+    $username   = mysqli_real_escape_string($con_main, trim($_POST['username']));
+    $gender     = mysqli_real_escape_string($con_main, $_POST['gender']);
+    $role_id    = (int)$_POST['role_id'];
+    $status     = (int)$_POST['status'];
+    $password   = $_POST['password'];
 
-    // --- 3a. RESUME/CV UPLOAD LOGIC ---
-    if (!empty($_FILES['resume']['name'])) {
-        // Create a unique filename using timestamp to prevent overwriting
-        $fileName = time() . "_" . basename($_FILES['resume']['name']);
-        $target = "../assets/uploads/resumes/" . $fileName;
-
-        if (move_uploaded_file($_FILES['resume']['tmp_name'], $target)) {
-            $cv_url = "assets/uploads/resumes/" . $fileName;
-        } else {
-            $message = "Failed to upload resume";
+    if ($u_id > 0) {
+        // --- UPDATE LOGIC ---
+        $pass_sql = "";
+        if (!empty($password)) {
+            $hashed = password_hash($password, PASSWORD_DEFAULT);
+            $pass_sql = ", password = '$hashed'";
         }
-    }
 
-    // --- 3b. CANDIDATE PROFILE "UPSERT" ---
-    // Check if the candidate record already exists for this user
-    $check_sql = "SELECT id FROM candidates WHERE user_id = '$user_id' LIMIT 1";
-    $result = mysqli_query($con_main, $check_sql);
-     
-    if (mysqli_num_rows($result) > 0) {
-        // UPDATE existing profile
-        $query = "UPDATE candidates SET 
-                  contact_no = '$contact', location_id = '$loc_id', postal_code = '$p_code', 
-                  job_title = '$job', bio = '$bio', cv_url = '$cv_url', status = 1
-                  WHERE user_id = '$user_id'";
+        $query = "UPDATE users SET 
+                  first_name = '$first_name', last_name = '$last_name', 
+                  email = '$email', username = '$username', 
+                  gender = '$gender', role_id = '$role_id', status = '$status' 
+                  $pass_sql 
+                  WHERE id = $u_id";
     } else {
-        // INSERT new profile
-        $query = "INSERT INTO candidates (user_id, contact_no, country, location_id, postal_code, job_title, bio, cv_url, status)
-                  VALUES ('$user_id', '$contact', '$country', '$loc_id', '$p_code', '$job', '$bio', '$cv_url', 1)";
+        // --- ADD LOGIC ---
+        // Check if email already exists
+        $check = $con_main->query("SELECT id FROM users WHERE email = '$email'");
+        if ($check->num_rows > 0) {
+            $message = "Error: Email is already registered!";
+            $query = false;
+        } else {
+            $hashed = password_hash($password, PASSWORD_DEFAULT);
+            $query = "INSERT INTO users (first_name, last_name, email, username, password, gender, role_id, status) 
+                      VALUES ('$first_name', '$last_name', '$email', '$username', '$hashed', '$gender', '$role_id', '$status')";
+        }
     }
-       
-    // --- 3c. UPDATE USER ACCOUNT & SESSION ---
-    if ($con_main->query($query)) {
-        // Update user's real names and track login statistics
-        $user_query = "UPDATE users SET first_name = '$first_name', last_name = '$last_name', 
-                       last_login = NOW(), login_count = login_count + 1 WHERE id = '$user_id'";
-        mysqli_query($con_main, $user_query);
 
-        // Fetch refreshed user info to update Session variables
-        $user_result = mysqli_query($con_main, "SELECT username, role_id FROM users WHERE id = '$user_id' LIMIT 1");
-
-        if ($row = mysqli_fetch_assoc($user_result)) {
-            $_SESSION['username'] = $row['username'];
-            $_SESSION['role_id']  = $row['role_id'];
-            $success_trigger = true; // Shows the success modal
-        }
-
-        // --- 3d. SKILLS ASSOCIATION ---
-        // Save user skills into a relational junction table (user_skills)
-        if ($success_trigger && !empty($_POST['skills'])) {
-            $skills = explode(',', $_POST['skills']); // Skills are passed as a comma-separated string
-
-            // Clear old skill associations to prevent duplicates
-            mysqli_query($con_main, "DELETE FROM user_skills WHERE user_id = '$user_id'");
-
-            foreach ($skills as $skill) {
-                $skill = mysqli_real_escape_string($con_main, trim($skill));
-                // Note: This logic assumes $skill is the ID. Ensure your JS sends IDs.
-                mysqli_query($con_main, "INSERT INTO user_skills (user_id, skill_id) VALUES ('$user_id', '$skill')");
-            }
-        }
+    if ($query && $con_main->query($query)) {
+        $success_trigger = true;
+        // Optionally redirect to clear POST data
+        header("Location: admin_user_list.php?success=1");
+        exit();
+    } elseif ($message == "") {
+        $message = "Database Error: " . $con_main->error;
     }
 }
+
+// 3. Fetch data for display (Edit Mode)
+$user = [];
+if ($user_id > 0) {
+    $user = $con_main->query("SELECT * FROM users WHERE id = $user_id")->fetch_assoc();
+}
+
+// Fetch Roles & Locations for dropdowns
+$roles_result = $con_main->query("SELECT id, name FROM roles WHERE status = 1");
+$locations_result = $con_main->query("SELECT id, name FROM locations WHERE status = 1");
 ?>
 
 <title>Job Seeker Profile</title>

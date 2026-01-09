@@ -274,3 +274,23 @@ function filterByDate() {
 
     window.location.href = window.location.pathname + '?' + urlParams.toString();
 }
+
+function clearForm() {
+    if (confirm("Are you sure you want to clear all entered information?")) {
+        const form = document.getElementById('multiStepProfileForm');
+        
+        // 1. Reset standard inputs, textareas, and selects
+        form.reset();
+
+        // 2. Manually clear hidden inputs (like your skills hidden field)
+        document.getElementById('hiddenSkillsInput').value = "";
+
+        // 3. Clear Visual Tags (if you are using a tag system)
+        const tagsContainer = document.getElementById('tagsContainer');
+        const tags = tagsContainer.querySelectorAll('.tag'); // Assuming your tags have a 'tag' class
+        tags.forEach(tag => tag.remove());
+
+        // 4. Return to Step 1 visually
+        navigateToStep(1);
+    }
+}
