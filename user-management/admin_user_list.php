@@ -89,7 +89,7 @@ include '../layouts/layout_start.php';
             <input type="text" id="searchInput" placeholder="Search by Name, Email or ID" style="border: none; flex: 1;" 
                    value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>" oninput="liveSearch()">
         </div>
-        <a href="admin_user_form.php" class="btn-add">+ Add New User</a>
+        <a href="admin_new_user.php" class="btn-add">+ Add New User</a>
     </div>
 
     <div class="d-flex justify-between" style="align-items: flex-end;">
