@@ -119,7 +119,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <?php include '../layouts/header.php'; ?>
 
-<div class="container">
+<div class="container" style="max-width: 650px;">
+    <div class="user-card">
     <h1>Job Seeker Profile</h1>
 
     <div class="tabs">
@@ -211,6 +212,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </form>
+    </div>
 </div>
 
 <div id="successModal" class="modal-overlay" style="<?= $success_trigger ? 'display:flex' : 'display:none' ?>">

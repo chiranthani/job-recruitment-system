@@ -66,7 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <?php include '../layouts/header.php'; ?>
 
-<div class="container">
+<div class="container" style="max-width: 600px;">
+    <div class="user-card">
     <h1>Let's Get Started</h1>
     
     <?php if ($message != ""): ?>
@@ -111,6 +112,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             Already have an account? <a href="../login.php" style="color: #0300b2ff; font-weight: bold;">Sign in</a>
         </p>
     </form>
+    </div>
 </div>
 
 <script src="script.js"></script>
