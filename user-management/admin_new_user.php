@@ -88,7 +88,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         $message = "User created successfully!";
     } else {
-        echo ($query);
         $error = "User creation failed.";
     }
 }
