@@ -218,7 +218,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div id="successModal" class="modal-overlay" style="<?= $success_trigger ? 'display:flex' : 'display:none' ?>">
     <div class="modal-content">
         <div class="checkmark-circle">✓</div>
-        <h2>Welcome to CareerBridge!</h2>
+        <h2>Welcome to JobBoard+!</h2>
         <p>Your profile has been created successfully. We're excited to help you find your next opportunity!</p>
         
         <div class="form-row mt-20" style="justify-content: center; gap: 10px;">

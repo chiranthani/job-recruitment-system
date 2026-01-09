@@ -31,9 +31,10 @@ body { font-family: Arial, sans-serif;background: #f5f5f5;}
 .btn-danger { background: #dc3545; color: #fff; }
 .btn-warning { background: #ffc107; color: #000; }
 .btn-info { background: #17a2b8; color: #fff; }
-.links { text-align: center; margin-top: 20px; }
-.links a { color: #667eea; text-decoration: none; margin: 0 10px; }
-.links a:hover { text-decoration: underline; }
+.links { margin-top: 10px; text-align: center;}
+.links p { margin-bottom: 8px; font-size: 14px; color: #666;}
+.links a { display: block; margin: 6px 0; font-size: 14px; color: #1a73e8; text-decoration: none; font-weight: 500; transition: color 0.2s ease, text-decoration 0.2s ease; }
+.links a:hover { color: #0b5ed7; text-decoration: underline; }
 .text-center { text-align: center; margin-top: 20px; }
 .text-center a { color: #007bff; text-decoration: none; }
 
@@ -57,6 +58,8 @@ body { font-family: Arial, sans-serif;background: #f5f5f5;}
 .register-container { max-width: 600px; margin: 60px auto; padding: 20px; }
 .register-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 40px; }
 .register-card h2 { text-align: center; margin-bottom: 30px; color: #333; }
+.checkbox-group label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;margin-bottom: 20px; }
+.checkbox-group input[type="checkbox"] { margin: 0;}
 
 /* ===== DASHBOARD PAGE ===== */
 .dashboard-container { max-width: 1200px; margin: 40px auto; padding: 20px; }
