@@ -92,6 +92,20 @@ if (!empty($where)) {
 $sql .= " ORDER BY j.id DESC";
 
 $result = $con_main->query($sql);
+
+$user_id = $_SESSION['user_id'] ?? 0;
+// get company details
+$query = "SELECT c.*, u.email, u.first_name, u.last_name, u.last_login 
+          FROM companies c 
+          JOIN users u ON u.company_id = c.id 
+          WHERE u.id = ?";
+$stmt = $con_main->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result2 = $stmt->get_result();
+$data = $result2->fetch_assoc();
+$approval_status = $data['admin_approval'];
+$is_active = $data['status'] == 1;
 ?>
 
 <section class="job-list-wrapper">
@@ -102,7 +116,24 @@ $result = $con_main->query($sql);
 
 <h2>Job Posts</h2>
 <p class="subtitle">Manage your job postings</p>
+    <?php if ($approval_status == 'PENDING'): ?>
+            <div class="alert error">
+                <strong>⏳ Verification Pending</strong><br>
+                Your company profile is awaiting admin approval. You'll be able to post jobs once your account is verified.
+            </div>
+        <?php elseif ($approval_status == 'REJECTED'): ?>
+            <div class="alert error">
+                <strong>❌ Verification Rejected</strong><br>
+                Your company profile verification was rejected. Please contact support for more information.
+            </div>
+        <?php endif; ?>
 
+   <?php if (!$is_active && $approval_status == 'APPROVED'): ?>
+        <div class="alert error">
+            <strong>⚠️ Account Inactive</strong><br>
+            Your account has been deactivated. Please contact support to reactivate your account.
+        </div>
+    <?php endif; ?>
 <form method="GET" id="filterForm">
 
 <!-- Top Bar -->
@@ -122,7 +153,10 @@ $result = $con_main->query($sql);
         <?php } ?>
     </div>
 
-    <a href="create_post.php" class="new-job-btn">New Job Post</a>
+  <a href="create_post.php"
+         class="new-job-btn <?php echo ($approval_status == 'APPROVED' && $is_active == 1)  ? '' : 'disabled'; ?>" 
+         <?php echo ($approval_status == 'APPROVED' && $is_active == 1) ? '' : 'onclick="return false;"'; ?>
+          >New Job Post</a>
 </div>
 
 <!-- Filters -->
@@ -176,6 +210,7 @@ $result = $con_main->query($sql);
     <th>Category</th>
     <th>Type</th>
     <th>Status</th>
+    <th>Publish</th>
     <th>Actions</th>
 </tr>
 </thead>
@@ -193,10 +228,34 @@ $result = $con_main->query($sql);
             <?= ucfirst($row['post_status']); ?>
         </span>
     </td>
+     <td>
+                    <form method="POST" action="toggle_job_status.php">
+
+                        <input type="hidden" name="job_id" value="<?= $row['id']; ?>">
+
+                        <input type="hidden" name="status"
+                                value="<?= ($row['post_status']=='published') ? 'draft' : 'published'; ?>">
+
+                        <label class="switch">
+                           <input type="checkbox"
+                            class="<?= ($approval_status == 'APPROVED' && $is_active == 1) ? '' : 'disabled'; ?>"
+                            <?= ($row['post_status'] == 'published') ? 'checked' : ''; ?>
+                            <?= ($approval_status == 'APPROVED' && $is_active == 1) 
+                                ? 'onchange="this.form.submit()"' 
+                                : 'disabled'; ?>
+                        >
+                        <span class="slider"></span>
+                    </label>
+
+                </form>
+            </td>
 
     <td class="action-buttons">
         <a href="job_view.php?job=<?= $row['id']; ?>" title="View">👁</a>
-        <a href="job_edit.php?id=<?= $row['id']; ?>" title="Edit">✏️</a>
+        <a href="job_edit.php?id=<?= $row['id']; ?>" title="Edit"
+         class="<?php echo ($approval_status == 'APPROVED' && $is_active == 1)  ? '' : 'disabled'; ?>" 
+         <?php echo ($approval_status == 'APPROVED' && $is_active == 1) ? '' : 'onclick="return false;"'; ?>
+          >✏️</a>
         <a href="../job-applicant/application-overview.php?search=<?= urlencode($row['title']); ?>" title="Applications">📄</a>
 
         <form method="POST" style="display:inline;"

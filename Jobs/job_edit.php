@@ -160,14 +160,14 @@ while ($row = $benefitResult->fetch_assoc()) {
         $benR = $con_main->query($benQ);
         while ($b = $benR->fetch_assoc()) {
         ?>
-            <label>
+            <span class="benefits-text">
                 <input type="checkbox"
                        name="benefits[]"
                        class="benefits-checkbox"
                        value="<?= $b['id']; ?>"
                        <?= in_array($b['id'],$selectedBenefits)?'checked':''; ?>>
                 <?= $b['name']; ?>
-            </label>
+            </span>
         <?php } ?>
     </div>
 </div>

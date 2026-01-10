@@ -107,7 +107,7 @@
                 $result = $con_main->query($query);
                 while ($benefit = $result->fetch_assoc()) {
                 ?>
-                    <label><input type="checkbox"  name="benefits[]" class="benefits-checkbox" value="<?php echo ($benefit['id']) ?>"> <?php echo ($benefit['name']); ?></label>
+                    <span class="benefits-text"><input type="checkbox"  name="benefits[]" class="benefits-checkbox" value="<?php echo ($benefit['id']) ?>"> <?php echo ($benefit['name']); ?></span>
                 <?php } ?>
             </div>
         </div>

@@ -59,7 +59,7 @@ while ($b = $benRes->fetch_assoc()) {
 <link rel="stylesheet" href="job-post.css">
 
 <section class="page-wrapper job-view-container">
-
+<a onclick="window.history.back()" class="back-link">← Go Back</a>
     <div class="job-header">
         <div>
             <div class="job-title"><?= htmlspecialchars($job['title']); ?></div>
@@ -132,9 +132,9 @@ while ($b = $benRes->fetch_assoc()) {
             </div>
         <?php endif ?>
 
-    <?php else: ?>
+    <?php elseif($userRole==1): ?>
         <div class="apply-box">
-            Please sign in to apply
+            Sign in as a candidate to apply
             <br />
             <a href="../login.php" class="new-job-btn" style="margin-top: 5px;">Sign in</a>
         </div>
