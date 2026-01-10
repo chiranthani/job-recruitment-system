@@ -125,6 +125,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <label>Confirm Password *</label>
                 <input type="password" name="confirm_password" required>
             </div>
+           <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" required>
+                    <span>I agree to the <a href="../terms.php" style="text-decoration:none" target="_blank">Terms & Conditions</a></span>
+                </label>
+            </div>
 
             <button type="submit" class="btn btn-primary">Register</button>
         </form>
@@ -134,5 +140,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 </div>
-
+<?php include '../layouts/footer.php'; ?>
 <?php include '../layouts/layout_end.php'; ?>

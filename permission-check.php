@@ -2,8 +2,8 @@
 include 'config/permissions.php';
 
 $currentPath = $_SERVER['PHP_SELF'];
-$userRole    = $_SESSION["role_id"];
-$allowed     = true;
+$userRole = $_SESSION["role_id"] ?? 0;
+$allowed = true;
 
 
 foreach ($ACCESS_RULES as $path => $roles) {
