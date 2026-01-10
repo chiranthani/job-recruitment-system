@@ -71,6 +71,22 @@ if($total_pages < 1) $total_pages = 1;
 $query = "SELECT id, first_name, last_name, email, role_id, status FROM users $filter_sql LIMIT $limit OFFSET $offset";
 $result = $con_main->query($query);
 
+$success_trigger = '';
+
+if(isset($_POST['delete_user'])){
+    $user = (int)$_POST['delete_user'];
+    if($user > 0){
+        $delete_query = "UPDATE `users` SET `is_deleted` = 1,`deletedAt` = NOW() WHERE id=$user";
+        $delete_result = $con_main->query($delete_query);
+        echo($delete_query);
+        $success_trigger = true;
+
+    }
+
+
+}
+
+
 include '../layouts/layout_start.php'; 
 ?>
 
@@ -150,7 +166,10 @@ include '../layouts/layout_start.php';
                         <td style="padding: 12px;">
                             <a href="admin_user_form.php?id=<?php echo $row['id']; ?>&mode=view" style="color: blue; text-decoration: none;">View</a> |  
                             <a href="admin_user_form.php?id=<?php echo $row['id']; ?>" style="color: orange; text-decoration: none;">Update</a> | 
-                            <a href="admin_user_form.php?id=<?php echo $row['id']; ?>" style="color: red; text-decoration: none;" onclick="return confirm('Delete this user?')">Delete</a>
+                            <form method="POST" style="display:inline" onsubmit="return confirm('Delete this user?');">
+                                <input type="hidden" id="delete_user" name="delete_user" value="<?php echo $row['id']; ?>"/>
+                                <button class="btn-delete" type="submit">Delete</button>
+                            </form>
                         </td>
                     </tr>
                 <?php endwhile; ?>
@@ -177,6 +196,16 @@ include '../layouts/layout_start.php';
             <button class="btn-add" style="opacity: 0.5; cursor: not-allowed;" disabled>Next</button>
         <?php endif; ?>
     </div>
+    </div>
+</div>
+
+<div id="successModal" class="modal-overlay" style="<?= $success_trigger ? 'display:flex' : 'display:none' ?>">
+    <div class="modal-content">
+        <div class="checkmark-circle">✓</div>
+        <h2>User deleted successfully</h2>        
+        <div class="form-row mt-20" style="justify-content: center; gap: 10px;">
+            <button class="btn-add" onclick="window.location.href='admin_user_list.php'">Ok</button>
+        </div>
     </div>
 </div>
 
