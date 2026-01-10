@@ -68,6 +68,7 @@ while ($b = $benRes->fetch_assoc()) {
             <div class="job-meta">
                 <div class="meta-item">📍 <?= htmlspecialchars($job['location_name']); ?></div>
                 <div class="meta-item">🧰 <?= htmlspecialchars($job['job_type']); ?></div>
+                  <div class="meta-item">📌 <?= htmlspecialchars($job['work_type']); ?></div>
             </div>
         </div>
 
