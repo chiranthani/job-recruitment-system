@@ -55,6 +55,7 @@ $totalPages = $result['totalPages'];
         </div>
 
 
+        <div class="container">
         <h3 class="section-title">Summary</h3>
 
         <form method="GET" id="searchForm" class="my-application-filter-bar">
@@ -62,11 +63,12 @@ $totalPages = $result['totalPages'];
                 <input
                     type="search"
                     name="search"
-                    value="<?= htmlspecialchars($search) ?>"
+                    id="searchInput"
+                    value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
                     placeholder="Search job title"
                     onsearch="this.form.submit()"
                 >
-                <button type="submit" class="btn btn-submit">Search</button>
+
             </div>
         </form>
 
@@ -145,9 +147,24 @@ $totalPages = $result['totalPages'];
             <?php endfor; ?>
         </div>
     </div>
-
+        </div>
 </section>
 
+<script>
+    let typingTimer;
+    const delay = 500;
 
+    const form = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+
+    // text search
+    searchInput.addEventListener('input', () => {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            form.submit();
+        }, delay);
+    });
+
+</script>
 <?php include '../layouts/footer.php'; ?>
 <?php include '../layouts/layout_end.php'; ?>

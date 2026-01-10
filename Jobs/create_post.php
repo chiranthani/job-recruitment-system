@@ -130,7 +130,7 @@
         <!-- Save + Close Buttons -->
         <div class="form-actions">
             <button type="submit" class="save-btn">Save</button>
-            <button type="button" class="close-btn">Close</button>
+            <button type="button" class="close-btn" onclick="history.back()">Close</button>
         </div>
 
     </form>

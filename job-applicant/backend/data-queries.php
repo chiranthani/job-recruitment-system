@@ -20,18 +20,20 @@ function getActiveCategoriesWithJobsCount()
                     job_categories.id,
                     job_categories.name,
                     job_categories.icon_path,
-                    COUNT(IF(job_posts.expiry_date >= CURRENT_DATE() AND job_posts.active_status = 1 AND job_posts.is_deleted = 0, job_posts.id, NULL)) AS post_count
+                    job_posts.post_status,
+                    COUNT(IF(job_posts.expiry_date >= CURRENT_DATE() AND job_posts.active_status = 1 AND job_posts.is_deleted = 0 AND job_posts.post_status = ?, job_posts.id, NULL)) AS post_count
                 FROM job_categories
                 LEFT JOIN job_posts 
                     ON job_posts.category_id = job_categories.id 
                 WHERE job_categories.status = ?
-                GROUP BY job_categories.id, job_categories.name, job_categories.icon_path;";
+                GROUP BY job_categories.id, job_categories.name, job_categories.icon_path";
 
     $stmt = $db->prepare($sql);
     if (!$stmt) return false;
 
     $status = AppConstants::ACTIVE_STATUS;
-    $stmt->bind_param("i", $status);
+    $published = AppConstants::POST_PUBLISHED;
+    $stmt->bind_param("si",$published,$status);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -43,12 +45,13 @@ function getApprovedCompanies()
 {
     $db = db();
 
-    $sql = "SELECT * FROM `companies` WHERE `admin_approval` = ?";
+    $sql = "SELECT * FROM `companies` WHERE `admin_approval` = ? AND `status`= ?";
     $stmt = $db->prepare($sql);
     if (!$stmt) return false;
 
     $approval = AppConstants::COMPANY_APPROVED;
-    $stmt->bind_param("s", $approval);
+    $active = AppConstants::ACTIVE_STATUS;
+    $stmt->bind_param("si", $approval,$active);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -370,6 +373,26 @@ function getAppliedJobs($status,$search=''){
 function searchJobs($filters){
     $db = db();
 
+    $user_id = $_SESSION['user_id'] ?? 0;
+    $userSkills = [];
+
+    if ($user_id > 0) {
+        $skillSql = "SELECT s.name 
+            FROM user_skills us
+            INNER JOIN skills s ON s.id = us.skill_id
+            WHERE us.user_id = ?
+        ";
+
+        $stmt = $db->prepare($skillSql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+
+        while ($row = $res->fetch_assoc()) {
+            $userSkills[] = strtolower($row['name']);
+        }
+    }
+
     $search = isset($filters['search']) ? trim($filters['search']) : '';
     $company = isset($filters['company']) ? trim($filters['company']) : '';
     $work_type = isset($filters['work_type']) ? trim($filters['work_type']) : '';
@@ -379,6 +402,19 @@ function searchJobs($filters){
     $limit = 6;
     $offset = ($page - 1) * $limit;
 
+    // skill matching SQL
+    $skillScoreSql = "0 AS skill_match_score";
+
+    if (!empty($userSkills)) {
+        $cases = [];
+        foreach ($userSkills as $skill) {
+            $skill = mysqli_real_escape_string($db, $skill);
+            $cases[] = "CASE WHEN job_posts.requirements LIKE '%$skill%' THEN 1 ELSE 0 END";
+        }
+
+        $skillScoreSql = "(" . implode(" + ", $cases) . ") AS skill_match_score";
+    }
+
     $query = "SELECT
         job_posts.id,
         job_posts.title,
@@ -387,11 +423,15 @@ function searchJobs($filters){
         job_posts.work_type,
         job_posts.job_type,
         job_posts.description,
+        job_posts.requirements,
         job_posts.expiry_date,
+        job_posts.post_status,
         companies.name AS company_name,
+        companies.status AS company_status,
         locations.name AS location_name,
         job_categories.name AS category_name,
-        DATEDIFF(job_posts.expiry_date, CURDATE()) AS days_left
+        DATEDIFF(job_posts.expiry_date, CURDATE()) AS days_left,
+        $skillScoreSql
     FROM
         `job_posts`
     INNER JOIN companies ON companies.id = job_posts.company_id
@@ -399,7 +439,8 @@ function searchJobs($filters){
     INNER JOIN locations ON locations.id = job_posts.location_id
     WHERE
         job_posts.active_status = ".AppConstants::ACTIVE_STATUS." AND job_posts.is_deleted = ".AppConstants::INACTIVE_STATUS." AND 
-        job_posts.expiry_date >= CURRENT_DATE()";
+        job_posts.expiry_date >= CURRENT_DATE() AND companies.status = ".AppConstants::ACTIVE_STATUS." AND 
+        job_posts.post_status = '".AppConstants::POST_PUBLISHED."' ";
 
     if ($search !== '') {
         $query .= " AND job_posts.title LIKE '%" . mysqli_real_escape_string($db, $search) . "%'";
@@ -418,7 +459,12 @@ function searchJobs($filters){
     }
 
 
-    $query .= " ORDER BY job_posts.id DESC";
+    // order
+    if (!empty($userSkills)) {
+        $query .= " ORDER BY skill_match_score DESC, job_posts.id DESC";
+    } else {
+        $query .= " ORDER BY job_posts.id DESC";
+    }
 
     $total_result = mysqli_query($db, $query);
     $total_records = mysqli_num_rows($total_result);
@@ -652,6 +698,24 @@ function getAJobPostDetails($jobId)
     if (!$stmt) return false;
 
     $stmt->bind_param("i", $jobId);
+
+    $stmt->execute();
+    return $stmt->get_result()->fetch_assoc();
+}
+
+/** get a candidate skills */
+function getCandidateSkills($user_id){
+    $db = db();
+
+    $sql = "SELECT user_skills.*, skills.name
+    FROM user_skills 
+    INNER JOIN skills ON skills.id = user_skills.skill_id
+    WHERE user_skills.user_id = ?";
+
+    $stmt = $db->prepare($sql);
+    if (!$stmt) return false;
+
+    $stmt->bind_param("i", $user_id);
 
     $stmt->execute();
     return $stmt->get_result()->fetch_assoc();

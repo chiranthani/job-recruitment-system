@@ -310,6 +310,7 @@ h2 {
     width: 100%;
     border-collapse: collapse;
     color: black;
+    font-size: 15px;
 }
 
 .job-table th {
@@ -319,7 +320,7 @@ h2 {
 .job-table th,
 .job-table td {
     padding: 12px;
-    border: 1px solid #999;
+    border-bottom: 1px solid #DBDEE5;
     text-align: center;
 }
 

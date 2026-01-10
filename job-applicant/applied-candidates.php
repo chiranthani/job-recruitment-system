@@ -43,7 +43,7 @@ $totalApplications = $results['total'];
                         <span class="job-location"><?php echo $job['location_name']; ?></span>
                     </div>
 
-                    <div class="job-extra">
+                    <div>
                         <span class="published-date">📅 Published: <?php echo $job['published_date']; ?></span>
                     </div>
                     <div class="job-stats">
@@ -60,6 +60,7 @@ $totalApplications = $results['total'];
                 <span class="job-id">Job ID: #<?php echo $job['id']; ?></span>
             </div>
         </div>
+         <div class="container">
         <form method="GET">
             <div class="filter-bar">
 
@@ -139,6 +140,7 @@ $totalApplications = $results['total'];
                 <a href="?job_id=<?= $jobId ?>&from=<?= $fromDate ?>&to=<?= $toDate ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
             <?php endfor; ?>
         </div>
+         </div>
     </div>
 </section>
 <?php include 'modals/application_status_change.php'; ?>

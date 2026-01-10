@@ -48,7 +48,7 @@ $cardData = getMyJobCardData();
             </div>
         </div>
 
-
+<div class="container">
         <h3 class="section-title">My Applications</h3>
 
         <div class="my-application-filter-bar">
@@ -121,6 +121,7 @@ $cardData = getMyJobCardData();
         </form>
     </div>
 </div>
+    </div>
 
 </section>
 <?php include 'modals/success-popup.php'; ?>
