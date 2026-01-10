@@ -59,7 +59,7 @@ while ($b = $benRes->fetch_assoc()) {
 <link rel="stylesheet" href="job-post.css">
 
 <section class="page-wrapper job-view-container">
-
+<a onclick="window.history.back()" class="back-link">← Go Back</a>
     <div class="job-header">
         <div>
             <div class="job-title"><?= htmlspecialchars($job['title']); ?></div>

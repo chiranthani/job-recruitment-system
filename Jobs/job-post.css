@@ -430,6 +430,7 @@ h2 {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 25px;
+    margin-top: 20px;
 }
 
 .job-title {
@@ -522,4 +523,11 @@ h2 {
 
 .job-form {
     margin-top: 25px;
+}
+
+.back-link {
+    cursor: pointer;
+    text-decoration: none;
+    color: #2563eb ;
+    font-size: 15px;
 }
