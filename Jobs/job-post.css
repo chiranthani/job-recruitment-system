@@ -279,7 +279,7 @@ h2 {
 .job-table {
     width: 100%;
     border-collapse: collapse;
-    background: #d8e8f6; /* lighter blue */
+    background: #d8e8f6; 
     color: black;
 }
 
@@ -287,7 +287,7 @@ h2 {
 .job-table td {
     padding: 12px;
     border: 1px solid #999;
-    text-align: left;
+    text-align: center;
 }
 
 /* Status Badge */
@@ -368,7 +368,7 @@ h2 {
 }
 
 .delete-btn:hover {
-    color: #dc2626; /* red on hover */
+    color: #dc2626; 
 }
 
 
