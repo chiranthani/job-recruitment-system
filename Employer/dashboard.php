@@ -90,7 +90,7 @@ $is_active = $data['status'] == 1;
     <div class="quick-actions">
         <h2>Quick Actions</h2>
         <div class="action-grid">
-            <a href="profile.php" class="action-btn">
+            <a href="company_profile.php" class="action-btn">
                 👤 View Profile
             </a>
             <a href="edit_profile.php" class="action-btn">

@@ -13,6 +13,13 @@
     --light-blue: #87F7FF;
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+}
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -171,7 +178,7 @@ body {
     position: fixed;
     top: 0;
     left: -260px;
-    width: 200px;
+    width: 250px;
     height: 100vh;
     background: var(--white);
     padding: 20px;
@@ -204,6 +211,22 @@ body {
     gap: 8px;
     transition: 0.3s ease;
 }
+
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+    z-index: 998;
+}
+
+.menu-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
 
 .mobile-menu .menu-item:hover {
     color: #000;
@@ -299,4 +322,62 @@ body {
         transition: left 0.3s ease;
     }
 
+}
+
+/**  start footer styles **/
+.site-footer {
+    background-color: #0f172a;
+    color: #cbd5e1;
+    padding: 40px 20px 25px;
+    text-align: center;
+}
+
+.footer-content {
+    max-width: 1000px;
+    margin: auto;
+}
+
+.footer-logo {
+    margin-bottom: 12px;
+}
+
+.footer-brand p {
+    max-width: 500px;
+    margin: 0 auto 25px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #94a3b8;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 25px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 18px;
+}
+
+.footer-links li a {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.footer-links li a:hover {
+    color: #38bdf8;
+}
+
+.footer-copy {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .footer-links {
+        gap: 12px;
+    }
 }

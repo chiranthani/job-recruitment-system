@@ -97,40 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-//     document.addEventListener('DOMContentLoaded', () => {
-//     const sInput = document.getElementById('skills-input');
-//     const sContainer = document.getElementById('skills-container');
-//     const hHiddenInput = document.getElementById('hidden-skills');
-//     let skillsArray = [];
-
-//     if (sInput) {
-//         sInput.addEventListener('keydown', (e) => {
-//             if (e.key === 'Enter') {
-//                 e.preventDefault();
-//                 const val = sInput.value.trim();
-                
-//                 if (val !== "" && !skillsArray.includes(val)) {
-//                     skillsArray.push(val);
-//                     renderSkillsUI(sContainer, sInput, hHiddenInput, skillsArray);
-//                     sInput.value = "";
-//                 }
-//             }
-//         });
-//     }
-// });
-
-// function renderSkillsUI(container, inputEl, hiddenField, array) {
-//     container.querySelectorAll('.skill-tag').forEach(t => t.remove());
-//     array.forEach(skill => {
-//         const div = document.createElement('div');
-//         div.className = 'skill-tag';
-//         div.innerHTML = `${skill} <span class="remove-btn" onclick="removeSkill('${skill}')">x</span>`;
-//         container.insertBefore(div, inputEl);
-//     });
-//     hiddenField.value = array.join(',');
-// }
-
-
 // admin_user_form image upload
 function previewUserImage(input) {
     console.log("File selected!"); // To Check browser console
@@ -239,3 +205,72 @@ window.updateTowns = function() {
             }
         });
     }
+
+let searchTimer;
+
+/**
+ * Automatically triggers search after the user stops typing
+ */
+function liveSearch() {
+    // Clear the timer if the user is still typing
+    clearTimeout(searchTimer);
+
+    // Wait 500ms after the last keystroke before reloading
+    searchTimer = setTimeout(function() {
+        const searchValue = document.getElementById('searchInput').value.trim();
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (searchValue !== "") {
+            urlParams.set('search', searchValue);
+        } else {
+            // If the field is cleared, remove the search parameter entirely
+            urlParams.delete('search');
+        }
+
+        // Reset to first page
+        urlParams.delete('page');
+
+        // Reload the page with the new filters
+        window.location.href = window.location.pathname + '?' + urlParams.toString();
+    }, 500); 
+}
+
+/**
+ * Filters the user list based on the selected account status
+ */
+function filterByStatus() {
+    const statusValue = document.getElementById('statusFilter').value;
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (statusValue !== "") {
+        urlParams.set('status', statusValue);
+    } else {
+        // If "All Status" is selected, remove the parameter
+        urlParams.delete('status');
+    }
+
+    // Always return to page 1 when filter changes
+    urlParams.delete('page');
+
+    // Reload with all combined filters (Search + Role + Status)
+    window.location.href = window.location.pathname + '?' + urlParams.toString();
+}
+
+/**
+ * Filters the user list based on registration date range
+ */
+function filterByDate() {
+    const dateValue = document.getElementById('dateFilter').value;
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (dateValue !== "") {
+        urlParams.set('date_range', dateValue);
+    } else {
+        urlParams.delete('date_range');
+    }
+
+    // Reset pagination
+    urlParams.delete('page');
+
+    window.location.href = window.location.pathname + '?' + urlParams.toString();
+}

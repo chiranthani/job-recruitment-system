@@ -84,7 +84,7 @@ $appliedJobs = getAppliedJobIds($userId,$appliedType) ?? [];
 
         </form>
         <section class="jobs-list">
-            <div>
+            <div style="margin-bottom: 10px;">
                 <?php if ($total_records > 0): ?>
                     <p>Found <strong><?= $total_records ?></strong> job<?= $total_records > 1 ? 's' : '' ?> matching your criteria.</p>
                 <?php else: ?>
@@ -123,15 +123,26 @@ $appliedJobs = getAppliedJobIds($userId,$appliedType) ?? [];
             <?php endforeach; ?>
 
 
-            <div class="pagination">
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <a
-                        href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>"
-                        class="<?= ($i == $page) ? 'active' : '' ?>">
-                        <?= $i ?>
-                    </a>
-                <?php endfor; ?>
-            </div>
+            <?php if ($totalPages > 1): ?>
+                <div class="pagination-wrapper">
+
+                    <div class="pagination-info">
+                        Page <strong><?= $page ?></strong> of <strong><?= $totalPages ?></strong>
+                    </div>
+
+                    <div class="pagination">
+                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                            <a
+                                href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>"
+                                class="<?= ($i == $page) ? 'active' : '' ?>">
+                                <?= $i ?>
+                            </a>
+                        <?php endfor; ?>
+                    </div>
+
+                </div>
+            <?php endif; ?>
+
 
         </section>
         

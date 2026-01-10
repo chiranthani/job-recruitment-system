@@ -2,7 +2,7 @@
 
 class AppConstants {
 
-    const APP_NAME = "Job Recruitment System";
+    const APP_NAME = "JobBoard+";
 
     // roles
     const ROLE_ADMIN = 3;

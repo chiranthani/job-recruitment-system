@@ -552,12 +552,14 @@ function getUnreadNotificationCount($userId) {
     $db = db();
 
     $count = 0;
+    $isRead = 0;
     if ($userId > 0) {
-        $stmt = $db->prepare("SELECT COUNT(*) AS total 
-             FROM notifications 
-             WHERE user_id = ? AND is_read = 0"
-        );
-        $stmt->bind_param("i", $userId);
+        $sql = "SELECT COUNT(*) AS total 
+                FROM notifications 
+                WHERE user_id = ? AND is_read = ?";
+
+        $stmt = $db->prepare($sql);
+        $stmt->bind_param("ii",$userId,$isRead);
         $stmt->execute();
         $result = $stmt->get_result()->fetch_assoc();
         $count = (int)$result['total'];
