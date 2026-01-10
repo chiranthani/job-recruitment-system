@@ -25,7 +25,7 @@ include 'backend/data-queries.php';
         <h2>Apply for <?php echo $job['title'] ?></h2>
         <p class="job-company">at <?php echo $job['company_name'] ?></p>
 
-        <form id="applyForm" enctype="multipart/form-data">
+        <form id="applyForm" method="POST" action="backend/application-submit.php" enctype="multipart/form-data">
             <input type="hidden" name="job_id" value="<?php echo $job['id'] ?>">
             <h3 class="form-title">Personal Information</h3>
 
@@ -66,7 +66,7 @@ include 'backend/data-queries.php';
             <div class="row">
                 <div class="col">
                     <label class="required">Current Role</label>
-                    <input type="text" name="current_role" placeholder="Senior Software Engineer">
+                    <input type="text" name="current_role" placeholder="Enter current role">
                 </div>
             </div>
 
@@ -123,6 +123,18 @@ include 'backend/data-queries.php';
 <?php include 'modals/success-popup.php'; ?>
 <?php include 'modals/error-popup.php'; ?>
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+
+        if (params.has('success')) {
+            showSuccess("🎉 Application Submitted!", params.get('success'));
+        }
+
+        if (params.has('error')) {
+            showError(params.get('error'));
+        }
+    });
+
     const resumeInput = document.getElementById('resumeInput');
     const resumeText = document.getElementById('resumeText');
     const removeBtn = document.getElementById('removeResumeBtn');
@@ -174,30 +186,6 @@ include 'backend/data-queries.php';
     }
 
 
-    document.getElementById("applyForm").addEventListener("submit", function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "backend/application-submit.php", true);
-
-        xhr.onload = function() {
-            if (xhr.status == 200) {
-                let res = JSON.parse(xhr.responseText);
-
-                if (res.status == "success") {
-                    showSuccess("🎉 Application Submitted!",res.message || "Successfully!");
-                } else {
-                    showError(res.message || "Something went wrong!");
-                }
-            } else {
-                showError("Server error! Try again.");
-            }
-        };
-
-        xhr.send(formData);
-    });
 
     // Popup handling
     function showError(msg) {

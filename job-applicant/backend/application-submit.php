@@ -1,17 +1,21 @@
 <?php
+session_start();
 include '../../config/database.php';
 include '../../config/constants.php';
+include '../../helpers/notifications.php';
 include 'data-queries.php';
 
-header("Content-Type: application/json");
 
 try {
+    $job_id = intval($_POST['job_id']);
+
     if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-        echo json_encode(["status" => "error", "message" => "Invalid request"]);
+        $msg = "Invalid request";
+        header("Location: ../apply.php?error=" . urlencode($msg) . "&job=" . urlencode($job_id));
         exit;
     }
 
-    $job_id = intval($_POST['job_id']);
+
     $first = htmlspecialchars(strip_tags($_POST['first_name']));
     $last = htmlspecialchars(strip_tags($_POST['last_name']));
     $email = htmlspecialchars(strip_tags($_POST['email']));
@@ -21,17 +25,16 @@ try {
     $notice = htmlspecialchars(strip_tags($_POST['notice']));
     $cvOption = $_POST['cv_option'] ?? 'new';
     $full_name = $first . ' ' . $last;
-    $user_id = $_SESSION['user_id'] ?? 4;
+    $user_id = $_SESSION['user_id'] ?? 0;
+
     $type = AppConstants::APPLIED_JOB;
 
     // duplicate check
     $check_result = getACandidateJob(intval($user_id),$job_id,$type);
 
     if ($check_result) {
-        echo json_encode([
-            "status" => "error",
-            "message" => "You have already applied for this job."
-        ]);
+        $msg = "You have already applied for this job.";
+        header("Location: ../apply.php?error=" . urlencode($msg) . "&job=" . urlencode($job_id));
         exit;
     }
 
@@ -45,9 +48,11 @@ try {
 
     } else {
       
-        if (!isset($_FILES['resume'])) {
-            echo json_encode(["status"=>"error","message"=>"Resume required"]);
+        if (!isset($_FILES['resume']) || empty($_FILES['resume']['name'])) {
+            $msg = "Resume required";
+            header("Location: ../apply.php?error=" . urlencode($msg) . "&job=" . urlencode($job_id));
             exit;
+
         }
 
         if (!empty($_FILES['resume']['name'])) {
@@ -56,11 +61,12 @@ try {
             $target = "../../assets/uploads/resumes/" . $fileName;
 
             if (!move_uploaded_file($_FILES['resume']['tmp_name'], $target)) {
-                echo json_encode(["status" => "error", "message" => "Failed to upload resume"]);
-                exit;
+            $msg = "Failed to upload resume";
+            header("Location: ../apply.php?error=" . urlencode($msg) . "&job=" . urlencode($job_id));
+            exit;
             }
 
-            $resumePath = "uploads/resumes/" . $fileName;
+            $resumePath = "assets/uploads/resumes/" . $fileName;
         }
 
     }
@@ -88,7 +94,8 @@ try {
 
     if (!$main_stmt->execute()) {
         $con_main->rollback();
-        echo json_encode(["status" => "error", "message" => "Failed to apply", "data" => $main_stmt->error]);
+        $msg = "Failed to apply: " . $main_stmt->error;
+        header("Location: ../apply.php?error=" . urlencode($msg) . "&job=" . urlencode($job_id));
         exit;
     }
 
@@ -102,22 +109,31 @@ try {
 
     if (!$cj_stmt->execute()) {
         $con_main->rollback();
-        echo json_encode(["status" => "error", "message" => "Failed to mark candidate job", "data" => $cj_stmt->error]);
+        $msg = "Failed to mark candidate job: " . $cj_stmt->error;
+        header("Location: ../apply.php?error=" . urlencode($msg) . "&job=" . urlencode($job_id));
         exit;
     }
 
     $con_main->commit();
 
-    echo json_encode([
-        "status" => "success",
-        "message" => "Your application has been sent successfully."
-    ]);
+    // send notification
+    $jobData = getAJobPostDetails($job_id);
+    $employers = getCompanyEmployerUsers($jobData['company_id']);
+
+    foreach ($employers as $employer) {
+        createNotification($con_main,$employer['id'],$user_id,$main_stmt->insert_id,AppConstants::NOTIFICATION_TYPES['0'],
+        "New application received for '{$jobData['title']}' from {$full_name}.");
+    }
+
+    $msg = "Your application has been sent successfully.";
+    header("Location: ../apply.php?success=" . urlencode($msg) . "&job=" . urlencode($job_id));
     exit;
 
 
 } catch (Exception $e) {
     $con_main->rollback();
 
-    echo json_encode(["status" => "error","message" =>"Something went wrong!", "data" => $e->getMessage()]);
+    $msg = "Something went wrong! " . $e->getMessage();
+    header("Location: ../apply.php?error=" . urlencode($msg) . "&job=" . urlencode($job_id));
     exit;
 }

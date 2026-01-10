@@ -422,6 +422,12 @@ label.required::after {
 .light { background: var(--light); color: var(--dark); }
 
 
+.interview-date {
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--gray);
+    font-weight: 500;
+}
 
 
 /* Job Card */
@@ -757,6 +763,17 @@ label.required::after {
 }
 .pagination a:hover { background: #005bb5; color: var(--white); }
 
+.notification { 
+    padding: 15px; 
+    border-bottom: 1px solid #eee;
+    background: var(--white); 
+    border-radius: 10px; 
+    margin-bottom: 5px;
+}
+
+.notification.unread { background: #f5f8ff; font-weight: bold; }
+.notification-time { font-size: 12px; color: #888; margin-top: 5px; }
+.mark-read-btn { float: right; font-size: 12px; cursor: pointer; color: var(--primary-color); }
 
 /** responsive **/
 @media (max-width: 600px) {

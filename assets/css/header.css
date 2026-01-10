@@ -96,8 +96,8 @@ body {
 
 
 .menu-icon {
-    width: 26px;
-    height: 26px;
+    width: 25px;
+    height: 25px;
     fill: #333;
     cursor: pointer;
 }
@@ -105,6 +105,65 @@ body {
 .menu-icon:hover {
     fill: var(--dark);
 }
+
+.notification-wrapper {
+    position: relative;
+    cursor: pointer;
+}
+
+.count-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background: red;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 50%;
+}
+
+.notification-dropdown {
+    position: absolute;
+    right: 0;
+    top: 28px;
+    width: 280px;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    display: none;
+    z-index: 999;
+}
+
+.notification-header {
+    padding: 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+}
+
+.notification-dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.notification-dropdown li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+}
+
+.notification-dropdown li.unread {
+    background: #f5f8ff;
+    font-weight: 600;
+}
+
+.notification-footer {
+    text-align: center;
+    padding: 8px;
+}
+
 
 /* ================== MOBILE MENU ================== */
 

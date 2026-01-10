@@ -87,7 +87,12 @@ $cardData = getMyJobCardData();
                 </div>
 
                 <div class="status-actions">
-                    <span class="status <?= $statusClass ?>">
+                    <?php if ($item['application_status'] == AppConstants::APPLICATION_STATUS['INTERVIEW'] && !empty($item['interview_at'])): ?>
+                       <div class="interview-date">
+                            <?= date('d M Y, h:i A', strtotime($item['interview_at'])) ?>
+                        </div>
+                    <?php endif; ?>
+                     <span class="status <?= $statusClass ?>">
                         <?= $item['application_status'] ?>
                     </span>
                  <?php if ($item['application_status'] == AppConstants::APPLICATION_STATUS['OFFERED']): ?>
