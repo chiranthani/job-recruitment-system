@@ -54,24 +54,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $company_id = NULL;
         $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
         if ($role_id == 2) {
+            
             // check exsiting company avaible or not
             $getCompany = $con_main->query("SELECT id FROM companies WHERE registration_no = '$company_reg_no' LIMIT 1 ");
-            if($getCompany->num_rows > 0){
-                $company_id = $getCompany['id'];
-            }else{
+            if ($getCompany->num_rows > 0) {
+                $company = $getCompany->fetch_assoc();
+                $company_id = $company['id'];
+            } else {
                 $companyQuery = "INSERT INTO companies (name, registration_no, admin_approval)
                 VALUES ('$company_name','$company_reg_no', 'APPROVED')";
-
-                if ($con_main->query($companyQuery) == true) {
-                    $company_id = $con_main->insert_id;
-                    $query = "INSERT INTO users (first_name, last_name, gender, email, username, password, role_id, profile_image,company_id)
-                        VALUES ('$first_name', '$last_name', '$gender','$email', '$username', '$hashed_pass', '$role_id', '$profile_img_url','$company_id')";
-                } else {
-                    $error = "Failed to create company.";
-                    $query = false;
-                }
+                $con_main->query($companyQuery);
+                $company_id = $con_main->insert_id;
             }
-            
+
+            if ($company_id) {
+                $query = "INSERT INTO users (first_name, last_name, gender, email, username, password, role_id, profile_image,company_id)
+                        VALUES ('$first_name', '$last_name', '$gender','$email', '$username', '$hashed_pass', '$role_id', '$profile_img_url','$company_id')";
+            } else {
+                $error = "Failed to create company.";
+                $query = false;
+            }
         } else {
             $query = "INSERT INTO users (first_name, last_name, gender, email, username, password, role_id, profile_image)
                       VALUES ('$first_name', '$last_name', '$gender','$email', '$username', '$hashed_pass', '$role_id', '$profile_img_url')";
