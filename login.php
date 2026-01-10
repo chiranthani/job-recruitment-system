@@ -64,7 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - CareerBridge</title>
+    <link rel="shortcut icon" href="<?php echo BaseConfig::$BASE_URL; ?>assets/images/favicon.png">
+    <title>Login - JobBoard+</title>
     <link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body class="login-body">
@@ -94,6 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </form>
             
             <div class="links">
+                <p>New here?</p>
+                <a href="user-management/signup.php">Register as Job Seeker</a>
                 <a href="Employer/register.php">Register as Employer</a>
                 <a href="home.php">Browse Jobs</a>
             </div>

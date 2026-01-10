@@ -65,6 +65,7 @@ $username = $_SESSION['username'] ?? 'Guest';
         <hr>
 
         <?php if ($is_logged_in): ?>
+            <a href="<?php echo BaseConfig::$BASE_URL; ?>notifications.php" class="menu-item side-menu-row"><img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/bell.png" class="menu-icon" alt="notifications" />Notifications</a>
             <a href="#" class="menu-item side-menu-row"><img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/default_profile_image.png" class="menu-icon" alt="profile" /> <?php echo $username; ?></a>
             <a href="<?php echo BaseConfig::$BASE_URL; ?>logout.php" class="menu-item side-menu-row"><img src="<?php echo BaseConfig::$BASE_URL; ?>assets/images/logout.png" class="menu-icon" alt="logout" /> Logout</a>
         <?php else: ?>
@@ -73,13 +74,16 @@ $username = $_SESSION['username'] ?? 'Guest';
             <button class="buttn buttn-sign-in" onclick="location.href='<?php echo BaseConfig::$BASE_URL; ?>login.php'">Sign In</button>
         <?php endif; ?>
     </div>
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 
     <script>
         function toggleMenu() {
             const menu = document.getElementById("mobileMenu");
             const btn = document.getElementById("menuBtn");
-
+            const overlay = document.getElementById("menuOverlay");
+    
             menu.classList.toggle("show");
+            overlay.classList.toggle("show");
 
             if (menu.classList.contains("show")) {
                 btn.innerHTML = "✖";
