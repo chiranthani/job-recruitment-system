@@ -1,15 +1,18 @@
 <?php 
+
 /**
  * ADMIN USER VIEW MODULE
  * Role Mapping: 1 = Candidate, 2 = Recruiter, 3 = Admin
  */
 
 include '../config/database.php'; 
+// standard layout headers
+include '../layouts/layout_start.php'; 
 
 // 1. INPUT VALIDATION
 // Capture ID from URL (e.g., admin_user_view.php?id=10) and cast to integer for security
 $user_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-
+$logged_user_role = $_SESSION['role_id'] ?? 0;
 // If no valid ID is provided, prevent page load and redirect back to the list
 if ($user_id <= 0) {
     header("Location: admin_user_list.php");
@@ -34,12 +37,20 @@ $query = "SELECT u.*, r.name as role_name, c.name as company_name,
 $result = $con_main->query($query);
 $user = $result->fetch_assoc();
 
-// standard layout headers
-include '../layouts/layout_start.php'; 
+$skills_query = "SELECT
+    skills.name
+FROM
+    `user_skills`
+   INNER JOIN skills On skills.id = user_skills.skill_id
+WHERE
+user_skills.user_id =$user_id";
+
+$skills_result = $con_main->query($skills_query);
+
 ?>
 
 <title>View Profile - <?php echo $user['username']; ?></title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../assets/css/user_management.css">
 
 <style>
     /* Labels used above data fields */
@@ -110,15 +121,20 @@ include '../layouts/layout_start.php';
 
                     <span class="view-label">Personal Biography</span>
                     <div class="view-data" style="min-height: 100px; line-height: 1.6;"><?php echo nl2br($user['bio'] ?? 'No bio provided.'); ?></div>
-
-                    <span class="view-label">Attached Document</span>
-                    <div class="view-data">
-                        <?php if(!empty($user['cv_url'])): ?>
-                            <a href="../<?php echo $user['cv_url']; ?>" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: bold;">📥 Click to View Resume (PDF)</a>
+                    
+                    <!-- if logged user is recuriter, display candidate skills -->
+                    <?php if($logged_user_role == 2): ?>
+                    <span class="view-label">Skills</span>
+                    <div>
+                        <?php if ($skills_result && $skills_result->num_rows > 0): ?>
+                            <?php while ($row = $skills_result->fetch_assoc()): ?>
+                                <span class="skill-badge"><?= htmlspecialchars($row['name']) ?></span>
+                            <?php endwhile; ?>
                         <?php else: ?>
-                            <span style="color: #999;">No Resume Uploaded</span>
+                            <span>No skills added</span>
                         <?php endif; ?>
                     </div>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <?php if($user['role_id'] == 2): ?>
@@ -130,7 +146,7 @@ include '../layouts/layout_start.php';
                 <?php if($user['role_id'] == 3): ?>
                     <div class="section-header">Administrator Access</div>
                     <div class="view-data" style="background: #fffbeb; border-color: #fde68a;">
-                        This user is a System Administrator. Profile details are restricted to basic account info.
+                        This user is a System Administrator.
                     </div>
                 <?php endif; ?>
 
@@ -138,7 +154,7 @@ include '../layouts/layout_start.php';
         </div>
 
         <div style="margin-top: 50px; text-align: right; border-top: 1px solid #eee; padding-top: 20px;">
-            <button type="button" class="btn-delete" onclick="window.location.href='admin_user_list.php';" style="padding: 12px 30px; cursor: pointer;">Close View</button>
+            <button type="button" class="btn-update" onclick="window.history.back()" style="padding: 12px 30px; cursor: pointer;">Close View</button>
         </div>
     </div>
 </div>

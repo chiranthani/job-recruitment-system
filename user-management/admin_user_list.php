@@ -78,7 +78,6 @@ if(isset($_POST['delete_user'])){
     if($user > 0){
         $delete_query = "UPDATE `users` SET `is_deleted` = 1,`deletedAt` = NOW() WHERE id=$user";
         $delete_result = $con_main->query($delete_query);
-        echo($delete_query);
         $success_trigger = true;
 
     }
@@ -91,7 +90,7 @@ include '../layouts/layout_start.php';
 ?>
 
 <title>User List View</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../assets/css/user_management.css">
 
 <?php include '../layouts/header.php'; ?>
 
@@ -167,10 +166,12 @@ include '../layouts/layout_start.php';
                             <a href="admin_user_view.php?id=<?php echo $row['id']; ?>" class="btn-view">View</a>
                             <a href="admin_user_form.php?id=<?php echo $row['id']; ?>" 
                                class="btn-update" style="text-decoration: none;">Update</a> 
+                               <?php if($row['role_id'] != 3): ?>
                             <form method="POST" style="display:inline" onsubmit="return confirm('Delete this user?');">
                                 <input type="hidden" id="delete_user" name="delete_user" value="<?php echo $row['id']; ?>"/>
                                 <button class="btn-delete" type="submit">Delete</button>
                             </form>
+                                <?php endif; ?>
                         </td>
                     </tr>
                 <?php endwhile; ?>

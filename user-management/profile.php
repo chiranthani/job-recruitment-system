@@ -110,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <title>Job Seeker Profile</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../assets/css/user_management.css">
 
 <style>
     /* Hide the professional info tab content initially */
@@ -131,7 +131,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <form id="multiStepProfileForm" method="POST" enctype="multipart/form-data">
         
         <div id="step1-content">
-            <p>Fill in the following information so companies know who you are...</p>
+            <p style="margin-bottom: 20px;">Fill in the following information so companies know who you are...</p>
             
             <div class="form-row">
                 <div class="form-group">

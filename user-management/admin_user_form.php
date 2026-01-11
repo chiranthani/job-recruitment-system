@@ -29,6 +29,9 @@ if ($user_id > 0) {
 $roles_result = $con_main->query("SELECT id, name FROM roles WHERE status = 1 ORDER BY id ASC");
 $companies_result = $con_main->query("SELECT id, name FROM companies WHERE status = 1 ORDER BY name ASC");
 
+$message = '';
+$error = '';
+
 // --- 4. FORM PROCESSING (POST REQUEST) ---
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Collect and Sanitize Inputs to prevent SQL Injection
@@ -38,9 +41,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $gender     = mysqli_real_escape_string($con_main, $_POST['gender']);
     $email      = mysqli_real_escape_string($con_main, trim($_POST['email']));
     $username   = mysqli_real_escape_string($con_main, trim($_POST['username']));
+    $confirm_password   = mysqli_real_escape_string($con_main, trim($_POST['confirm_password']));
+    $password   = $_POST['password'];
     $status     = (int)$_POST['status'];
     $role_id    = (int)$_POST['role_id'];
-    
+
+    $company_id = ($role_id == 2 && !empty($_POST['company_id'])) ? (int)$_POST['company_id'] : NULL;
 // --- SERVER-SIDE VALIDATION ---
     
     // Check if Email already exists (excluding current user)
@@ -52,17 +58,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "This email address is already registered.";
     } elseif ($check_user->num_rows > 0) {
         $error = "This username is already taken.";
-    } elseif ($user_id == 0 && empty($password)) {
-        $error = "Password is required for new users.";
     } elseif (!empty($password) && $password !== $confirm_password) {
         $error = "Passwords do not match.";
-    } elseif ($role_id == 2 && $company_id == 0) {
+    } elseif ($user_id == 0 && empty($password)) {
+        $error = "Password is required for new users.";
+    } elseif ($role_id == 2 && $company_id == NULL) {
         $error = "Please select a company for the Recruiter role.";
     }
 
     // logic: Only Recruiters (Role 2) require a Company ID
-    $company_id = ($role_id == 2) ? (int)$_POST['company_id'] : 0;
-    $password   = $_POST['password'];
+
 
     // IMAGE UPLOAD LOGIC
     $profile_img_url = $user['profile_image'] ?? ''; // Keep old image if no new one is uploaded
@@ -75,14 +80,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    $pass_update = "";
+    // Only update password if a new one is typed in the form
+    if (!empty($password)) {
+        $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
+        $pass_update = ", `password` = '$hashed_pass'";
+    }
+
+    $company_update = "";
+    if ($company_id !== NULL) {
+        $company_id = (int)$company_id;
+        $company_update = ", `company_id` = $company_id";
+    }
+
     if ($user_id > 0) {
         // --- 5. UPDATE LOGIC ---
-        $pass_update = "";
-        // Only update password if a new one is typed in the form
-        if (!empty($password)) {
-            $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
-            $pass_update = ", `password` = '$hashed_pass'";
-        }
 
         $query = "UPDATE `users` SET 
                   `email`         = '$email', 
@@ -92,13 +104,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                   `last_name`     = '$last_name', 
                   `profile_image` = '$profile_img_url', 
                   `gender`        = '$gender', 
-                  `company_id`    = '$company_id',
                   `status`        = '$status'
+                  $company_update
                   $pass_update 
                   WHERE `id`      = '$user_id'";
     } else {
         // --- 6. ADD (INSERT) LOGIC ---
-        $hashed_pass = password_hash($password, PASSWORD_DEFAULT); // Secure hashing
+    
         $query = "INSERT INTO `users` (`first_name`, `last_name`, `gender`, `status`, `email`, `username`, `password`, `role_id`, `company_id`, `profile_image`)
                   VALUES ('$first_name', '$last_name', '$gender', '$status', '$email', '$username', '$hashed_pass', '$role_id', '$company_id', '$profile_img_url')";
     }
@@ -108,7 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: admin_user_list.php");
         exit();
     } else {
-        $message = "Error: " . $con_main->error;
+        $error = "Error: " . $con_main->error;
     }
 }
 
@@ -117,7 +129,7 @@ include '../layouts/layout_start.php';
 ?>
 
 <title><?php echo $user_id ? 'Update User' : 'User Registration'; ?></title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../assets/css/user_management.css">
 
 <?php include '../layouts/header.php'; ?>
 
@@ -125,7 +137,19 @@ include '../layouts/layout_start.php';
     <div class="user-card">
         <h1><?php echo $user_id ? 'Update User Details' : 'User Registration'; ?></h1>
 
-        <form action="process_user.php" method="POST" enctype="multipart/form-data" style="margin-top: 70px;">
+         <?php if ($message): ?>
+            <div class="alert alert-success" id="pageAlert">
+                <?= htmlspecialchars($message) ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($error): ?>
+            <div class="alert alert-error" id="pageAlert">
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" enctype="multipart/form-data" style="margin-top: 70px;">
             
             <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
 
@@ -183,7 +207,7 @@ include '../layouts/layout_start.php';
                 </div>
                 <div class="form-group">
                     <label>Password <?php echo $user_id ? '(Leave blank to keep current)' : '<span class="required">*</span>'; ?></label>
-                    <input type="password" name="password" id="password" <?php echo $user_id ? '' : 'required'; ?>>
+                    <input type="password" name="password" id="password"  autocomplete="new-password" <?php echo $user_id ? '' : 'required'; ?>>
                 </div>
             </div>
 
@@ -197,7 +221,7 @@ include '../layouts/layout_start.php';
                 </div>
                 <div class="form-group">
                     <label>Confirm Password <span class="required">*</span></label>
-                    <input type="password" name="confirm_password">
+                    <input type="password" name="confirm_password" autocomplete="new-password">
                 </div>
             </div>
 
@@ -230,7 +254,7 @@ include '../layouts/layout_start.php';
                 <div class="form-group" id="company_wrapper" style="display: none;">
                     <label>Company Name <span class="required">*</span></label>
                     <select name="company_id" id="company_id">
-                        <option value="">Select Company</option>
+                        <option value="" disabled>Select Company</option>
                         <?php 
                         $companies_result->data_seek(0);
                         while($company = $companies_result->fetch_assoc()): ?>
@@ -246,7 +270,7 @@ include '../layouts/layout_start.php';
             <div class="form-row">
                 <div class="mt-20">
                     <div class="mt-20 d-flex" style="gap: 10px;">
-                        <button type="button" class="btn-delete" onclick="window.location.href='admin_user_list.php';">Close</button>
+                        <button type="button" class="btn-update" onclick="window.location.href='admin_user_list.php';">Close</button>
                         <?php if($user_id > 0): ?>
                             <button type="submit" class="btn-add">Update</button>
                         <?php else: ?>
@@ -260,6 +284,23 @@ include '../layouts/layout_start.php';
 </div>
 
 <script src="script.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const alertBox = document.getElementById("pageAlert");
+
+        if (alertBox) {
+            setTimeout(() => {
+                alertBox.classList.add("hide");
+
+                setTimeout(() => {
+                    alertBox.remove();
+                }, 400);
+            }, 3500); // hide after 3.5 seconds
+        }
+
+    });
+</script>
 <?php 
 // Include layout ends
 include '../layouts/footer.php'; 
