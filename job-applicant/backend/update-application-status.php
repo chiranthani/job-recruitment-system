@@ -25,6 +25,10 @@ $redirectPath = $isCandidate ? '../my-jobs.php' : '../applied-candidates.php';
 
 $applicationData = getAApplicationDetails($applicationId);
 
+if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+    redirectBack($redirectPath, 'error', 'Invalid request',$isCandidate,$applicationData['job_id']);
+}
+
 /* common validation */
 if ($applicationId <= 0 || !in_array($status, AppConstants::APPLICATION_STATUS, true)) {
     redirectBack($redirectPath, 'error', 'Invalid request data',$isCandidate,$applicationData['job_id']);

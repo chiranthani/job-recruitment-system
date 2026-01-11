@@ -1,7 +1,7 @@
 <?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
 
-<link rel="stylesheet" href="application.css">
+<link rel="stylesheet" href="../assets/css/application.css">
 
 <?php
 include '../layouts/header.php';
@@ -17,23 +17,25 @@ $total_records = $results['total_records'];
 // get cadidate applied jobs
 $userId = $_SESSION['user_id'] ?? 0;
 $appliedType = AppConstants::APPLIED_JOB;
-$appliedJobs = getAppliedJobIds($userId,$appliedType) ?? [];
+$appliedJobs = getAppliedJobIds($userId, $appliedType) ?? [];
 ?>
 
 <div class="main-container">
-   <h2 class="page-title">Search Jobs</h2>
-        <p class="page-sub-title">Find new opportunities</p>
+    <h2 class="page-title">Search Jobs</h2>
+    <p class="page-sub-title">Find new opportunities</p>
     <div>
-        <form method="GET" class="search-top-filter">
+        <form method="GET" id="jobSearchForm" class="search-top-filter">
 
             <input
-                type="text"
+                type="search"
                 name="search"
+                id="searchInput"
                 class="job-search-box"
                 value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
+                onsearch="this.form.submit()"
                 placeholder="Search job title...">
 
-            <select name="work_type" class="work-type-select">
+            <select name="work_type" id="workType" class="work-type-select">
                 <option value="all">All work types</option>
                 <?php foreach (AppConstants::WORK_TYPES as $type): ?>
                     <option value="<?= $type ?>"
@@ -43,7 +45,7 @@ $appliedJobs = getAppliedJobIds($userId,$appliedType) ?? [];
                 <?php endforeach; ?>
             </select>
 
-            <select name="company" class="company-select">
+            <select name="company" id="company" class="company-select">
                 <option value="all">All Companies</option>
                 <?php foreach (getApprovedCompanies() as $res): ?>
                     <option value="<?= $res['id'] ?>"
@@ -52,15 +54,13 @@ $appliedJobs = getAppliedJobIds($userId,$appliedType) ?? [];
                     </option>
                 <?php endforeach; ?>
             </select>
-
-            <button type="submit" class="btn">Search</button>
     </div>
 
     <div class="search-content-area">
 
         <aside class="search-sidebar">
             <h3 class="category-header">
-                Categories 
+                Categories
                 <span class="arrow"></span>
             </h3>
             <div class="filter-list">
@@ -94,17 +94,24 @@ $appliedJobs = getAppliedJobIds($userId,$appliedType) ?? [];
             </div>
             <?php foreach ($jobs as $job): ?>
                 <div class="job-card">
+                    <?php $hasMatch = ($job['skill_match_score'] ?? 0) > 0; ?>
                     <div class="job-card-header">
-                        <h4><?= htmlspecialchars($job['title']) ?></h4>
-                       <div>
-                         <?php if (in_array($job['id'], $appliedJobs)): ?>
-                            <span class="applied-badge">✔ Applied</span>
-                        <?php endif ?>
-                         <a class="apply-btn" href="../Jobs/job_view.php?job=<?= $job['id'] ?>">View</a>
-                       </div>
+                        <h4><?= htmlspecialchars($job['title']) ?>
+                        <?php if ($hasMatch): ?>
+                            <span class="skill-badge">Skill Match</span>
+                        <?php endif; ?>
+                    </h4>
+                        <div>
+                            <?php if (in_array($job['id'], $appliedJobs)): ?>
+                                <span class="applied-badge">✔ Applied </span>
+                            <?php endif ?>
+                            <a class="apply-btn" href="../Jobs/job_view.php?job=<?= $job['id'] ?>">View</a>
+                        </div>
                     </div>
 
-                    <a href="company-jobs.php?company_id=<?= $job['company_id'] ?>"><p class="company"><?= $job['company_name'] ?></p></a>
+                    <a href="company-jobs.php?company_id=<?= $job['company_id'] ?>">
+                        <p class="company"><?= $job['company_name'] ?> </p>
+                    </a>
 
                     <div class="job-card-about">
                         <div><?= $job['location_name'] ?></div>
@@ -145,11 +152,10 @@ $appliedJobs = getAppliedJobIds($userId,$appliedType) ?? [];
 
 
         </section>
-        
+
     </div>
 </div>
-<script>
-
+<script type="text/javascript">
     // Mobile category toggle
     const categoryHeader = document.querySelector('.category-header');
     const filterList = document.querySelector('.filter-list');
@@ -162,6 +168,25 @@ $appliedJobs = getAppliedJobIds($userId,$appliedType) ?? [];
     });
 
 
+    let typingTimer;
+    const delay = 500;
+
+    const form = document.getElementById('jobSearchForm');
+    const searchInput = document.getElementById('searchInput');
+    const workType = document.getElementById('workType');
+    const company = document.getElementById('company');
+
+    // text search
+    searchInput.addEventListener('input', () => {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            form.submit();
+        }, delay);
+    });
+
+    // dropdowns
+    workType.addEventListener('change', () => form.submit());
+    company.addEventListener('change', () => form.submit());
 </script>
 
 

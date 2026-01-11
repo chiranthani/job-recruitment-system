@@ -5,19 +5,97 @@ include '../config/database.php';
 $user_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $user = [];
 if ($user_id > 0) {
-    // Select based on users table structure
     $user_query = "SELECT * FROM users WHERE id = $user_id";
     $user_result = $con_main->query($user_query);
     $user = $user_result->fetch_assoc();
 }
 
-// 2. Fetch Roles from the database
-$roles_query = "SELECT id, name FROM roles WHERE status = 1 ORDER BY id ASC";
-$roles_result = $con_main->query($roles_query);
+// 2. Fetch Roles and Locations
+$roles_result = $con_main->query("SELECT id, name FROM roles WHERE status = 1 ORDER BY id ASC");
+$locations_result = $con_main->query("SELECT id, name FROM locations WHERE status = 1 ORDER BY name ASC");
 
-// 3. Fetch Cities/Towns (Locations)
-$location_query = "SELECT id, name FROM locations WHERE status = 1 ORDER BY name ASC";
-$locations_result = $con_main->query($location_query);
+// --- 3. FORM PROCESSING (POST REQUEST) ---
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Sanitize and capture inputs for the users table
+    $user_id    = isset($_POST['user_id']) ? (int)$_POST['user_id'] : 0;
+    $first_name = mysqli_real_escape_string($con_main, trim($_POST['first_name']));
+    $last_name  = mysqli_real_escape_string($con_main, trim($_POST['last_name']));
+    $gender     = mysqli_real_escape_string($con_main, $_POST['gender']);
+    $status     = (int)$_POST['status'];
+    $email      = mysqli_real_escape_string($con_main, trim($_POST['email']));
+    $username   = mysqli_real_escape_string($con_main, trim($_POST['username']));
+    $role_id    = (int)$_POST['role_id'];
+    $password   = $_POST['password'];
+
+    // --- 3a. IMAGE UPLOAD LOGIC ---
+    $profile_img_url = '';
+    if (!empty($_FILES['profile_image']['name'])) {
+        $fileName = time() . "_" . basename($_FILES['profile_image']['name']);
+        $target = "../assets/uploads/profile_pics/" . $fileName;
+
+        if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $target)) {
+            $profile_img_url = "assets/uploads/profile_pics/" . $fileName;
+        }
+    }
+
+    // --- 3b. ADD vs UPDATE (UPSERT) LOGIC ---
+    if ($user_id > 0) {
+        // --- UPDATE LOGIC ---
+        $pass_update = "";
+        if (!empty($password)) {
+            $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
+            $pass_update = ", password = '$hashed_pass'";
+        }
+
+        $img_update = "";
+        if ($profile_img_url != '') {
+            $img_update = ", profile_image = '$profile_img_url'";
+        }
+
+        $query = "UPDATE users SET 
+                  first_name = '$first_name', 
+                  last_name = '$last_name', 
+                  gender = '$gender', 
+                  status = '$status', 
+                  email = '$email', 
+                  username = '$username', 
+                  role_id = '$role_id'
+                  $pass_update
+                  $img_update
+                  WHERE id = '$user_id'";
+        
+        $action_label = "updated";
+    } else {
+        // --- ADD LOGIC ---
+        // 1. Check if email already exists before adding
+        $check_email = mysqli_query($con_main, "SELECT id FROM users WHERE email = '$email' LIMIT 1");
+        
+        if (mysqli_num_rows($check_email) > 0) {
+            $message = "Error: This email is already registered.";
+            $query = false; // Prevent execution
+        } else {
+            $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
+            $query = "INSERT INTO users (first_name, last_name, gender, status, email, username, password, role_id, profile_image)
+                      VALUES ('$first_name', '$last_name', '$gender', '$status', '$email', '$username', '$hashed_pass', '$role_id', '$profile_img_url')";
+            
+            $action_label = "added";
+        }
+    }
+
+    // --- 3c. EXECUTION ---
+    if ($query && $con_main->query($query)) {
+        // Successful operation
+        $success_trigger = true;
+        $message = "User $action_label successfully!";
+        
+        // Update Session if the admin just edited their own account
+        if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
+            $_SESSION['username'] = $username;
+        }
+    } elseif (!isset($message)) {
+        $message = "Database Error: " . $con_main->error;
+    }
+}
 
 include '../layouts/layout_start.php'; 
 ?>
@@ -53,10 +131,8 @@ include '../layouts/layout_start.php';
                 <input type="text" name="first_name" value="<?php echo $user['first_name'] ?? ''; ?>" required>
             </div>
             <div class="form-group">
-                 <label>Country <span class="required">*</span></label>
-                 <select name="country" id="country-select" onchange="updateRegions()" required>
-                    <option value="Sri Lanka" selected>Sri Lanka</option></select>
-                    <small style="color: #656363ff;">Service currently only available in Sri Lanka.</small>
+                <label>Email <span class="required">*</span></label>
+                <input type="text" name="email" value="<?php echo $user['email'] ?? ''; ?>" required>
             </div>
         </div>
 
@@ -66,8 +142,8 @@ include '../layouts/layout_start.php';
                 <input type="text" name="last_name" value="<?php echo $user['last_name'] ?? ''; ?>" required>
             </div>
             <div class="form-group">
-                <label>Email <span class="required">*</span></label>
-                <input type="text" name="email" value="<?php echo $user['email'] ?? ''; ?>" required>
+                <label>User name <span class="required">*</span></label>
+                <input type="text" name="username" value="<?php echo $user['username'] ?? ''; ?>" required>
             </div>
         </div>
 
@@ -80,38 +156,12 @@ include '../layouts/layout_start.php';
                     <label style="display:inline; margin-left: 10px;"><input type="radio" name="gender" value="Other" <?php echo (isset($user['gender']) && $user['gender'] == 'Other') ? 'checked' : ''; ?>> Other</label>
                 </div>
             </div>
-            <div class="form-group"><label>Postal code/zip</label><input type="text" name="postal_code"></div>
+            <div class="form-group">
+                <label>Password <span class="required">*</span></label><input type="password" name="password" <?php echo $user_id ? '' : 'required'; ?>></div>
         </div>
 
         <div class="form-row">
-            <div class="form-group"><label>Date of Birth <span class="required">*</span></label><input type="date" name="dob"></div>
-            <div class="form-group">
-                <label>Town <span class="required">*</span></label>
-                <select name="location_id" id="city-select" required>
-                    <option value="">Select Town</option>
-                    <?php while($loc = $locations_result->fetch_assoc()): ?>
-                        <option value="<?php echo $loc['id']; ?>" <?php echo (isset($user['location_id']) && $user['location_id'] == $loc['id']) ? 'selected' : ''; ?>>
-                            <?php echo $loc['name']; ?>
-                        </option>
-                    <?php endwhile; ?>
-                </select>
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label>Contact Number <span class="required">*</span></label>
-                <input type="text" name="contact_no">
-            </div>
-            <div class="form-group">
-                <label>User name <span class="required">*</span></label>
-                <input type="text" name="username" value="<?php echo $user['username'] ?? ''; ?>" required>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group"><label>Address <span class="required">*</span></label><textarea name="address" style="height: 60px;"></textarea></div>
-            <div class="form-group"><label>Password <span class="required">*</span></label><input type="password" name="password" <?php echo $user_id ? '' : 'required'; ?>></div>
         </div>
 
         <div class="form-row">
@@ -122,12 +172,12 @@ include '../layouts/layout_start.php';
                     <option value="0" <?php echo (isset($user['status']) && $user['status'] == 0) ? 'selected' : ''; ?>>Inactive</option>
                 </select>
             </div>
-            <div class="form-group"><label>Confirm Password <span class="required">*</span></label><input type="password" name="confirm_password"></div>
+            <div class="form-group">
+                <label>Confirm Password <span class="required">*</span></label><input type="password" name="confirm_password"></div>
         </div>
 
         <div class="form-row">
-            <div class="form-group"></div>
-            <div class="form-group">
+        <div class="form-group">
                 <label>User Role <span class="required">*</span></label>
                 <select name="role_id" required>
                     <option value="">Select Role</option>
@@ -138,10 +188,18 @@ include '../layouts/layout_start.php';
                     <?php endwhile; ?>
                 </select>
             </div>
+            <div class="form-group"></div>
         </div>
 
+        <div class="form-row"></div>
+
+        <div class="form-row">  
+
         <div class="mt-20">
-            <button type="submit" name="btn_action" value="add" class="btn-add">Add</button>
+    <div class="mt-20 d-flex" style="gap: 10px;">
+        <button type="button" class="btn-add" onclick="navigateToStep(2)">Next</button>
+        <button type="button" class="btn-delete" onclick="clearForm()">Clear Form</button>
+    </div>
             <?php if($user_id > 0): ?>
                 <button type="submit" name="btn_action" value="update" class="btn-update" style="margin-left: 20px;">Update</button>
             <?php endif; ?>

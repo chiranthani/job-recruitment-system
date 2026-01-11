@@ -13,7 +13,7 @@
         <p>Explore exciting opportunities and apply to start your journey towards a rewarding career.</p>
 
         <form class="search-bar" method="GET" action="job-applicant/job-search.php">
-            <input type="text" name="search" placeholder="Search jobs (e.g., Designer, Developer ...)">
+            <input type="text" name="search" placeholder="Search jobs (enter a job title ...)">
             <button type="submit">Search</button>
         </form>
     </div>

@@ -1,7 +1,7 @@
 <?php include 'config/database.php'; ?>
 <?php include 'layouts/layout_start.php'; ?>
 <?php include 'permission-check.php'; ?>
-<link rel="stylesheet" href="job-applicant/application.css">
+<link rel="stylesheet" href="assets/css/application.css">
 
 <?php include 'layouts/header.php'; ?>
 <?php include 'job-applicant/backend/data-queries.php'; ?>
@@ -16,7 +16,7 @@
     <h2 class="page-title">My Notifications</h2>
 
     <?php if (empty($notifications['notifications'])): ?>
-        <p>No notifications found.</p>
+        <div style="margin-top: auto;text-align: center;padding: 40px 0;">No notifications found.</div>
     <?php else: ?>
         <?php foreach ($notifications['notifications'] as $n): ?>
             <div class="notification <?php echo $n['is_read'] == 0 ? 'unread' : ''; ?>" data-id="<?php echo $n['id']; ?>">

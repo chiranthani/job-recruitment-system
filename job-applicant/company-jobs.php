@@ -1,6 +1,6 @@
 <?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
-<link rel="stylesheet" href="application.css">
+<link rel="stylesheet" href="../assets/css/application.css">
 <?php include '../layouts/header.php'; ?>
 <?php include 'backend/data-queries.php'; ?>
 

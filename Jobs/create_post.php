@@ -2,9 +2,10 @@
 <?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
 <?php include '../layouts/header.php'; ?>
+<?php include '../permission-check.php'; ?>
 <!-- end page common elements-->
 
-<link rel="stylesheet" href="job-post.css">
+<link rel="stylesheet" href="../assets/css/job-post.css">
 
 <section class="job-wrapper">
 <?php if (isset($_SESSION['error'])) { ?>
@@ -107,7 +108,7 @@
                 $result = $con_main->query($query);
                 while ($benefit = $result->fetch_assoc()) {
                 ?>
-                    <label><input type="checkbox"  name="benefits[]" class="benefits-checkbox" value="<?php echo ($benefit['id']) ?>"> <?php echo ($benefit['name']); ?></label>
+                    <span class="benefits-text"><input type="checkbox"  name="benefits[]" class="benefits-checkbox" value="<?php echo ($benefit['id']) ?>"> <?php echo ($benefit['name']); ?></span>
                 <?php } ?>
             </div>
         </div>
@@ -130,7 +131,7 @@
         <!-- Save + Close Buttons -->
         <div class="form-actions">
             <button type="submit" class="save-btn">Save</button>
-            <button type="button" class="close-btn">Close</button>
+            <button type="button" class="close-btn" onclick="history.back()">Close</button>
         </div>
 
     </form>

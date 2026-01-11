@@ -2,7 +2,7 @@
 <?php include '../layouts/layout_start.php'; ?>
 <?php include '../permission-check.php'; ?>
 
-<link rel="stylesheet" href="application.css">
+<link rel="stylesheet" href="../assets/css/application.css">
 
 <?php include '../layouts/header.php'; 
 include 'backend/data-queries.php';
@@ -22,7 +22,7 @@ include 'backend/data-queries.php';
         <?php $job = getSelectedJobPostDetails($_GET['job']); ?>
            
         <a onclick="window.history.back()" class="back-link">← Back to Job Details</a>
-        <h2>Apply for <?php echo $job['title'] ?></h2>
+        <h2 style="margin: 5px 0;">Apply for <?php echo $job['title'] ?></h2>
         <p class="job-company">at <?php echo $job['company_name'] ?></p>
 
         <form id="applyForm" method="POST" action="backend/application-submit.php" enctype="multipart/form-data">
@@ -113,7 +113,7 @@ include 'backend/data-queries.php';
                 </div>
             </div>
             <div class="form-footer-btns">
-                <button type="button" class="btn btn-cancel">Cancel</button>
+                <button type="button" class="btn btn-cancel" onclick="window.history.back()" >Cancel</button>
                 <button type="submit" class="btn btn-submit">Submit Application</button>
             </div>
 
