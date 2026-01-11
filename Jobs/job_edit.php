@@ -44,7 +44,7 @@ while ($row = $benefitResult->fetch_assoc()) {
 }
 ?>
 
-<link rel="stylesheet" href="job-post.css">
+<link rel="stylesheet" href="../assets/css/job-post.css">
 
 <section class="job-wrapper">
 

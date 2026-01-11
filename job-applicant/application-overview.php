@@ -2,7 +2,7 @@
 <?php include '../layouts/layout_start.php'; ?>
 <?php include '../permission-check.php'; ?>
 
-<link rel="stylesheet" href="application.css">
+<link rel="stylesheet" href="../assets/css/application.css">
 
 <?php
 include '../layouts/header.php';
@@ -137,15 +137,22 @@ $totalPages = $result['totalPages'];
                 <?php endif; ?>
             </tbody>
         </table>
-        <div class="pagination">
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a
-                    href="?page=<?= $i ?>&search=<?= urlencode($search) ?>"
-                    class="<?= $i == $page ? 'active' : '' ?>">
-                    <?= $i ?>
-                </a>
-            <?php endfor; ?>
-        </div>
+         <?php if ($totalPages >= 1): ?>
+         <div class="pagination-wrapper">
+            <div class="pagination-info">
+                Page <strong><?= $page ?></strong> of <strong><?= $totalPages ?></strong>
+            </div>
+            <div class="pagination">
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a
+                        href="?page=<?= $i ?>&search=<?= urlencode($search) ?>"
+                        class="<?= $i == $page ? 'active' : '' ?>">
+                        <?= $i ?>
+                    </a>
+                <?php endfor; ?>
+            </div>
+         </div>
+         <?php endif ?>
     </div>
         </div>
 </section>

@@ -2,7 +2,7 @@
 <?php include '../layouts/layout_start.php'; ?>
 <?php include '../permission-check.php'; ?>
 
-<link rel="stylesheet" href="application.css">
+<link rel="stylesheet" href="../assets/css/application.css">
 
 <?php include '../layouts/header.php'; 
 include 'backend/data-queries.php';
@@ -72,7 +72,7 @@ $cardData = getMyJobCardData();
 
     <div class="application-list">
         <?php if (empty($applications)): ?>
-            <p>No applications found</p>
+            <div style="margin-top: auto;text-align: center;padding: 40px 0;">No applications found</div>
         <?php endif; ?>
 
         <?php foreach ($applications as $item): 

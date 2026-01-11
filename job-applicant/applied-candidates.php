@@ -2,7 +2,7 @@
 <?php include '../layouts/layout_start.php'; ?>
 <?php include '../permission-check.php'; ?>
 
-<link rel="stylesheet" href="application.css">
+<link rel="stylesheet" href="../assets/css/application.css">
 
 <?php include '../layouts/header.php'; ?>
 <?php include 'backend/data-queries.php'; ?>
@@ -27,7 +27,7 @@ $totalApplications = $results['total'];
 <section>
     <div class="main-container">
         <a onclick="window.history.back()" class="back-link">← Back to Overview</a>
-        <h2 class="page-title">Candidate Applications</h2>
+        <h2 class="page-title" style="margin-top: 5px;">Candidate Applications</h2>
 
         <!-- Job Card -->
         <div class="job-header-card">
@@ -135,11 +135,18 @@ $totalApplications = $results['total'];
             </tbody>
         </table>
         </form>
-        <div class="pagination">
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a href="?job_id=<?= $jobId ?>&from=<?= $fromDate ?>&to=<?= $toDate ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
-            <?php endfor; ?>
-        </div>
+         <?php if ($totalPages >= 1): ?>
+         <div class="pagination-wrapper">
+            <div class="pagination-info">
+                Page <strong><?= $page ?></strong> of <strong><?= $totalPages ?></strong>
+            </div>
+            <div class="pagination">
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a href="?job_id=<?= $jobId ?>&from=<?= $fromDate ?>&to=<?= $toDate ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
+                <?php endfor; ?>
+            </div>
+         </div>
+          <?php endif ?>
          </div>
     </div>
 </section>

@@ -145,7 +145,7 @@
             <h2>Need More Help?</h2>
             <p>If you have questions or need assistance, please contact our support team:</p>
             <ul>
-                <li>Email: support@careerbridge.com</li>
+                <li>Email: support@jobboardplus.com</li>
                 <li>Phone: +94 11 234 5678</li>
                 <li>Working Hours: Monday - Friday, 9:00 AM - 5:00 PM</li>
             </ul>

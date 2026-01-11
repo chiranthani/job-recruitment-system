@@ -56,7 +56,7 @@ while ($b = $benRes->fetch_assoc()) {
 ?>
 <!-- end page common elements -->
 
-<link rel="stylesheet" href="job-post.css">
+<link rel="stylesheet" href="../assets/css/job-post.css">
 
 <section class="page-wrapper job-view-container">
 <a onclick="window.history.back()" class="back-link">← Go Back</a>

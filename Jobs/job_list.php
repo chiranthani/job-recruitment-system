@@ -34,7 +34,7 @@ if (isset($_POST['delete_job_id'])) {
 ?>
 <!-- end page common elements -->
 
-<link rel="stylesheet" href="job-post.css">
+<link rel="stylesheet" href="../assets/css/job-post.css">
 
 <?php
 /* =========================
@@ -266,7 +266,7 @@ $is_active = $data['status'] == 1;
     </td>
 </tr>
 <?php } } else { ?>
-<tr><td colspan="6">No job posts found</td></tr>
+<tr><td colspan="7">No job posts found</td></tr>
 <?php } ?>
 </tbody>
 </table>

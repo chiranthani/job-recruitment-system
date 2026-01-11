@@ -335,7 +335,7 @@ label.required::after {
 
 /* buttons */
 .btn {
-    padding: 6px 12px;
+    padding: 8px 12px;
     border-radius: 5px;
     cursor: pointer;
     font-size: 13px;
@@ -786,7 +786,7 @@ label.required::after {
 }
 
 .pagination-info {
-    margin-bottom: 8px;
+    margin: 8px;
     font-size: 14px;
     color: #555;
 }
