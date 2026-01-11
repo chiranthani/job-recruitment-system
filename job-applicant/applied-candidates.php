@@ -110,7 +110,12 @@ $totalApplications = $results['total'];
                                     <input type="checkbox" name="application_ids[]" value="<?= $r['id'] ?>">
                                 <?php endif; ?>
                             </td>
-                            <td data-label="Name"><?= htmlspecialchars($r['candidate_name']) ?></td>
+                            <td data-label="Name">
+                                <a href="../user-management/admin_user_view.php?id=<?= $r['id'] ?>" class="job-link">
+                                    <?= htmlspecialchars($r['candidate_name']) ?>
+                                    <span  class="status" style="color: gray;" ><?= $r['is_deleted'] ? '(Deleted)' : '' ?></span>
+                                </a>
+                           </td>
                             <td data-label="Email"><?= htmlspecialchars($r['candidate_email']) ?></td>
                             <td data-label="Contact Number"><?= $r['contact_number'] ?? '-' ?></td>
                             <td data-label="Experience"><?= $r['experience'] ?? '-' ?></td>

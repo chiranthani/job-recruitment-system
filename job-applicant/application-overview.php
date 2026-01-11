@@ -90,7 +90,7 @@ $totalPages = $result['totalPages'];
             <tbody style="text-align:center;">
                 <?php if (empty($jobs) || count($jobs) == 0): ?>
                     <tr>
-                        <td colspan="8">No records found</td>
+                        <td colspan="9">No records found</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($jobs as $job): ?>

@@ -528,7 +528,8 @@ function getJobApplications($jobId, $from, $to, $search, $page = 1){
     $sql = "SELECT
             applications.*,
             users.first_name,
-            users.last_name
+            users.last_name,
+            users.is_deleted
         FROM applications
         INNER JOIN users ON users.id = applications.user_id
         $where

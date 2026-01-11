@@ -9,9 +9,12 @@ include 'layouts/header.php';
     .terms-container {
     max-width: 900px;
     margin: 40px auto;
-    padding: 0 20px;
+    padding: 30px;
     line-height: 1.7;
     color: #333;
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .terms-container h1 {

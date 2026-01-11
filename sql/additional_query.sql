@@ -22,3 +22,7 @@ ALTER TABLE `candidates` CHANGE `updatedAt` `updatedAt` DATETIME NULL DEFAULT NU
 ALTER TABLE `user_skills` CHANGE `createdAt` `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
 ALTER TABLE `user_skills` CHANGE `updatedAt` `updatedAt` DATETIME NULL DEFAULT NULL;
 ALTER TABLE `user_skills` CHANGE `status` `status` TINYINT(1) NOT NULL DEFAULT '1';
+
+ALTER TABLE `users` DROP FOREIGN KEY `users_ibfk_1`; ALTER TABLE `users` ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `companies`(`id`) ON DELETE SET NULL ON UPDATE SET NULL;
+DELETE FROM job_categories WHERE `job_categories`.`id` = 13;
+
