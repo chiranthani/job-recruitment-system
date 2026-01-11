@@ -1,14 +1,16 @@
-// script.js
+/**
+ * UI & MODAL MANAGEMENT
+ */
 
-// Function to show a specific popup by its ID
+// Function to show a specific popup/modal by its ID
 function showPopup(popupId) {
     const popup = document.getElementById(popupId);
     if (popup) {
-        popup.style.display = 'flex';
+        popup.style.display = 'flex'; // Centered overlay
     }
 }
 
-// Function to close a specific popup
+// Function to close a specific popup/modal
 function closePopup(popupId) {
     const popup = document.getElementById(popupId);
     if (popup) {
@@ -16,23 +18,26 @@ function closePopup(popupId) {
     }
 }
 
-// Helper to close popup if clicking outside the content box
+// Global click listener: Close modal if the user clicks the dark background (overlay)
 window.onclick = function(event) {
     if (event.target.classList.contains('modal-overlay')) {
         event.target.style.display = 'none';
     }
 }
 
-// Function to switch between steps
+/**
+ * MULTI-STEP FORM NAVIGATION
+ * Used for complex forms like Candidate Profile Registration
+ */
 function navigateToStep(stepNumber) {
-    // Hide all steps
+    // Hide all step containers (Add more IDs here if you have 3+ steps)
     document.getElementById('step1-content').style.display = 'none';
     document.getElementById('step2-content').style.display = 'none';
 
-    // Show the target step
+    // Show the specific target step
     document.getElementById('step' + stepNumber + '-content').style.display = 'block';
 
-    // Update Tab UI
+    // Highlight the active Tab in the UI
     const tabs = document.querySelectorAll('.tab-link');
     tabs.forEach((tab, index) => {
         if (index + 1 === stepNumber) {
@@ -43,23 +48,30 @@ function navigateToStep(stepNumber) {
     });
 }
 
-
-// 3. Interactive Tag Input for Skills
+/**
+ * SKILLS TAG INPUT SYSTEM
+ * Converts text input into visual tags and stores IDs in a hidden field for PHP
+ */
 document.addEventListener('DOMContentLoaded', () => {
     const skillsInput = document.getElementById('skillsInput');
     const tagsContainer = document.getElementById('tagsContainer');
     const hiddenSkillsInput = document.getElementById('hiddenSkillsInput');
     const options = document.querySelectorAll('#skill-options option');
     
+    // Map skill names to their Database IDs from the datalist
     const skillMap = {};
     options.forEach(opt => {
         skillMap[opt.value] = opt.dataset.id;
     });
+
     if (skillsInput && tagsContainer && hiddenSkillsInput) {
         let skillIds = [];
         let skillNames = [];
 
+        // Synchronize the hidden input with the array for form submission
         function updateHiddenInput() { hiddenSkillsInput.value = skillIds.join(','); }
+
+        // Redraw tags inside the container
         function renderTags() {
             tagsContainer.querySelectorAll('.tag').forEach(tag => tag.remove());
             skillNames.forEach((skill, index) => {
@@ -70,11 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Listen for Enter or Comma to add a tag
         skillsInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' || e.key === ',') {
                 e.preventDefault();
                 const name = skillsInput.value.trim();
 
+                // Validation: Only add if it exists in the database list and isn't already added
                 if (skillMap[name] && !skillIds.includes(skillMap[name])) {
                     skillNames.push(name);
                     skillIds.push(skillMap[name]);
@@ -85,22 +99,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // Remove a tag when the 'x' is clicked
         tagsContainer.addEventListener('click', e => {
-                if (e.target.classList.contains('close')) {
-                    const i = e.target.dataset.index;
-                    skillNames.splice(i, 1);
-                    skillIds.splice(i, 1);
-                    renderTags();
-                    updateHiddenInput();
-                }
-            });
+            if (e.target.classList.contains('close')) {
+                const i = e.target.dataset.index;
+                skillNames.splice(i, 1);
+                skillIds.splice(i, 1);
+                renderTags();
+                updateHiddenInput();
+            }
+        });
     }
 });
 
-// admin_user_form image upload
+/**
+ * IMAGE UPLOAD & PREVIEW LOGIC
+ * Used in admin_user_form.php for profile pictures
+ */
 function previewUserImage(input) {
-    console.log("File selected!"); // To Check browser console
-    
     const preview = document.getElementById('user-img');
     const placeholder = document.getElementById('placeholder-icon');
     
@@ -108,34 +124,33 @@ function previewUserImage(input) {
         const reader = new FileReader();
 
         reader.onload = function(e) {
-            // 1. Set the image source to the file data
+            // Set preview source to the local file data
             preview.src = e.target.result;
-            // 2. Show the image
+            // Ensure visual consistency: Show image, Hide icon
             preview.style.setProperty("display", "block", "important");
-            // 3. Hide the placeholder icon
             placeholder.style.setProperty("display", "none", "important");
-            
-            console.log("Image switched!");
         };
 
         reader.readAsDataURL(input.files[0]);
     }
 }
 
+// Resets the image upload field
 function removeUserImage() {
     const preview = document.getElementById('user-img');
     const placeholder = document.getElementById('placeholder-icon');
     const input = document.getElementById('user-photo-input');
 
-    input.value = ""; // Reset file input
+    input.value = ""; 
     preview.src = "";
     preview.style.display = 'none';
     placeholder.style.display = 'block';
-    console.log("Image removed!");
 }
 
-// 1. DATA OBJECT (Must be global)
-// Ensure this data is at the top of your script.js
+/**
+ * LOCATION DROPDOWN HIERARCHY
+ * Dynamic cascading dropdowns: Country -> Region -> Town
+ */
 const locationData = {
     "Sri Lanka": {
         "Western": ["Colombo", "Gampaha", "Kalutara"],
@@ -147,26 +162,23 @@ const locationData = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Automatically populate regions for Sri Lanka on page load
     if (document.getElementById("country-select")) {
         updateRegions(); 
     }
 });
 
+// Updates the Region list based on selected Country
 window.updateRegions = function() {
     const countrySel = document.getElementById("country-select");
     const regionSel = document.getElementById("region-select");
     const citySel = document.getElementById("city-select");
-    
     const selectedCountry = countrySel.value;
 
-    // Reset dropdowns
     regionSel.innerHTML = '<option value="">Select Region</option>';
     citySel.innerHTML = '<option value="">Select Town</option>';
 
     if (selectedCountry && locationData[selectedCountry]) {
-        const regions = Object.keys(locationData[selectedCountry]);
-        regions.forEach(region => {
+        Object.keys(locationData[selectedCountry]).forEach(region => {
             const opt = document.createElement("option");
             opt.value = region;
             opt.text = region;
@@ -175,6 +187,7 @@ window.updateRegions = function() {
     }
 };
 
+// Updates Town list based on selected Region
 window.updateTowns = function() {
     const countrySel = document.getElementById("country-select");
     const regionSel = document.getElementById("region-select");
@@ -186,8 +199,7 @@ window.updateTowns = function() {
     citySel.innerHTML = '<option value="">Select Town</option>';
 
     if (selectedCountry && selectedRegion && locationData[selectedCountry][selectedRegion]) {
-        const towns = locationData[selectedCountry][selectedRegion];
-        towns.forEach(town => {
+        locationData[selectedCountry][selectedRegion].forEach(town => {
             const opt = document.createElement("option");
             opt.value = town;
             opt.text = town;
@@ -196,101 +208,86 @@ window.updateTowns = function() {
     }
 };
 
-//Resume Upload Preview/Check 
-    const resumeInput = document.getElementById('resume_upload');
-    if (resumeInput) {
-        resumeInput.addEventListener('change', function() {
-            if (this.files[0]) {
-                console.log("File selected: " + this.files[0].name);
-            }
-        });
-    }
-
+/**
+ * ADMIN SEARCH & FILTER LOGIC
+ * Reloads the user list page with URL parameters for PHP filtering
+ */
 let searchTimer;
 
-/**
- * Automatically triggers search after the user stops typing
- */
+// Live Search: Waits for user to stop typing (Debounce)
 function liveSearch() {
-    // Clear the timer if the user is still typing
     clearTimeout(searchTimer);
-
-    // Wait 500ms after the last keystroke before reloading
     searchTimer = setTimeout(function() {
         const searchValue = document.getElementById('searchInput').value.trim();
         const urlParams = new URLSearchParams(window.location.search);
 
-        if (searchValue !== "") {
-            urlParams.set('search', searchValue);
-        } else {
-            // If the field is cleared, remove the search parameter entirely
-            urlParams.delete('search');
-        }
+        if (searchValue !== "") urlParams.set('search', searchValue);
+        else urlParams.delete('search');
 
-        // Reset to first page
-        urlParams.delete('page');
-
-        // Reload the page with the new filters
+        urlParams.delete('page'); // Reset to page 1
         window.location.href = window.location.pathname + '?' + urlParams.toString();
     }, 500); 
 }
 
-/**
- * Filters the user list based on the selected account status
- */
+// Filter by Account Status (Active/Inactive)
 function filterByStatus() {
     const statusValue = document.getElementById('statusFilter').value;
     const urlParams = new URLSearchParams(window.location.search);
 
-    if (statusValue !== "") {
-        urlParams.set('status', statusValue);
-    } else {
-        // If "All Status" is selected, remove the parameter
-        urlParams.delete('status');
-    }
+    if (statusValue !== "") urlParams.set('status', statusValue);
+    else urlParams.delete('status');
 
-    // Always return to page 1 when filter changes
     urlParams.delete('page');
-
-    // Reload with all combined filters (Search + Role + Status)
     window.location.href = window.location.pathname + '?' + urlParams.toString();
 }
 
 /**
- * Filters the user list based on registration date range
+ * FORM CONTROLS
  */
-function filterByDate() {
-    const dateValue = document.getElementById('dateFilter').value;
-    const urlParams = new URLSearchParams(window.location.search);
 
-    if (dateValue !== "") {
-        urlParams.set('date_range', dateValue);
-    } else {
-        urlParams.delete('date_range');
-    }
-
-    // Reset pagination
-    urlParams.delete('page');
-
-    window.location.href = window.location.pathname + '?' + urlParams.toString();
-}
-
+// Reset form and UI elements
 function clearForm() {
     if (confirm("Are you sure you want to clear all entered information?")) {
         const form = document.getElementById('multiStepProfileForm');
-        
-        // 1. Reset standard inputs, textareas, and selects
         form.reset();
-
-        // 2. Manually clear hidden inputs (like your skills hidden field)
         document.getElementById('hiddenSkillsInput').value = "";
-
-        // 3. Clear Visual Tags (if you are using a tag system)
         const tagsContainer = document.getElementById('tagsContainer');
-        const tags = tagsContainer.querySelectorAll('.tag'); // Assuming your tags have a 'tag' class
-        tags.forEach(tag => tag.remove());
-
-        // 4. Return to Step 1 visually
+        if (tagsContainer) {
+            tagsContainer.querySelectorAll('.tag').forEach(tag => tag.remove());
+        }
         navigateToStep(1);
     }
 }
+
+// Dynamic UI: Show/Hide Company dropdown based on Role (Recruiter = 2)
+function toggleCompanyField() {
+    const roleSelect = document.getElementById('role_id');
+    const hiddenRole = document.getElementById('hidden_role_id');
+    const companyWrapper = document.getElementById('company_wrapper');
+    const companySelect = document.getElementById('company_id');
+
+    if (!roleSelect || !companyWrapper) return;
+
+    // Check role ID (Works for both dynamic select and disabled Edit-mode select)
+    const currentRole = roleSelect.disabled && hiddenRole ? hiddenRole.value : roleSelect.value;
+
+    if (currentRole === "2") { // ROLE: RECRUITER
+        companyWrapper.style.display = "block";
+        companySelect.disabled = false;
+        companySelect.setAttribute('required', 'required');
+    } else {
+        companyWrapper.style.display = "none";
+        companySelect.disabled = true;
+        companySelect.removeAttribute('required');
+        companySelect.value = ""; 
+    }
+}
+
+// Initialize listeners on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleCompanyField();
+    const roleSelect = document.getElementById('role_id');
+    if (roleSelect) {
+        roleSelect.addEventListener('change', toggleCompanyField);
+    }
+});
