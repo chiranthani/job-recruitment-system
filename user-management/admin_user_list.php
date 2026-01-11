@@ -164,8 +164,9 @@ include '../layouts/layout_start.php';
                             <?php echo ($row['status'] == 1) ? '<span style="color: green;">Active</span>' : '<span style="color: red;">Inactive</span>'; ?>
                         </td>
                         <td style="padding: 12px;">
-                            <a href="admin_user_form.php?id=<?php echo $row['id']; ?>&mode=view" style="color: blue; text-decoration: none;">View</a> |  
-                            <a href="admin_user_form.php?id=<?php echo $row['id']; ?>" style="color: orange; text-decoration: none;">Update</a> | 
+                            <a href="admin_user_view.php?id=<?php echo $row['id']; ?>" class="btn-view">View</a>
+                            <a href="admin_user_form.php?id=<?php echo $row['id']; ?>" 
+                               class="btn-update" style="text-decoration: none;">Update</a> 
                             <form method="POST" style="display:inline" onsubmit="return confirm('Delete this user?');">
                                 <input type="hidden" id="delete_user" name="delete_user" value="<?php echo $row['id']; ?>"/>
                                 <button class="btn-delete" type="submit">Delete</button>
