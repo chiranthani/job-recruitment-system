@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../assets/css/user_management.css">
 
 <?php include '../layouts/header.php'; ?>
 
@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     <?php endif; ?>
     
-    <form action="signup.php" method="POST">
+    <form action="signup.php" method="POST" style="margin-top: 30px;">
         <div class="form-group">
             <label for="email">Email Address <span class="required">*</span></label>
             <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
@@ -100,7 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="form-group">
             <label style="display: flex; align-items: center; cursor: pointer;">
                 <input type="checkbox" required style="width: auto; margin-right: 15px;">
-                I Agree to the Terms and Conditions
+                <span>I agree to the <a href="../terms.php" style="text-decoration:none" target="_blank">Terms & Conditions</a></span>
             </label>
         </div>
 
@@ -108,7 +108,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit" class="btn-add" style="width: 100%; padding: 12px;">Create Profile</button>
         </div>
 
-        <p class="text-center mt-20" style="color: #f81818ff; font-weight:bold ">
+        <p class="text-center mt-20" style="color: #333;">
             Already have an account? <a href="../login.php" style="color: #0300b2ff; font-weight: bold;">Sign in</a>
         </p>
     </form>

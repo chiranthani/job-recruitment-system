@@ -20,6 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username   = mysqli_real_escape_string($con_main, trim($_POST['username']));
     $role_id    = (int)$_POST['role_id'];
     $password   = $_POST['password'];
+    $confirm_password   = $_POST['confirm_password'];
 
     if ($role_id == 2) {
         $company_name   = trim($_POST['company_name'] ?? '');
@@ -30,6 +31,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $query = false;
         }
     }
+    // Password mismatch
+    if (!empty($password) && $password !== $confirm_password) {
+        $errors = "Passwords do not match.";
+        $query = false;
+    }
+
+
 
     // --- IMAGE UPLOAD LOGIC ---
     $profile_img_url = 'assets/images/default_profile_image.png';
@@ -104,7 +112,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <title>New User Creation</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../assets/css/user_management.css">
 
 <?php include '../layouts/header.php'; ?>
 
@@ -124,7 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         <?php endif; ?>
 
-        <form method="POST" enctype="multipart/form-data" style="margin-top: 70px;">
+        <form method="POST" enctype="multipart/form-data" style="margin-top: 70px;" autocomplete="off">
 
             <div style="position: absolute; top: 30px; right: 55px; text-align: center; z-index: 10;">
                 <div id="image-preview" style="width: 100px; height: 100px; border: 3px solid var(--ink-color); border-radius: 50%; margin: 0 auto 10px; display: flex; justify-content: center; align-items: center; font-size: 40px; overflow: hidden; background-color: #f9f9f9;">
@@ -174,7 +182,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <input type="text" name="username" value="" required>
                 </div>
                 <div class="form-group">
-                    <label>Password <span class="required">*</span></label><input type="password" name="password">
+                    <label>Password <span class="required">*</span></label>
+                    <input type="password" name="password"  autocomplete="new-password">
                 </div>
             </div>
 
@@ -188,7 +197,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Confirm Password <span class="required">*</span></label><input type="password" name="confirm_password">
+                    <label>Confirm Password <span class="required">*</span></label>
+                    <input type="password" name="confirm_password"  autocomplete="new-password">
                 </div>
             </div>
 
@@ -214,13 +224,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="mt-20">
                     <div class="mt-20 d-flex" style="gap: 10px;">
 
-                        <button type="button" class="btn-delete" onclick="clearForm()">Clear Form</button>
+                        <button type="button" class="btn-update" onclick="clearForm()">Clear Form</button>
                         <button type="submit" class="btn-add">Create</button>
                     </div>
 
                 </div>
         </form>
     </div>
+</div>
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function() {

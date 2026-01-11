@@ -10,7 +10,7 @@ $stmt_jobs = $con_main->prepare($job_count_query);
 $stmt_jobs->execute();
 $job_count = $stmt_jobs->get_result()->fetch_assoc()['total'];
 
-$company_count_query = "SELECT COUNT(*) AS total FROM companies";
+$company_count_query = "SELECT COUNT(*) AS total FROM companies WHERE status = 1";
 $stmt_company = $con_main->prepare($company_count_query);
 $stmt_company->execute();
 $company_count = $stmt_company->get_result()->fetch_assoc()['total'];
@@ -20,7 +20,7 @@ $stmt_pending = $con_main->prepare($pending_count_query);
 $stmt_pending->execute();
 $pending_count = $stmt_pending->get_result()->fetch_assoc()['total'];
 
-$users_count_query = "SELECT COUNT(*) AS total FROM users";
+$users_count_query = "SELECT COUNT(*) AS total FROM users WHERE is_deleted = 0";
 $stmt_users = $con_main->prepare($users_count_query);
 $stmt_users->execute();
 $users_count = $stmt_users->get_result()->fetch_assoc()['total'];
@@ -41,7 +41,7 @@ $users_count = $stmt_users->get_result()->fetch_assoc()['total'];
         </div>
 
         <div class="stat-card">
-            <div style="font-size:18px; margin-bottom: 10px;">🏢 <span> Companies</span></div>
+            <div style="font-size:18px; margin-bottom: 10px;">🏢 <span> Active Companies</span></div>
             <div class="stat-value">
                 <div><?= $company_count ?? 0 ?></div>
             </div>
