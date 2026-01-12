@@ -1,11 +1,13 @@
-<?php include '../config/database.php'; ?>
-<?php include '../layouts/layout_start.php'; ?>
-<?php include '../permission-check.php'; ?>
+<?php include '../layouts/layout_start.php';
+require '../permission-check.php';
+require 'backend/data-queries.php';
+?>
 
 <link rel="stylesheet" href="../assets/css/application.css">
 
-<?php include '../layouts/header.php'; 
-include 'backend/data-queries.php';
+<?php
+include '../layouts/header.php';
+
 $currentStatus = $_GET['status'] ?? 'ALL';
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $applications = getAppliedJobs($currentStatus, $search);
@@ -39,7 +41,7 @@ $cardData = getMyJobCardData();
                     <p>Pending Decision</p>
                 </div>
             </div>
-             <div class="card">
+            <div class="card">
                 <div class="card-icon">🏆</div>
                 <div class="card-content">
                     <h3><?= $cardData['hired_count']; ?></h3>
@@ -48,79 +50,79 @@ $cardData = getMyJobCardData();
             </div>
         </div>
 
-<div class="container">
-        <h3 class="section-title">My Applications</h3>
+        <div class="container">
+            <h3 class="section-title">My Applications</h3>
 
-        <div class="my-application-filter-bar">
-            <!-- Status Tabs -->
-            <div class="status-tabs">
-               <button class="tab <?= $currentStatus === 'ALL' ? 'active' : '' ?>" data-status="ALL">All</button>
-                <?php foreach (AppConstants::APPLICATION_STATUS as $label): ?>
-                    <button class="tab <?= $currentStatus === $label ? 'active' : '' ?>" data-status="<?= $label ?>">
-                        <?= $label ?>
-                    </button>
-                <?php endforeach; ?>
+            <div class="my-application-filter-bar">
+                <!-- Status Tabs -->
+                <div class="status-tabs">
+                    <button class="tab <?= $currentStatus === 'ALL' ? 'active' : '' ?>" data-status="ALL">All</button>
+                    <?php foreach (AppConstants::APPLICATION_STATUS as $label): ?>
+                        <button class="tab <?= $currentStatus === $label ? 'active' : '' ?>" data-status="<?= $label ?>">
+                            <?= $label ?>
+                        </button>
+                    <?php endforeach; ?>
 
-            </div>
-
-            <!-- Search Bar -->
-            <div class="search-box">
-                <input type="text" id="jobSearch" value="<?= $search ?>" placeholder="Search job title or company...">
-            </div>
-
-        </div>
-
-    <div class="application-list">
-        <?php if (empty($applications)): ?>
-            <div style="margin-top: auto;text-align: center;padding: 40px 0;">No applications found</div>
-        <?php endif; ?>
-
-        <?php foreach ($applications as $item): 
-            $statusClass = strtolower(str_replace(' ', '-', $item['application_status']));
-            $date = date('d/m/Y', strtotime($item['applied_at']));
-        ?>
-            <div class="application-item">
-                <div>
-                    <h4><?= htmlspecialchars($item['title']) ?></h4>
-                    <p class="company"><?= htmlspecialchars($item['company_name']) ?></p>
-                    <p class="date">Applied on <?= $date ?></p>
                 </div>
 
-                <div class="status-actions">
-                    <?php if ($item['application_status'] == AppConstants::APPLICATION_STATUS['INTERVIEW'] && !empty($item['interview_at'])): ?>
-                       <div class="interview-date">
-                            <?= date('d M Y, h:i A', strtotime($item['interview_at'])) ?>
-                        </div>
-                    <?php endif; ?>
-                     <span class="status <?= $statusClass ?>">
-                        <?= $item['application_status'] ?>
-                    </span>
-                 <?php if ($item['application_status'] == AppConstants::APPLICATION_STATUS['OFFERED']): ?>
-                    <button class="btn btn-success"
-                        onclick="submitStatus(<?= $item['id'] ?>, '<?= AppConstants::APPLICATION_STATUS['OFFER_ACCEPTED'] ?>')">
-                        Accept Offer
-                    </button>
+                <!-- Search Bar -->
+                <div class="search-box">
+                    <input type="text" id="jobSearch" value="<?= $search ?>" placeholder="Search job title or company...">
+                </div>
 
-                    <button class="btn btn-danger"
-                        onclick="submitStatus(<?= $item['id'] ?>, '<?= AppConstants::APPLICATION_STATUS['OFFER_RJECTED'] ?>')">
-                        Reject Offer
-                    </button>
+            </div>
+
+            <div class="application-list">
+                <?php if (empty($applications)): ?>
+                    <div style="margin-top: auto;text-align: center;padding: 40px 0;">No applications found</div>
                 <?php endif; ?>
 
+                <?php foreach ($applications as $item):
+                    $statusClass = strtolower(str_replace(' ', '-', $item['application_status']));
+                    $date = date('d/m/Y', strtotime($item['applied_at']));
+                ?>
+                    <div class="application-item">
+                        <div>
+                            <h4><?= htmlspecialchars($item['title']) ?></h4>
+                            <p class="company"><?= htmlspecialchars($item['company_name']) ?></p>
+                            <p class="date">Applied on <?= $date ?></p>
+                        </div>
 
-                    <button class="btn btn-view"
-                        onclick="window.location.href='../Jobs/job_view.php?job=<?= $item['job_id'] ?>'">
-                        View Details
-                    </button>
-                </div>
+                        <div class="status-actions">
+                            <?php if ($item['application_status'] == AppConstants::APPLICATION_STATUS['INTERVIEW'] && !empty($item['interview_at'])): ?>
+                                <div class="interview-date">
+                                    <?= date('d M Y, h:i A', strtotime($item['interview_at'])) ?>
+                                </div>
+                            <?php endif; ?>
+                            <span class="status <?= $statusClass ?>">
+                                <?= $item['application_status'] ?>
+                            </span>
+                            <?php if ($item['application_status'] == AppConstants::APPLICATION_STATUS['OFFERED']): ?>
+                                <button class="btn btn-success"
+                                    onclick="submitStatus(<?= htmlspecialchars($item['id']) ?>, '<?= AppConstants::APPLICATION_STATUS['OFFER_ACCEPTED'] ?>')">
+                                    Accept Offer
+                                </button>
+
+                                <button class="btn btn-danger"
+                                    onclick="submitStatus(<?= htmlspecialchars($item['id']) ?>, '<?= AppConstants::APPLICATION_STATUS['OFFER_RJECTED'] ?>')">
+                                    Reject Offer
+                                </button>
+                            <?php endif; ?>
+
+
+                            <button class="btn btn-view"
+                                onclick="window.location.href='../Jobs/job_view.php?job=<?= urldecode((int)$item['job_id']) ?>'">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+                <form id="statusForm" method="POST" action="backend/update-application-status.php" style="display:none;">
+                    <input type="hidden" name="application_id" id="application_id">
+                    <input type="hidden" name="status" id="status">
+                </form>
             </div>
-        <?php endforeach; ?>
-        <form id="statusForm" method="POST" action="backend/update-application-status.php" style="display:none;">
-            <input type="hidden" name="application_id" id="application_id">
-            <input type="hidden" name="status" id="status">
-        </form>
-    </div>
-</div>
+        </div>
     </div>
 
 </section>
@@ -128,26 +130,26 @@ $cardData = getMyJobCardData();
 <?php include 'modals/error-popup.php'; ?>
 
 <?php if (isset($_GET['success'])): ?>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    showSuccess("Success",<?= json_encode($_GET['success']) ?>);
-});
-</script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            showSuccess("Success", <?= json_encode($_GET['success']) ?>);
+        });
+    </script>
 <?php endif; ?>
 
 <?php if (isset($_GET['error'])): ?>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    showError(<?= json_encode($_GET['error']) ?>);
-});
-</script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            showError(<?= json_encode($_GET['error']) ?>);
+        });
+    </script>
 <?php endif; ?>
 
 <script>
     let currentStatus = 'ALL';
 
     document.querySelectorAll('.status-tabs .tab').forEach(tab => {
-        tab.addEventListener('click', function () {
+        tab.addEventListener('click', function() {
             const params = new URLSearchParams(window.location.search);
             params.set('status', this.dataset.status);
             params.set('search', document.getElementById('jobSearch').value);
@@ -157,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let searchTimer;
 
-    document.getElementById('jobSearch').addEventListener('keyup', function () {
+    document.getElementById('jobSearch').addEventListener('keyup', function() {
         clearTimeout(searchTimer);
 
         searchTimer = setTimeout(() => {
@@ -183,12 +185,12 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("errorPopup").style.display = "flex";
     }
 
-    function showSuccess(title,msg) {
+    function showSuccess(title, msg) {
         document.getElementById("popup-title").textContent = title;
         document.getElementById("popup-message").textContent = msg;
         document.getElementById("successPopup").style.display = "flex";
     }
-    
+
     function closeSuccessPopup() {
         document.getElementById("successPopup").style.display = "none";
         clearQueryParams();

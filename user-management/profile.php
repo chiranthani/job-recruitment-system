@@ -5,7 +5,6 @@
  * including personal info, professional details, skill tags, and CV uploads.
  */
 
-include '../config/database.php';
 include '../layouts/layout_start.php';
 
 // --- 1. ACCESS CONTROL ---

@@ -1,8 +1,9 @@
 <?php
 session_start();
-include_once __DIR__ . '/../config/baseConfig.php';
-include_once __DIR__ . '/../config/constants.php';
-include_once __DIR__ . '/../config/roleBasedMenus.php';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/baseConfig.php';
+require_once __DIR__ . '/../config/constants.php';
+require_once __DIR__ . '/../config/roleBasedMenus.php';
 ?>
 <!DOCTYPE html>
 

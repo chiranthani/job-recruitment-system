@@ -4,8 +4,7 @@
  * Purpose: This file handles both the registration of new users and the updating of existing profiles.
  */
 
-// 1. DATABASE CONNECTION
-include '../config/database.php'; 
+include '../layouts/layout_start.php';
 
 // INITIALIZE VARIABLES: Prevents "Undefined variable" warnings during initial page load
 $user_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -125,7 +124,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // Include Layouts after processing logic to prevent "Headers Already Sent" errors
-include '../layouts/layout_start.php'; 
+ 
 ?>
 
 <title><?php echo $user_id ? 'Update User' : 'User Registration'; ?></title>

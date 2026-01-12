@@ -15,7 +15,7 @@
             <div class="row" id="interviewBox" style="display:none;">
                 <div class="col">
                     <label class="required">Interview Date & Time</label>
-                    <input type="datetime-local" id="interview_date" name="interview_date">
+                    <input type="datetime-local" id="interview_date" name="interview_date"  min="<?= date('Y-m-d\TH:i'); ?>">
                 </div>
             </div>
 

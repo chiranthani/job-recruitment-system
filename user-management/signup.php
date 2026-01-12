@@ -5,7 +5,6 @@
  */
 
 // Include database connection and layout initialization
-include '../config/database.php'; 
 include '../layouts/layout_start.php';
 
 // Initialize message variable for error reporting

@@ -1,9 +1,8 @@
 <!-- start page common elements -->
-<?php include 'config/database.php'; ?>
 <?php include 'layouts/layout_start.php'; ?>
 <link rel="stylesheet" href="assets/css/home.css">
-<?php include 'layouts/header.php'; ?>
-<?php include 'job-applicant/backend/data-queries.php'; ?>
+<?php require_once 'layouts/header.php';
+require_once 'job-applicant/backend/data-queries.php'; ?>
 <!-- end page common elements-->
 
 <!-- start page main content -->
@@ -40,5 +39,5 @@
 <!-- end page main content -->
 
 
-<?php include 'layouts/footer.php'; ?>
-<?php include 'layouts/layout_end.php'; ?>
+<?php require_once 'layouts/footer.php'; ?>
+<?php require_once 'layouts/layout_end.php'; ?>

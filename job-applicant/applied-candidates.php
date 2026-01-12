@@ -1,11 +1,12 @@
-<?php include '../config/database.php'; ?>
-<?php include '../layouts/layout_start.php'; ?>
-<?php include '../permission-check.php'; ?>
+<?php
+include '../layouts/layout_start.php';
+require '../permission-check.php';
+require 'backend/data-queries.php';
+?>
 
 <link rel="stylesheet" href="../assets/css/application.css">
 
 <?php include '../layouts/header.php'; ?>
-<?php include 'backend/data-queries.php'; ?>
 
 <?php
 $jobId = (int)$_GET['job_id'];
@@ -60,99 +61,101 @@ $totalApplications = $results['total'];
                 <span class="job-id">Job ID: #<?php echo $job['id']; ?></span>
             </div>
         </div>
-         <div class="container">
-        <form method="GET">
-            <div class="filter-bar">
+        <div class="container">
+            <form method="GET">
+                <div class="filter-bar">
 
+                    <input type="hidden" name="job_id" value="<?= $jobId ?>">
+                    <div><label>From</label><input type="date" name="from" value="<?= htmlspecialchars($fromDate) ?>"></div>
+                    <div><label>To</label><input type="date" name="to" value="<?= htmlspecialchars($toDate) ?>"></div>
+                    <div><label>Search</label><input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search candidate name/email"></div>
+                    <div><button type="submit" class="btn btn-submit" style="margin-top: 22px;">Filter</button></div>
+
+                </div>
+            </form>
+            <form method="POST" action="backend/mark-reviewed.php" id="markReviewedForm">
                 <input type="hidden" name="job_id" value="<?= $jobId ?>">
-                <div><label>From</label><input type="date" name="from" value="<?= htmlspecialchars($fromDate) ?>"></div>
-                <div><label>To</label><input type="date" name="to" value="<?= htmlspecialchars($toDate) ?>"></div>
-                <div><label>Search</label><input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search candidate name/email"></div>
-                <div><button type="submit" class="btn btn-submit" style="margin-top: 22px;">Filter</button></div>
+                <div style="display: flex; justify-content:space-between;gap:10px">
+                    <button type="submit" class="btn btn-submit">Mark as Reviewed</button>
+                    <span><strong><?= $totalApplications ?></strong> Application(s) Found</span>
+                </div>
 
-            </div>
-        </form>
-        <form method="POST" action="backend/mark-reviewed.php" id="markReviewedForm">
-            <input type="hidden" name="job_id" value="<?= $jobId ?>">
-        <div style="display: flex; justify-content:space-between;gap:10px">
-            <button type="submit" class="btn btn-submit">Mark as Reviewed</button>
-            <span><strong><?= $totalApplications ?></strong> Application(s) Found</span>
-        </div>
-
-        <table class="responsive-table">
-            <thead>
-                <tr>
-                    <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Contact No</th>
-                    <th>Experience</th>
-                    <th>Current Role</th>
-                    <th>Notice Time</th>
-                    <th>Applied Date</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (count($applications) == 0): ?>
-                    <tr>
-                        <td colspan="10" style="text-align:center;">No applications found</td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($applications as $r):
-                        $statusClass = strtolower(str_replace(' ', '-', $r['application_status']));
-                        $cv = $r['cv_url'] ? $base_url .''.$r['cv_url'] : '#';
-                    ?>
+                <table class="responsive-table">
+                    <thead>
                         <tr>
-                            <td>
-                                <?php if ($r['application_status'] == AppConstants::APPLICATION_STATUS['APPLIED']): ?>
-                                    <input type="checkbox" name="application_ids[]" value="<?= $r['id'] ?>">
-                                <?php endif; ?>
-                            </td>
-                            <td data-label="Name">
-                                <a href="../user-management/admin_user_view.php?id=<?= $r['id'] ?>" class="job-link">
-                                    <?= htmlspecialchars($r['candidate_name']) ?>
-                                    <span  class="status" style="color: gray;" ><?= $r['is_deleted'] ? '(Deleted)' : '' ?></span>
-                                </a>
-                           </td>
-                            <td data-label="Email"><?= htmlspecialchars($r['candidate_email']) ?></td>
-                            <td data-label="Contact Number"><?= $r['contact_number'] ?? '-' ?></td>
-                            <td data-label="Experience"><?= $r['experience'] ?? '-' ?></td>
-                            <td data-label="Current Role"><?= $r['current_role'] ?? '-' ?></td>
-                            <td data-label="Notice Period"><?= $r['notice_period'] ?? '-' ?></td>
-                            <td data-label="Applied At"><?= $r['applied_at'] ?></td>
-                            <td data-label="Status">
-                                <span class="status-pill <?= $statusClass ?>"><?= $r['application_status'] ?></span>
-                                <?php if ($r['application_status'] === AppConstants::APPLICATION_STATUS['INTERVIEW'] && !empty($r['interview_at'])): ?>
-                                    <div class="interview-date">
-                                        <?= date('d M Y, h:i A', strtotime($r['interview_at'])) ?>
-                                    </div>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <a href="<?= $cv ?>" target="_blank" class="btn btn-info">👁 CV</a>
-                                <button type="button" class="btn btn-view" onclick="openStatusModal(<?= $r['id'] ?>,'<?= $r['application_status'] ?>','<?= $r['interview_at'] ?? '' ?>')">Change Status</button>
-                            </td>
+                            <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Contact No</th>
+                            <th>Experience</th>
+                            <th>Current Role</th>
+                            <th>Notice Time</th>
+                            <th>Applied Date</th>
+                            <th>Status</th>
+                            <th></th>
                         </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
-        </form>
-         <?php if ($totalPages >= 1): ?>
-         <div class="pagination-wrapper">
-            <div class="pagination-info">
-                Page <strong><?= $page ?></strong> of <strong><?= $totalPages ?></strong>
-            </div>
-            <div class="pagination">
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <a href="?job_id=<?= $jobId ?>&from=<?= $fromDate ?>&to=<?= $toDate ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
-                <?php endfor; ?>
-            </div>
-         </div>
-          <?php endif ?>
-         </div>
+                    </thead>
+                    <tbody>
+                        <?php if (count($applications) == 0): ?>
+                            <tr>
+                                <td colspan="10" style="text-align:center;">No applications found</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($applications as $r):
+                                $statusClass = strtolower(str_replace(' ', '-', $r['application_status']));
+                                $cv = $r['cv_url'] ? $base_url . '' . $r['cv_url'] : '#';
+                            ?>
+                                <tr>
+                                    <td>
+                                        <?php if ($r['application_status'] == AppConstants::APPLICATION_STATUS['APPLIED']): ?>
+                                            <input type="checkbox" name="application_ids[]" value="<?= htmlspecialchars($r['id']) ?>">
+                                        <?php endif; ?>
+                                    </td>
+                                    <td data-label="Name">
+                                        <a href="../user-management/admin_user_view.php?id=<?= urldecode((int)$r['user_id']) ?>" class="job-link">
+                                            <?= htmlspecialchars($r['candidate_name']) ?>
+                                            <span class="status" style="color: gray;"><?= $r['is_deleted'] ? '(Deleted)' : '' ?></span>
+                                        </a>
+                                    </td>
+                                    <td data-label="Email"><?= htmlspecialchars($r['candidate_email']) ?></td>
+                                    <td data-label="Contact Number"><?= htmlspecialchars($r['contact_number']) ?? '-' ?></td>
+                                    <td data-label="Experience"><?= htmlspecialchars($r['experience']) ?? '-' ?></td>
+                                    <td data-label="Current Role"><?= htmlspecialchars($r['current_role']) ?? '-' ?></td>
+                                    <td data-label="Notice Period"><?= htmlspecialchars($r['notice_period']) ?? '-' ?></td>
+                                    <td data-label="Applied At"><?= $r['applied_at'] ?></td>
+                                    <td data-label="Status">
+                                        <span class="status-pill <?= $statusClass ?>"><?= $r['application_status'] ?></span>
+                                        <?php if ($r['application_status'] === AppConstants::APPLICATION_STATUS['INTERVIEW'] && !empty($r['interview_at'])): ?>
+                                            <div class="interview-date">
+                                                <?= date('d M Y, h:i A', strtotime($r['interview_at'])) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex;gap:3px;align-items: baseline;">
+                                        <a href="<?= $cv ?>" target="_blank" class="btn btn-info">CV</a>
+                                        <button type="button" class="btn btn-view" onclick="openStatusModal(<?= $r['id'] ?>,'<?= $r['application_status'] ?>','<?= $r['interview_at'] ?? '' ?>')">Change Status</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </form>
+            <?php if ($totalPages > 1): ?>
+                <div class="pagination-wrapper">
+                    <div class="pagination-info">
+                        Page <strong><?= $page ?></strong> of <strong><?= $totalPages ?></strong>
+                    </div>
+                    <div class="pagination">
+                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                            <a href="?job_id=<?= $jobId ?>&from=<?= $fromDate ?>&to=<?= $toDate ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+            <?php endif ?>
+        </div>
     </div>
 </section>
 <?php include 'modals/application_status_change.php'; ?>
@@ -161,7 +164,7 @@ $totalApplications = $results['total'];
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const params = new URLSearchParams(window.location.search);
 
         if (params.has('success')) {
@@ -218,13 +221,12 @@ $totalApplications = $results['total'];
 
     function clearQueryParams() {
         const url = new URL(window.location.href);
-    
+
         url.searchParams.delete('success');
         url.searchParams.delete('error');
 
         window.history.replaceState({}, document.title, url.pathname + url.search);
     }
-
 </script>
 <?php include '../layouts/footer.php'; ?>
 <?php include '../layouts/layout_end.php'; ?>

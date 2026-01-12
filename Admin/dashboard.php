@@ -1,4 +1,3 @@
-<?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
 <link rel="stylesheet" href="../assets/css/main.css">
 

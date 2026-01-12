@@ -370,20 +370,20 @@ function getAppliedJobs($status,$search=''){
 
 
 /** job search */
-function searchJobs($filters){
+function searchJobs($filters)
+{
     $db = db();
 
     $user_id = $_SESSION['user_id'] ?? 0;
     $userSkills = [];
 
+    // logged user skills
     if ($user_id > 0) {
-        $skillSql = "SELECT s.name 
+        $stmt = $db->prepare("SELECT s.name
             FROM user_skills us
             INNER JOIN skills s ON s.id = us.skill_id
             WHERE us.user_id = ?
-        ";
-
-        $stmt = $db->prepare($skillSql);
+        ");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $res = $stmt->get_result();
@@ -403,79 +403,110 @@ function searchJobs($filters){
     $offset = ($page - 1) * $limit;
 
     // skill matching SQL
-    $skillScoreSql = "0 AS skill_match_score";
+    $skillCases  = [];
+    $params      = [];
+    $types       = "";
 
     if (!empty($userSkills)) {
-        $cases = [];
         foreach ($userSkills as $skill) {
-            $skill = mysqli_real_escape_string($db, $skill);
-            $cases[] = "CASE WHEN job_posts.requirements LIKE '%$skill%' THEN 1 ELSE 0 END";
+            $skillCases[] = "CASE WHEN job_posts.requirements LIKE ? THEN 1 ELSE 0 END";
+            $params[] = "%$skill%";
+            $types   .= "s";
         }
-
-        $skillScoreSql = "(" . implode(" + ", $cases) . ") AS skill_match_score";
+        $skillScoreSql = "(" . implode(" + ", $skillCases) . ") AS skill_match_score";
+    } else {
+        $skillScoreSql = "0 AS skill_match_score";
     }
 
+    // main filter query
     $query = "SELECT
-        job_posts.id,
-        job_posts.title,
-        job_posts.category_id,
-        job_posts.company_id,
-        job_posts.work_type,
-        job_posts.job_type,
-        job_posts.description,
-        job_posts.requirements,
-        job_posts.expiry_date,
-        job_posts.post_status,
-        companies.name AS company_name,
-        companies.status AS company_status,
-        locations.name AS location_name,
-        job_categories.name AS category_name,
-        DATEDIFF(job_posts.expiry_date, CURDATE()) AS days_left,
-        $skillScoreSql
-    FROM
-        `job_posts`
-    INNER JOIN companies ON companies.id = job_posts.company_id
-    INNER JOIN job_categories ON job_categories.id = job_posts.category_id
-    INNER JOIN locations ON locations.id = job_posts.location_id
-    WHERE
-        job_posts.active_status = ".AppConstants::ACTIVE_STATUS." AND job_posts.is_deleted = ".AppConstants::INACTIVE_STATUS." AND 
-        job_posts.expiry_date >= CURRENT_DATE() AND companies.status = ".AppConstants::ACTIVE_STATUS." AND 
-        job_posts.post_status = '".AppConstants::POST_PUBLISHED."' ";
+            job_posts.id,
+            job_posts.title,
+            job_posts.category_id,
+            job_posts.company_id,
+            job_posts.work_type,
+            job_posts.job_type,
+            job_posts.description,
+            job_posts.requirements,
+            job_posts.expiry_date,
+            job_posts.post_status,
+            companies.name AS company_name,
+            locations.name AS location_name,
+            job_categories.name AS category_name,
+            DATEDIFF(job_posts.expiry_date, CURDATE()) AS days_left,
+            $skillScoreSql
+        FROM job_posts
+        INNER JOIN companies ON companies.id = job_posts.company_id
+        INNER JOIN job_categories ON job_categories.id = job_posts.category_id
+        INNER JOIN locations ON locations.id = job_posts.location_id
+        WHERE
+            job_posts.active_status = ?
+            AND job_posts.is_deleted = ?
+            AND job_posts.expiry_date >= CURRENT_DATE()
+            AND companies.status = ?
+            AND job_posts.post_status = ?
+    ";
+
+    $params = array_merge($params, [
+        AppConstants::ACTIVE_STATUS,
+        AppConstants::INACTIVE_STATUS,
+        AppConstants::ACTIVE_STATUS,
+        AppConstants::POST_PUBLISHED
+    ]);
+    $types .= "iiis";
 
     if ($search !== '') {
-        $query .= " AND job_posts.title LIKE '%" . mysqli_real_escape_string($db, $search) . "%'";
+        $query .= " AND job_posts.title LIKE ?";
+        $params[] = "%$search%";
+        $types   .= "s";
     }
 
-    if ($company != 'all' && $company != '') {
-        $query .= " AND job_posts.company_id = '" . mysqli_real_escape_string($db, $company) . "'";
+    if ($company !== '' && $company !== 'all') {
+        $query .= " AND job_posts.company_id = ?";
+        $params[] = (int)$company;
+        $types   .= "i";
     }
-    if ($work_type != 'all' && $work_type != '') {
-        $query .= " AND job_posts.work_type = '" . mysqli_real_escape_string($db, $work_type) . "'";
+
+    if ($work_type !== '' && $work_type !== 'all') {
+        $query .= " AND job_posts.work_type = ?";
+        $params[] = $work_type;
+        $types   .= "s";
     }
 
     if (!empty($categories)) {
-        $categories_sql = "'" . implode("','", array_map(fn($v) => mysqli_real_escape_string($db, $v), $categories)) . "'";
-        $query .= " AND job_posts.category_id IN ($categories_sql)";
+        $placeholders = implode(',', array_fill(0, count($categories), '?'));
+        $query .= " AND job_posts.category_id IN ($placeholders)";
+        foreach ($categories as $cat) {
+            $params[] = (int)$cat;
+            $types   .= "i";
+        }
     }
 
+    $query .= !empty($userSkills)
+        ? " ORDER BY skill_match_score DESC, job_posts.id DESC"
+        : " ORDER BY job_posts.id DESC";
 
-    // order
-    if (!empty($userSkills)) {
-        $query .= " ORDER BY skill_match_score DESC, job_posts.id DESC";
-    } else {
-        $query .= " ORDER BY job_posts.id DESC";
-    }
 
-    $total_result = mysqli_query($db, $query);
-    $total_records = mysqli_num_rows($total_result);
+    $stmt = $db->prepare($query);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $total_result = $stmt->get_result();
+    $total_records = $total_result->num_rows;
     $total_pages = ceil($total_records / $limit);
 
-    // pagination add and fetch
-    $query .= " LIMIT $offset, $limit";
-    $final_result = mysqli_query($db, $query);
+    $query .= " LIMIT ?, ?";
+    $params[] = $offset;
+    $params[] = $limit;
+    $types   .= "ii";
+
+    $stmt = $db->prepare($query);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
     $jobs = [];
 
-    while ($row = mysqli_fetch_assoc($final_result)) {
+    while ($row = $result->fetch_assoc()) {
         $jobs[] = $row;
     }
 

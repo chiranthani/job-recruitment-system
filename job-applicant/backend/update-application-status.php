@@ -1,9 +1,9 @@
 <?php
 session_start();
-include '../../config/database.php';
-include '../../config/constants.php';
-include '../../helpers/notifications.php';
-include 'data-queries.php';
+require_once '../../config/database.php';
+require_once '../../config/constants.php';
+require_once '../../helpers/notifications.php';
+require_once 'data-queries.php';
 
 // helper function
 function redirectBack($path,$type,$message,$isJobseeker,$job){
@@ -63,6 +63,19 @@ if(!$isCandidate){
     }
 }
 
+if (!empty($interviewDate)) {
+    $date = DateTime::createFromFormat('Y-m-d\TH:i', $interviewDate);
+   
+    if (!$date) {
+        redirectBack($redirectPath, 'error', 'Invalid interview date format.',$isCandidate,$applicationData['job_id']);
+    } 
+    $formattedDate = $date->format('Y-m-d H:i:s'); 
+    $now = new DateTime();
+
+    if ($date < $now) {
+        redirectBack($redirectPath, 'error', 'Interview date cannot be in the past.',$isCandidate,$applicationData['job_id']);
+    }
+}
 
 /* update */
 $sql = "UPDATE applications

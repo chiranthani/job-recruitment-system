@@ -1,48 +1,50 @@
-<?php include '../config/database.php'; ?>
-<?php include '../layouts/layout_start.php'; ?>
-<?php include '../permission-check.php'; ?>
+<?php include '../layouts/layout_start.php';
+require '../permission-check.php';
+require 'backend/data-queries.php';
+?>
 
 <link rel="stylesheet" href="../assets/css/application.css">
 
-<?php include '../layouts/header.php'; 
-include 'backend/data-queries.php';
-    $userId = $_SESSION['user_id'] ?? 0;
+<?php
+include '../layouts/header.php';
 
-    $candidate = getCandidateDetails($userId);
+$userId = $_SESSION['user_id'] ?? 0;
 
-    $existingResume = $candidate['cv_url'] ?? null;
-    $fname = $candidate['first_name'] ?? '';
-    $lname = $candidate['last_name'] ?? '';
-    $email = $candidate['email'] ?? '';
-    $contact_no = $candidate['contact_no'] ?? '';
+$candidate = getCandidateDetails($userId);
+
+$existingResume = $candidate['cv_url'] ?? null;
+$fname = $candidate['first_name'] ?? '';
+$lname = $candidate['last_name'] ?? '';
+$email = $candidate['email'] ?? '';
+$contact_no = $candidate['contact_no'] ?? '';
 ?>
 
 <section>
     <div class="job-apply-container">
         <?php $job = getSelectedJobPostDetails($_GET['job']); ?>
-           
+
         <a onclick="window.history.back()" class="back-link">← Back to Job Details</a>
-        <h2 style="margin: 5px 0;">Apply for <?php echo $job['title'] ?></h2>
-        <p class="job-company">at <?php echo $job['company_name'] ?></p>
+        <h2 style="margin: 5px 0;">Apply for <?= htmlspecialchars($job['title']) ?></h2>
+        <p class="job-company">at <?= htmlspecialchars($job['company_name']) ?></p>
 
         <form id="applyForm" method="POST" action="backend/application-submit.php" enctype="multipart/form-data">
-            <input type="hidden" name="job_id" value="<?php echo $job['id'] ?>">
+            <input type="hidden" name="job_id" value="<?= $job['id'] ?>">
             <h3 class="form-title">Personal Information</h3>
 
             <div class="row">
                 <div class="col">
                     <label class="required">First Name</label>
-                    <input type="text" name="first_name" value="<?php echo $fname ?>" placeholder="John" required>
+                    <input type="text" name="first_name" value="<?= htmlspecialchars($fname) ?>" placeholder="John" required>
                 </div>
                 <div class="col">
                     <label class="required">Last Name</label>
-                    <input type="text" name="last_name" value="<?php echo $lname ?>" placeholder="Doe" required>
+                    <input type="text" name="last_name" value="<?= htmlspecialchars($lname) ?>" placeholder="Doe" required>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
                     <label class="required">Email</label>
-                    <input type="email" name="email" value="<?php echo $email ?>" placeholder="john.doe@example.com" required>
+                    <input type="email" name="email" value="<?php echo htmlspecialchars($email) ?>" placeholder="john.doe@example.com" required>
                 </div>
             </div>
             <div class="row">
@@ -113,7 +115,7 @@ include 'backend/data-queries.php';
                 </div>
             </div>
             <div class="form-footer-btns">
-                <button type="button" class="btn btn-cancel" onclick="window.history.back()" >Cancel</button>
+                <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
                 <button type="submit" class="btn btn-submit">Submit Application</button>
             </div>
 
@@ -123,7 +125,7 @@ include 'backend/data-queries.php';
 <?php include 'modals/success-popup.php'; ?>
 <?php include 'modals/error-popup.php'; ?>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const params = new URLSearchParams(window.location.search);
 
         if (params.has('success')) {
@@ -144,7 +146,7 @@ include 'backend/data-queries.php';
     const newCvBox = document.getElementById('newCvBox');
 
     cvRadios.forEach(radio => {
-        radio.addEventListener('change', function () {
+        radio.addEventListener('change', function() {
             if (this.value == 'new') {
                 newCvBox.style.display = 'block';
                 resumeInput.required = true;
@@ -193,12 +195,12 @@ include 'backend/data-queries.php';
         document.getElementById("errorPopup").style.display = "flex";
     }
 
-    function showSuccess(title,msg) {
+    function showSuccess(title, msg) {
         document.getElementById("popup-title").textContent = title;
         document.getElementById("popup-message").textContent = msg;
         document.getElementById("successPopup").style.display = "flex";
     }
-    
+
     function closeSuccessPopup() {
         document.getElementById("successPopup").style.display = "none";
         window.location.replace('job-search.php');
@@ -212,7 +214,6 @@ include 'backend/data-queries.php';
 
         window.history.replaceState({}, document.title, url.pathname + url.search);
     }
-
 </script>
 
 

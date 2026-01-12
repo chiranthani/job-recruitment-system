@@ -1,11 +1,10 @@
-<?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
 
 <link rel="stylesheet" href="../assets/css/application.css">
 
 <?php
 include '../layouts/header.php';
-include 'backend/data-queries.php';
+require 'backend/data-queries.php';
 
 $results = searchJobs($_GET);
 
@@ -97,10 +96,10 @@ $appliedJobs = getAppliedJobIds($userId, $appliedType) ?? [];
                     <?php $hasMatch = ($job['skill_match_score'] ?? 0) > 0; ?>
                     <div class="job-card-header">
                         <h4><?= htmlspecialchars($job['title']) ?>
-                        <?php if ($hasMatch): ?>
-                            <span class="skill-badge">Skill Match</span>
-                        <?php endif; ?>
-                    </h4>
+                            <?php if ($hasMatch): ?>
+                                <span class="skill-badge">Skill Match</span>
+                            <?php endif; ?>
+                        </h4>
                         <div>
                             <?php if (in_array($job['id'], $appliedJobs)): ?>
                                 <span class="applied-badge">✔ Applied </span>
@@ -110,13 +109,13 @@ $appliedJobs = getAppliedJobIds($userId, $appliedType) ?? [];
                     </div>
 
                     <a href="company-jobs.php?company_id=<?= $job['company_id'] ?>">
-                        <p class="company"><?= $job['company_name'] ?> </p>
+                        <p class="company"><?= htmlspecialchars($job['company_name']) ?> </p>
                     </a>
 
                     <div class="job-card-about">
-                        <div><?= $job['location_name'] ?></div>
-                        <div><?= $job['job_type'] ?></div>
-                        <div class="status job-type"><?= $job['work_type'] ?></div>
+                        <div><?= htmlspecialchars($job['location_name']) ?></div>
+                        <div><?= htmlspecialchars($job['job_type']) ?></div>
+                        <div class="status job-type"><?= htmlspecialchars($job['work_type']) ?></div>
                     </div>
 
                     <div class="job-card-des">

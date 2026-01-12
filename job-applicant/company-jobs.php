@@ -1,8 +1,7 @@
-<?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
 <link rel="stylesheet" href="../assets/css/application.css">
-<?php include '../layouts/header.php'; ?>
-<?php include 'backend/data-queries.php'; ?>
+<?php include '../layouts/header.php';
+require 'backend/data-queries.php'; ?>
 
 <?php
 $companyId = (int)($_GET['company_id'] ?? 0);

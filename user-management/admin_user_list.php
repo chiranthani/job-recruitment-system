@@ -4,7 +4,7 @@
  * Includes filtering by Role, Status, Search, and Date Range with Pagination.
  */
 
-include '../config/database.php';
+include '../layouts/layout_start.php'; 
 
 // --- 1. CAPTURE FILTER INPUTS FROM URL (GET REQUESTS) ---
 // Capture User Role (e.g., Job Seekers = 1)
@@ -86,7 +86,6 @@ if(isset($_POST['delete_user'])){
 }
 
 
-include '../layouts/layout_start.php'; 
 ?>
 
 <title>User List View</title>

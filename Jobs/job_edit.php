@@ -1,5 +1,4 @@
 <?php
-include '../config/database.php';
 include '../layouts/layout_start.php';
 include '../layouts/header.php';
 
