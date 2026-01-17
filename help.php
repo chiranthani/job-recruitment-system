@@ -40,13 +40,13 @@
                 <li>Track your application status in "My Jobs"</li>
             </ul>
 
-            <h3>4. Managing Your Profile</h3>
+            <!-- <h3>4. Managing Your Profile</h3>
             <ul>
                 <li>Update your personal information</li>
                 <li>Add your skills and experience</li>
                 <li>Upload or update your CV</li>
                 <li>Keep your contact information current</li>
-            </ul>
+            </ul> -->
         </div>
 
         <!-- For Employers -->

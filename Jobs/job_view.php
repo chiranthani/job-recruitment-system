@@ -131,7 +131,7 @@ while ($b = $benRes->fetch_assoc()) {
             </div>
         <?php endif ?>
 
-    <?php elseif($userRole==1): ?>
+    <?php elseif($userRole==0): ?>
         <div class="apply-box">
             Sign in as a candidate to apply
             <br />

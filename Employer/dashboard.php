@@ -95,11 +95,11 @@ $is_active = $data['status'] == 1;
             <a href="edit_profile.php" class="action-btn">
                 ✏️ Edit Profile
             </a>
-            <a href="../Jobs/create_post.php" class="action-btn <?php echo (!$is_approved || !$is_active) ? 'disabled' : ''; ?>" 
+            <a href="../jobs/create_post.php" class="action-btn <?php echo (!$is_approved || !$is_active) ? 'disabled' : ''; ?>" 
                <?php echo (!$is_approved || !$is_active) ? 'onclick="return false;"' : ''; ?>>
                 ➕ Post New Job
             </a>
-            <a href="../Jobs/job_list.php" class="action-btn">
+            <a href="../jobs/job_list.php" class="action-btn">
                 📋 My Job Posts
             </a>
             <a href="../help.php" class="action-btn">

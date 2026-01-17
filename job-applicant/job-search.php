@@ -104,7 +104,7 @@ $appliedJobs = getAppliedJobIds($userId, $appliedType) ?? [];
                             <?php if (in_array($job['id'], $appliedJobs)): ?>
                                 <span class="applied-badge">✔ Applied </span>
                             <?php endif ?>
-                            <a class="apply-btn" href="../Jobs/job_view.php?job=<?= $job['id'] ?>">View</a>
+                            <a class="apply-btn" href="../jobs/job_view.php?job=<?= $job['id'] ?>">View</a>
                         </div>
                     </div>
 

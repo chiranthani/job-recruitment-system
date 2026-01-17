@@ -111,7 +111,7 @@ $cardData = getMyJobCardData();
 
 
                             <button class="btn btn-view"
-                                onclick="window.location.href='../Jobs/job_view.php?job=<?= urldecode((int)$item['job_id']) ?>'">
+                                onclick="window.location.href='../jobs/job_view.php?job=<?= urldecode((int)$item['job_id']) ?>'">
                                 View Details
                             </button>
                         </div>

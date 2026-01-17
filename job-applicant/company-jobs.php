@@ -61,7 +61,7 @@ if (!$company) {
                             <?php if (in_array($job['id'], $appliedJobs)): ?>
                             <span class="applied-badge">✔ Applied</span>
                             <?php endif ?>
-                         <a href="../Jobs/job_view.php?job=<?= $job['id'] ?>" class="buttn buttn-outline">View</a>
+                         <a href="../jobs/job_view.php?job=<?= $job['id'] ?>" class="buttn buttn-outline">View</a>
                         </div>
                     </div>
 
