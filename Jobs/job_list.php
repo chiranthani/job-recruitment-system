@@ -91,7 +91,6 @@ $sql = "SELECT
         FROM job_posts j
         LEFT JOIN job_categories c ON j.category_id = c.id
         WHERE j.is_deleted = 0
-          AND j.active_status = 1
           AND j.company_id = $companyId";
 
 if (!empty($where)) {

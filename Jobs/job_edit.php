@@ -141,13 +141,13 @@ while ($row = $benefitResult->fetch_assoc()) {
 <!-- Description -->
 <div class="form-row">
     <label>* Description:</label>
-    <textarea name="description" class="textarea" required><?= htmlspecialchars($job['description']); ?></textarea>
+    <textarea name="description" class="textarea" required><?= $job['description']; ?></textarea>
 </div>
 
 <!-- Requirements -->
 <div class="form-row">
     <label>* Requirements:</label>
-    <textarea name="requirements" class="textarea" required><?= htmlspecialchars($job['requirements']); ?></textarea>
+    <textarea name="requirements" class="textarea" required><?= $job['requirements']; ?></textarea>
 </div>
 
 <!-- Benefits -->

@@ -79,13 +79,13 @@ while ($b = $benRes->fetch_assoc()) {
     <!-- Description -->
     <div class="section-title">Description:</div>
     <div class="job-description">
-        <?= nl2br(htmlspecialchars($job['description'])); ?>
+        <?= $job['description']; ?>
     </div>
 
     <!-- Requirements -->
     <div class="section-title">Requirements</div>
     <div class="job-requirements">
-        <?= nl2br(htmlspecialchars($job['requirements'])); ?>
+        <?= $job['requirements']; ?>
     </div>
 
     <!-- Benefits -->
