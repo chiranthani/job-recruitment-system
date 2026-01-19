@@ -5,7 +5,6 @@
  * Role Mapping: 1 = Candidate, 2 = Recruiter, 3 = Admin
  */
 
-include '../config/database.php'; 
 // standard layout headers
 include '../layouts/layout_start.php'; 
 

@@ -5,7 +5,6 @@
  * including personal info, professional details, skill tags, and CV uploads.
  */
 
-include '../config/database.php';
 include '../layouts/layout_start.php';
 
 // --- 1. ACCESS CONTROL ---
@@ -222,7 +221,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <p>Your profile has been created successfully. We're excited to help you find your next opportunity!</p>
         
         <div class="form-row mt-20" style="justify-content: center; gap: 10px;">
-            <button class="btn-add" onclick="window.location.href='profile.php'">Review Profile</button>
             <button class="btn-add" onclick="window.location.href='../job-applicant/job-search.php'">Start Browsing Jobs</button>
         </div>
     </div>

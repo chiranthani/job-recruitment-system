@@ -1,5 +1,4 @@
 <!-- start page common elements -->
-<?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
 <link rel="stylesheet" href="../assets/css/main.css">
 <?php include '../layouts/header.php'; ?>

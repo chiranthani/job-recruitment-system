@@ -1,23 +1,29 @@
 <!-- start page common elements -->
 <?php
-include '../config/database.php';
 include '../layouts/layout_start.php';
 include '../layouts/header.php';
 include '../permission-check.php';
 
-/* =========================
-   DELETE JOB (SAME FILE)
-========================= */
+/* ===============
+   DELETE JOB 
+================== */
 
 if (isset($_POST['delete_job_id'])) {
 
     $job_id = (int) $_POST['delete_job_id'];
 
-    if ($job_id > 0) {
+    $countSql = "SELECT COUNT(*) AS total FROM applications WHERE job_id = ?";
+    $stmt = $con_main->prepare($countSql);
+    $stmt->bind_param("i", $job_id);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_assoc();
+
+    if ($result['total'] > 0) {
+        $_SESSION['error'] = "Cannot delete this job. Applications already exist.";
+    }else{
+           if ($job_id > 0) {
         $stmt = $con_main->prepare(
-            "UPDATE job_posts 
-             SET is_deleted = 1, active_status = 0 
-             WHERE id = ?"
+            "DELETE FROM job_posts WHERE id = ?"
         );
         $stmt->bind_param("i", $job_id);
 
@@ -26,10 +32,10 @@ if (isset($_POST['delete_job_id'])) {
         } else {
             $_SESSION['error'] = "Failed to delete job post.";
         }
+        }
+
     }
 
-    header("Location: job_list.php");
-    exit;
 }
 ?>
 <!-- end page common elements -->
@@ -78,11 +84,11 @@ $sql = "SELECT
             j.title,
             j.post_status,
             j.job_type,
+            j.expiry_date,
             c.name AS category_name
         FROM job_posts j
         LEFT JOIN job_categories c ON j.category_id = c.id
         WHERE j.is_deleted = 0
-          AND j.active_status = 1
           AND j.company_id = $companyId";
 
 if (!empty($where)) {
@@ -113,6 +119,10 @@ $is_active = $data['status'] == 1;
 <?php if (isset($_SESSION['success'])) { ?>
     <div class="alert success"><?= $_SESSION['success']; ?></div>
 <?php unset($_SESSION['success']); } ?>
+
+<?php if (isset($_SESSION['error'])) { ?>
+    <div class="alert error"><?= $_SESSION['error']; ?></div>
+<?php unset($_SESSION['error']); } ?>
 
 <h2>Job Posts</h2>
 <p class="subtitle">Manage your job postings</p>
@@ -210,6 +220,7 @@ $is_active = $data['status'] == 1;
     <th>Category</th>
     <th>Type</th>
     <th>Status</th>
+    <th>Expiry date</th>
     <th>Publish</th>
     <th>Actions</th>
 </tr>
@@ -228,6 +239,7 @@ $is_active = $data['status'] == 1;
             <?= ucfirst($row['post_status']); ?>
         </span>
     </td>
+     <td><?= htmlspecialchars($row['expiry_date']); ?></td>
      <td>
                     <form method="POST" action="toggle_job_status.php">
 

@@ -1,6 +1,5 @@
 <!-- start page common elements -->
 <?php
-include '../config/database.php';
 include '../layouts/layout_start.php';
 include '../layouts/header.php';
 
@@ -80,13 +79,13 @@ while ($b = $benRes->fetch_assoc()) {
     <!-- Description -->
     <div class="section-title">Description:</div>
     <div class="job-description">
-        <?= nl2br(htmlspecialchars($job['description'])); ?>
+        <?= $job['description']; ?>
     </div>
 
     <!-- Requirements -->
     <div class="section-title">Requirements</div>
     <div class="job-requirements">
-        <?= nl2br(htmlspecialchars($job['requirements'])); ?>
+        <?= $job['requirements']; ?>
     </div>
 
     <!-- Benefits -->
@@ -132,7 +131,7 @@ while ($b = $benRes->fetch_assoc()) {
             </div>
         <?php endif ?>
 
-    <?php elseif($userRole==1): ?>
+    <?php elseif($userRole==0): ?>
         <div class="apply-box">
             Sign in as a candidate to apply
             <br />

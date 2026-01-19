@@ -1,5 +1,4 @@
 <!-- start page common elements -->
-<?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
 <?php include '../layouts/header.php'; ?>
 <?php include '../permission-check.php'; ?>

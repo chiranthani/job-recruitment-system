@@ -1,7 +1,7 @@
 <?php
 session_start();
-include '../../config/database.php';
-include '../../config/constants.php';
+require_once '../../config/database.php';
+require_once '../../config/constants.php';
 
 $userId = $_SESSION['user_id'] ?? 0;
 $active = AppConstants::ACTIVE_STATUS;

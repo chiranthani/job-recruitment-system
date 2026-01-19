@@ -1,9 +1,9 @@
 <?php
 session_start();
-include '../../config/database.php';
-include '../../config/constants.php';
-include '../../helpers/notifications.php';
-include 'data-queries.php';
+require_once '../../config/database.php';
+require_once '../../config/constants.php';
+require_once 'data-queries.php';
+require_once '../../helpers/notifications.php';
 
 
 try {
@@ -61,9 +61,9 @@ try {
             $target = "../../assets/uploads/resumes/" . $fileName;
 
             if (!move_uploaded_file($_FILES['resume']['tmp_name'], $target)) {
-            $msg = "Failed to upload resume";
-            header("Location: ../apply.php?error=" . urlencode($msg) . "&job=" . urlencode($job_id));
-            exit;
+                $msg = "Failed to upload resume";
+                header("Location: ../apply.php?error=" . urlencode($msg) . "&job=" . urlencode($job_id));
+                exit;
             }
 
             $resumePath = "assets/uploads/resumes/" . $fileName;

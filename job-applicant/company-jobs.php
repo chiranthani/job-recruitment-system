@@ -1,8 +1,7 @@
-<?php include '../config/database.php'; ?>
 <?php include '../layouts/layout_start.php'; ?>
 <link rel="stylesheet" href="../assets/css/application.css">
-<?php include '../layouts/header.php'; ?>
-<?php include 'backend/data-queries.php'; ?>
+<?php include '../layouts/header.php';
+require 'backend/data-queries.php'; ?>
 
 <?php
 $companyId = (int)($_GET['company_id'] ?? 0);
@@ -62,7 +61,7 @@ if (!$company) {
                             <?php if (in_array($job['id'], $appliedJobs)): ?>
                             <span class="applied-badge">✔ Applied</span>
                             <?php endif ?>
-                         <a href="../Jobs/job_view.php?job=<?= $job['id'] ?>" class="buttn buttn-outline">View</a>
+                         <a href="../jobs/job_view.php?job=<?= $job['id'] ?>" class="buttn buttn-outline">View</a>
                         </div>
                     </div>
 

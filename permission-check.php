@@ -1,5 +1,5 @@
 <?php
-include 'config/permissions.php';
+require 'config/permissions.php';
 
 $currentPath = $_SERVER['PHP_SELF'];
 $userRole = $_SESSION["role_id"] ?? 0;
