@@ -23,9 +23,7 @@ if (isset($_POST['delete_job_id'])) {
     }else{
            if ($job_id > 0) {
         $stmt = $con_main->prepare(
-            "UPDATE job_posts 
-             SET is_deleted = 1, deletedAt = NOW() 
-             WHERE id = ?"
+            "DELETE FROM job_posts WHERE id = ?"
         );
         $stmt->bind_param("i", $job_id);
 
@@ -34,7 +32,7 @@ if (isset($_POST['delete_job_id'])) {
         } else {
             $_SESSION['error'] = "Failed to delete job post.";
         }
-    }
+        }
 
     }
 
